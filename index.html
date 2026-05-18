@@ -1657,116 +1657,686 @@ function renderAdminClients(filter) {
     const init = (c.name || 'U').charAt(0).toUpperCase();
     const since = c.createdAt ? new Date(c.createdAt).toLocaleDateString('pt-BR') : '—';
     const billing = c.nextBilling ? new Date(c.nextBilling).toLocaleDateString('pt-BR') : '—';
-    const statusClass = c.status === 'active' ? 's-scheduled' : 's-pending';
-    const statusLabel = c.status === 'active' ? 'Ativo' : c.status === 'suspended' ? 'Suspenso' : c.status;
-    return `
-    <div class="admin-client-row" onclick="openAdminClient('${c.id||c._id||''}')">
-      <div class="client-avatar">${init}</div>
-      <div><div style="font-size:14px;font-weight:600;">${c.name || '—'}</div><div style="font-size:12px;color:var(--faint);">${c.email || '—'}</div></div>
-      <div class="admin-tag ${c.type === 'solo' ? 'tag-solo' : 'tag-clinic'}">${c.plan || (c.type === 'solo' ? 'Médico Solo' : 'Clínica')}</div>
-      <div style="font-size:13px;color:var(--muted);">Desde ${since}<br><span style="font-size:11px;">Próx. cobrança: ${billing}</span></div>
-      <div class="status-badge ${statusClass}">${statusLabel}</div>
-    </div>`;
-  }).join('');
+
+// ===== API CONFIG =====
+const API = 'https://praxi-bot-production.up.railway.app';
+let authToken = localStorage.getItem('praxi_token') || null;
+let currentUser = JSON.parse(localStorage.getItem('praxi_user') || 'null');
+let adminClients = [];
+
+// ===== API HELPERS =====
+async function apiPost(path, body, token) {
+  const res = await fetch(API + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
+    body: JSON.stringify(body)
+  });
+  return res.json();
+}
+async function apiGet(path, token) {
+  const res = await fetch(API + path, { headers: token ? { Authorization: 'Bearer ' + token } : {} });
+  return res.json();
+}
+async function apiPatch(path, body, token) {
+  const res = await fetch(API + path, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    body: JSON.stringify(body)
+  });
+  return res.json();
+}
+async function apiDelete(path, token) {
+  const res = await fetch(API + path, { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
+  return res.json();
+}
+
+function showToast(msg, type) {
+  type = type || 'ok';
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:' + (type==='ok'?'#1a6b5a':'#ef4444') + ';color:white;padding:12px 24px;border-radius:40px;font-size:14px;font-weight:500;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.2);';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.remove(); }, 3000);
+}
+
+// ===== AUTH =====
+let loginType = 'doctor';
+function setLoginType(btn, type) {
+  loginType = type;
+  document.querySelectorAll('.type-btn').forEach(function(b) { b.classList.remove('active'); });
+  btn.classList.add('active');
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value.trim();
+  if (!email || !pass) { showToast('Preencha e-mail e senha', 'err'); return; }
+  const btn = event.target;
+  btn.textContent = 'Entrando...'; btn.disabled = true;
+  try {
+    const data = await apiPost('/api/auth/login', { email, password: pass });
+    if (data.token) {
+      authToken = data.token;
+      localStorage.setItem('praxi_token', authToken);
+      if (data.client) {
+        currentUser = data.client;
+        localStorage.setItem('praxi_user', JSON.stringify(currentUser));
+      }
+      if (data.role === 'admin') {
+        showPage('admin');
+        loadAdminPanel();
+      } else if (loginType === 'clinic') {
+        showPage('clinic');
+        initClinicDash();
+      } else {
+        showPage('doctor');
+        initDoctorDash();
+      }
+    } else {
+      showToast(data.error || 'Credenciais inválidas', 'err');
+    }
+  } catch(e) { showToast('Erro de conexão', 'err'); }
+  btn.textContent = 'Entrar →'; btn.disabled = false;
+}
+
+async function doAdminLogin() {
+  const email = document.getElementById('admin-email').value.trim();
+  const pass = document.getElementById('admin-pass').value.trim();
+  if (!email || !pass) { showToast('Preencha e-mail e senha', 'err'); return; }
+  const btn = event.target;
+  btn.textContent = 'Entrando...'; btn.disabled = true;
+  try {
+    const data = await apiPost('/api/auth/login', { email, password: pass });
+    if (data.token && data.role === 'admin') {
+      authToken = data.token;
+      localStorage.setItem('praxi_token', authToken);
+      showPage('admin');
+      loadAdminPanel();
+    } else {
+      showToast(data.error || 'Acesso negado', 'err');
+    }
+  } catch(e) { showToast('Erro de conexão', 'err'); }
+  btn.textContent = 'Entrar no painel →'; btn.disabled = false;
+}
+
+function doLogout() {
+  authToken = null;
+  currentUser = null;
+  localStorage.removeItem('praxi_token');
+  localStorage.removeItem('praxi_user');
+  showPage('home');
+}
+
+// ===== ADMIN PANEL =====
+async function loadAdminPanel() {
+  try {
+    const data = await apiGet('/api/admin/clients', authToken);
+    adminClients = data.clients || [];
+    renderAdminClients('all');
+    updateAdminStats();
+    updateAdminTabs();
+  } catch(e) { showToast('Erro ao carregar clientes', 'err'); }
+}
+
+function updateAdminTabs() {
+  const all = adminClients.length;
+  const solo = adminClients.filter(function(c) { return c.type === 'solo'; }).length;
+  const clinic = adminClients.filter(function(c) { return c.type === 'clinic'; }).length;
+  const pending = adminClients.filter(function(c) { return c.status === 'pending'; }).length;
+  const tabContainer = document.querySelector('#ap-admin-clients .admin-tabs');
+  if (tabContainer) {
+    tabContainer.innerHTML =
+      '<button class="admin-tab active" onclick="filterAdminClients(\'all\',this)">Todos (' + all + ')</button>' +
+      '<button class="admin-tab" onclick="filterAdminClients(\'solo\',this)">Solo (' + solo + ')</button>' +
+      '<button class="admin-tab" onclick="filterAdminClients(\'clinic\',this)">Clínica (' + clinic + ')</button>' +
+      (pending > 0 ? '<button class="admin-tab" onclick="filterAdminClients(\'pending\',this)" style="color:#92400e;">⏳ Pendentes (' + pending + ')</button>' : '');
+  }
+}
+
+function updateAdminStats() {
+  const total = adminClients.length;
+  const solo = adminClients.filter(function(c) { return c.type === 'solo'; }).length;
+  const clinic = adminClients.filter(function(c) { return c.type === 'clinic'; }).length;
+  const mrr = adminClients
+    .filter(function(c) { return c.status === 'active'; })
+    .reduce(function(sum, c) { return sum + (c.type === 'solo' ? 197 : 497); }, 0);
+
+  const statsPanel = document.getElementById('ap-admin-stats');
+  if (statsPanel) {
+    statsPanel.innerHTML =
+      '<div class="stats-grid">' +
+      '<div class="stat-card"><div class="stat-label">Total Clientes</div><div class="stat-val">' + total + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Médicos Solo</div><div class="stat-val">' + solo + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">Clínicas</div><div class="stat-val">' + clinic + '</div></div>' +
+      '<div class="stat-card"><div class="stat-label">MRR</div><div class="stat-val" style="font-size:26px;">R$' + (mrr >= 1000 ? (mrr/1000).toFixed(1) + 'k' : mrr) + '</div></div>' +
+      '</div>';
+  }
 }
 
 function filterAdminClients(filter, btn) {
-  document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
+  document.querySelectorAll('.admin-tab').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
   renderAdminClients(filter);
 }
 
-function openAdminClient(id) {
-  const c = adminClients.find(x => (x.id || x._id || '') === id);
+function renderAdminClients(filter) {
+  const list = document.getElementById('admin-clients-list');
+  if (!list) return;
+  let clients = adminClients;
+  if (filter === 'solo') clients = clients.filter(function(c) { return c.type === 'solo'; });
+  else if (filter === 'clinic') clients = clients.filter(function(c) { return c.type === 'clinic'; });
+  else if (filter === 'pending') clients = clients.filter(function(c) { return c.status === 'pending'; });
+
+  if (!clients.length) {
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--faint);">Nenhum cliente encontrado.</div>';
+    return;
+  }
+
+  list.innerHTML = clients.map(function(c) {
+    const init = c.name ? c.name[0].toUpperCase() : '?';
+    const tagClass = c.type === 'clinic' ? 'tag-clinic' : 'tag-solo';
+    const tagLabel = c.type === 'clinic' ? 'Clínica' : 'Solo';
+    const statusColor = c.status === 'active' ? 'var(--accent)' : c.status === 'pending' ? '#92400e' : 'var(--red)';
+    const statusLabel = c.status === 'active' ? 'Ativo' : c.status === 'pending' ? 'Pendente' : 'Suspenso';
+    const since = c.createdAt ? new Date(c.createdAt).toLocaleDateString('pt-BR') : '—';
+    const billing = c.nextBilling ? new Date(c.nextBilling).toLocaleDateString('pt-BR') : '—';
+
+    return '<div class="admin-client-row" onclick="openAdminClientModal(\'' + c.id + '\')">' +
+      '<div class="client-avatar" style="background:var(--accent-l);color:var(--accent);">' + init + '</div>' +
+      '<div><div class="client-name">' + c.name + '</div><div style="font-size:12px;color:var(--faint);">' + c.email + '</div></div>' +
+      '<div><span class="admin-tag ' + tagClass + '">' + tagLabel + '</span></div>' +
+      '<div><div style="font-size:13px;color:var(--muted);">Desde ' + since + '</div><div style="font-size:12px;color:var(--faint);">Próx. cobrança: ' + billing + '</div></div>' +
+      '<div style="display:flex;align-items:center;gap:8px;">' +
+        '<span style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;background:' + (c.status==='active'?'var(--accent-l)':c.status==='pending'?'#fef3c7':'var(--red-l)') + ';color:' + statusColor + ';">' + statusLabel + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function openAdminClientModal(clientId) {
+  const c = adminClients.find(function(x) { return x.id === clientId; });
   if (!c) return;
+  const modal = document.getElementById('admin-client-modal');
+  const title = document.getElementById('acm-title');
+  const content = document.getElementById('acm-content');
+  title.textContent = c.name;
+  const statusLabel = c.status === 'active' ? 'Ativo' : c.status === 'pending' ? 'Aguardando aprovação' : 'Suspenso';
   const since = c.createdAt ? new Date(c.createdAt).toLocaleDateString('pt-BR') : '—';
-  const billing = c.nextBilling ? new Date(c.nextBilling).toLocaleDateString('pt-BR') : '—';
-  document.getElementById('acm-title').textContent = c.name || 'Cliente';
-  document.getElementById('acm-content').innerHTML = `
-    <div class="info-grid" style="margin-bottom:20px;">
-      <div class="info-item"><label>E-mail</label><input id="acm-email" value="${c.email||''}" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;margin-top:3px;"></div>
-      <div class="info-item"><label>Plano</label>
-        <select id="acm-plan" style="width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;margin-top:3px;">
-          <option ${c.plan==='Médico Solo'?'selected':''}>Médico Solo</option>
-          <option ${c.plan==='Clínica'?'selected':''}>Clínica</option>
-        </select>
-      </div>
-      <div class="info-item"><label>CRM</label><span>${c.crm||'—'}</span></div>
-      <div class="info-item"><label>Especialidade</label><span>${c.specialty||'—'}</span></div>
-      <div class="info-item"><label>Telefone</label><span>${c.phone||'—'}</span></div>
-      <div class="info-item"><label>Cliente desde</label><span>${since}</span></div>
-      <div class="info-item"><label>Próx. cobrança</label><span>${billing}</span></div>
-      <div class="info-item"><label>Status</label><span class="status-badge ${c.status==='active'?'s-scheduled':'s-pending'}">${c.status==='active'?'Ativo':'Suspenso'}</span></div>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
-      <button class="btn-sm" onclick="saveAdminClient('${id}')">💾 Salvar alterações</button>
-      <button class="btn-sm-out" onclick="toggleSuspend('${id}','${c.status}')">${c.status==='active'?'⏸ Suspender':'▶ Reativar'}</button>
-    </div>`;
-  document.getElementById('admin-client-modal').classList.add('show');
+
+  content.innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;">' +
+      '<div class="info-item"><label>E-mail</label><span>' + c.email + '</span></div>' +
+      '<div class="info-item"><label>Tipo</label><span>' + (c.type === 'clinic' ? 'Clínica' : 'Médico Solo') + '</span></div>' +
+      '<div class="info-item"><label>Status</label><span>' + statusLabel + '</span></div>' +
+      '<div class="info-item"><label>Cliente desde</label><span>' + since + '</span></div>' +
+      (c.phone ? '<div class="info-item"><label>Telefone</label><span>' + c.phone + '</span></div>' : '') +
+      (c.specialty ? '<div class="info-item"><label>Especialidade</label><span>' + c.specialty + '</span></div>' : '') +
+    '</div>' +
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;">' +
+      (c.status !== 'active' ? '<button class="btn-sm" onclick="approveClient(\'' + c.id + '\')" style="background:var(--accent);">✅ Aprovar acesso</button>' : '') +
+      (c.status === 'active' ? '<button class="btn-sm" style="background:var(--muted);" onclick="suspendClient(\'' + c.id + '\')">⏸ Suspender</button>' : '') +
+      '<button class="btn-delete" onclick="suspendClient(\'' + c.id + '\')">Suspender conta</button>' +
+    '</div>';
+
+  modal.classList.add('show');
 }
 
-async function saveAdminClient(id) {
-  const email = document.getElementById('acm-email')?.value;
-  const plan = document.getElementById('acm-plan')?.value;
-  const btn = document.querySelector('#admin-client-modal .btn-sm');
-  setLoading(btn, true);
+function closeAdminModal() {
+  document.getElementById('admin-client-modal').classList.remove('show');
+}
+
+async function approveClient(clientId) {
   try {
-    const data = await apiPatch(`/api/admin/clients/${id}`, { email, plan }, authToken);
-    if (data.error) { showToast(data.error, 'err'); }
-    else { showToast('Dados salvos! ✅'); closeAdminModal(); await loadAdminClients(); }
-  } catch(e) { showToast('Erro ao salvar', 'err'); }
-  setLoading(btn, false);
+    await apiPatch('/api/admin/clients/' + clientId, { status: 'active' }, authToken);
+    showToast('Cliente aprovado! E-mail de boas-vindas enviado.');
+    closeAdminModal();
+    loadAdminPanel();
+  } catch(e) { showToast('Erro ao aprovar cliente', 'err'); }
 }
 
-async function toggleSuspend(id, currentStatus) {
-  const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
+async function suspendClient(clientId) {
+  if (!confirm('Tem certeza que deseja suspender este cliente?')) return;
   try {
-    const data = await apiPatch(`/api/admin/clients/${id}`, { status: newStatus }, authToken);
-    if (data.error) { showToast(data.error, 'err'); }
-    else { showToast(newStatus === 'active' ? 'Conta reativada ✅' : 'Conta suspensa ⏸'); closeAdminModal(); await loadAdminClients(); }
-  } catch(e) { showToast('Erro', 'err'); }
+    await apiDelete('/api/admin/clients/' + clientId, authToken);
+    showToast('Cliente suspenso.');
+    closeAdminModal();
+    loadAdminPanel();
+  } catch(e) { showToast('Erro ao suspender cliente', 'err'); }
 }
 
-function closeAdminModal() { document.getElementById('admin-client-modal').classList.remove('show'); }
+// ===== DOCTOR DASH =====
+function initDoctorDash() {
+  renderCalendar();
+  renderClients();
+  renderBarChart('bar-chart-doctor', [12,18,24,20,28,34]);
+  renderWAPreview();
+  renderWAQueue();
+  document.getElementById('ia-widget').classList.add('show');
+}
 
-function renderAdminPosts(){
-  const list=document.getElementById('admin-posts-list');
-  if(!list)return;
-  list.innerHTML=DISCUSSIONS.map(d=>`
-    <div class="admin-post-row">
-      <div class="admin-post-info">
-        <div class="admin-post-title">${d.title}</div>
-        <div class="admin-post-meta">${d.specialty} · ${d.author} · 💎${d.reactions.gem} 😱${d.reactions.shock} ❤️${d.reactions.heart} · ${d.comments.length} comentários</div>
-      </div>
-      <button class="btn-delete" onclick="if(confirm('Excluir este post?'))this.parentElement.remove()">Excluir</button>
-    </div>`).join('');
+// ===== CLINIC DASH =====
+function initClinicDash() {
+  renderPros();
+  renderClinicCal();
+  renderClinicClients();
+  renderBarChart('clinic-bar-chart', [47,34,28,21,19]);
+  initClinicAdminPros();
+}
+
+// ===== PAGE & PANEL NAV =====
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  const el = document.getElementById('page-' + id);
+  if (el) el.classList.add('active');
+  window.scrollTo(0, 0);
+
+  const nav = document.getElementById('main-nav');
+  const dashPages = ['doctor','clinic','admin','admin-login','login','register'];
+  nav.style.display = dashPages.includes(id) ? 'none' : '';
+
+  if (id === 'community') { renderDiscussions(); renderRanking(); }
+  if (id === 'doctor' && !el.dataset.init) { el.dataset.init = '1'; initDoctorDash(); }
+  if (id === 'clinic' && !el.dataset.init) { el.dataset.init = '1'; initClinicDash(); }
+  if (id === 'admin') { loadAdminPanel(); }
+}
+
+const panelTitles = {
+  agenda:'Agenda', clients:'Clientes', stats:'Estatísticas', whatsapp:'WhatsApp Bot',
+  'admin-clients':'Clientes', 'admin-posts':'Comunidade', 'admin-stats':'Visão geral'
+};
+
+function showPanel(panel, dash, el) {
+  const prefix = dash === 'doctor' ? 'dp' : dash === 'admin' ? 'ap' : 'cp';
+  document.querySelectorAll('[id^="' + prefix + '-"]').forEach(function(p) { p.classList.remove('active'); });
+  const target = document.getElementById(prefix + '-' + panel);
+  if (target) target.classList.add('active');
+  const titleEl = document.getElementById(dash + '-title');
+  if (titleEl) titleEl.textContent = panelTitles[panel] || panel;
+  const sidebar = el ? el.closest('.sidebar') : null;
+  if (sidebar) sidebar.querySelectorAll('.nav-item').forEach(function(n) { n.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  scrollMainToTop();
+}
+
+function scrollMainToTop() {
+  const mc = document.querySelector('.main-content');
+  if (mc) mc.scrollTop = 0;
+}
+
+// ===== CALENDAR =====
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+
+function renderCalendar() {
+  const label = document.getElementById('month-label');
+  const body = document.getElementById('cal-body');
+  if (!label || !body) return;
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  label.textContent = months[currentMonth] + ' ' + currentYear;
+  const first = new Date(currentYear, currentMonth, 1).getDay();
+  const days = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const prevDays = new Date(currentYear, currentMonth, 0).getDate();
+  const today = new Date();
+  let html = '';
+  for (let i = 0; i < first; i++) {
+    html += '<div class="cal-cell other"><div class="cal-num">' + (prevDays - first + i + 1) + '</div></div>';
+  }
+  for (let d = 1; d <= days; d++) {
+    const isToday = d === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
+    const key = currentYear + '-' + (currentMonth + 1) + '-' + d;
+    const evs = EVENTS[key] || [];
+    const evsHtml = evs.map(function(e) { return '<div class="cal-event ' + e.type + '">' + e.label + '</div>'; }).join('');
+    html += '<div class="cal-cell' + (isToday ? ' today' : '') + '" onclick="showDayDetail(' + d + ')">' +
+      '<div class="cal-num">' + d + '</div>' + evsHtml + '</div>';
+  }
+  const remaining = 42 - first - days;
+  for (let i = 1; i <= remaining; i++) {
+    html += '<div class="cal-cell other"><div class="cal-num">' + i + '</div></div>';
+  }
+  body.innerHTML = html;
+}
+
+function prevMonth() { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(); }
+function nextMonth() { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } renderCalendar(); }
+
+function showDayDetail(day) {
+  const detail = document.getElementById('day-detail');
+  const title = document.getElementById('day-detail-title');
+  const timeline = document.getElementById('day-timeline');
+  if (!detail) return;
+  const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  title.textContent = day + ' de ' + months[currentMonth] + ' de ' + currentYear;
+  const key = currentYear + '-' + (currentMonth + 1) + '-' + day;
+  const evs = EVENTS[key] || [];
+  if (!evs.length) {
+    timeline.innerHTML = '<p style="color:var(--faint);font-size:14px;">Nenhuma consulta neste dia.</p>';
+  } else {
+    const times = ['09:00','11:00','14:00','16:00'];
+    timeline.innerHTML = evs.map(function(e, i) {
+      return '<div class="tl-item"><div class="tl-time">' + (times[i] || '—') + '</div>' +
+        '<div class="tl-bar"></div>' +
+        '<div class="tl-card"><h4>' + e.label + '</h4><p>Consulta agendada</p></div></div>';
+    }).join('');
+  }
+  detail.classList.add('show');
+}
+
+function renderClinicCal() {
+  const body = document.getElementById('clinic-cal-body');
+  if (!body) return;
+  const first = new Date(currentYear, currentMonth, 1).getDay();
+  const days = new Date(currentYear, currentMonth + 1, 0).getDate();
+  const prevDays = new Date(currentYear, currentMonth, 0).getDate();
+  const today = new Date();
+  let html = '';
+  for (let i = 0; i < first; i++) {
+    html += '<div class="cal-cell other"><div class="cal-num">' + (prevDays - first + i + 1) + '</div></div>';
+  }
+  for (let d = 1; d <= days; d++) {
+    const isToday = d === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
+    html += '<div class="cal-cell' + (isToday ? ' today' : '') + '"><div class="cal-num">' + d + '</div></div>';
+  }
+  body.innerHTML = html;
+}
+
+// ===== CLIENTS =====
+function renderClients() {
+  const list = document.getElementById('clients-list');
+  const count = document.getElementById('clients-count');
+  if (!list) return;
+  if (count) count.innerHTML = '<strong>' + CLIENTS.length + '</strong> pacientes';
+  list.innerHTML = CLIENTS.map(function(c) {
+    const statusMap = { scheduled:'s-scheduled', pending:'s-pending', new:'s-new' };
+    const statusLabel = { scheduled:'Agendado', pending:'Pendente', new:'Novo' };
+    return '<div class="client-row" onclick="openFicha(\'' + c.name + '\')">' +
+      '<div class="client-avatar">' + c.init + '</div>' +
+      '<div><div class="client-name">' + c.name + '</div><div class="client-age">' + c.age + ' anos · ' + c.city + '</div></div>' +
+      '<div class="client-summary">' + c.summary + '</div>' +
+      '<div class="client-next"><strong>Próxima consulta</strong>' + c.next + '</div>' +
+      '<span class="status-badge ' + statusMap[c.status] + '">' + statusLabel[c.status] + '</span>' +
+    '</div>';
+  }).join('');
+}
+
+function filterClients(q) {
+  const list = document.getElementById('clients-list');
+  if (!list) return;
+  const filtered = CLIENTS.filter(function(c) { return c.name.toLowerCase().includes(q.toLowerCase()); });
+  const count = document.getElementById('clients-count');
+  if (count) count.innerHTML = '<strong>' + filtered.length + '</strong> pacientes';
+  list.innerHTML = filtered.map(function(c) {
+    return '<div class="client-row" onclick="openFicha(\'' + c.name + '\')">' +
+      '<div class="client-avatar">' + c.init + '</div>' +
+      '<div><div class="client-name">' + c.name + '</div><div class="client-age">' + c.age + ' anos</div></div>' +
+      '<div class="client-summary">' + c.summary + '</div>' +
+      '<div class="client-next">' + c.next + '</div>' +
+      '<span class="status-badge s-scheduled">Agendado</span>' +
+    '</div>';
+  }).join('');
+}
+
+function renderClinicClients() {
+  const list = document.getElementById('clinic-clients-list');
+  if (!list) return;
+  list.innerHTML = CLIENTS.map(function(c) {
+    return '<div class="client-row" onclick="openFicha(\'' + c.name + '\')">' +
+      '<div class="client-avatar">' + c.init + '</div>' +
+      '<div><div class="client-name">' + c.name + '</div><div class="client-age">' + c.age + ' anos · ' + c.city + '</div></div>' +
+      '<div class="client-summary">' + c.summary + '</div>' +
+      '<div class="client-next">' + c.next + '</div>' +
+      '<span class="status-badge s-scheduled">Agendado</span>' +
+    '</div>';
+  }).join('');
+}
+
+// ===== FICHA =====
+function openFicha(name) {
+  const c = CLIENTS.find(function(x) { return x.name === name; }) || {};
+  document.getElementById('fo-avatar').textContent = c.init || name[0];
+  document.getElementById('fo-name').textContent = c.name || name;
+  document.getElementById('fo-meta').textContent = (c.age ? c.age + ' anos · ' : '') + (c.city || '');
+  document.getElementById('fo-info').innerHTML =
+    '<div class="info-item"><label>Nascimento</label><span>' + (c.born || '—') + '</span></div>' +
+    '<div class="info-item"><label>E-mail</label><span>' + (c.email || '—') + '</span></div>' +
+    '<div class="info-item"><label>Telefone</label><span>' + (c.phone || '—') + '</span></div>' +
+    '<div class="info-item"><label>Medicamentos</label><span>' + (c.meds || '—') + '</span></div>';
+  document.getElementById('fo-history').innerHTML =
+    '<div class="history-item"><div class="history-date">15/04/2025</div><div class="history-desc">Primeira consulta</div><div class="history-notes">' + (c.summary || '') + '</div></div>';
+  document.getElementById('fo-insights').innerHTML =
+    '<div class="ai-insight"><div class="ai-label">🧠 Insight Praxi</div><div class="ai-text">Com base no histórico, recomenda-se acompanhamento trimestral e revisão de medicamentos.</div><div class="ai-source">Fonte: literatura clínica</div></div>';
+  document.getElementById('fo-docs').innerHTML =
+    '<div class="doc-item"><div class="doc-icon">📄</div><div class="doc-info"><div class="doc-name">Exame sangue.pdf</div><div class="doc-date">Enviado em 10/04/2025</div></div></div>';
+  document.getElementById('ficha-overlay').classList.add('show');
+}
+
+function closeFicha() { document.getElementById('ficha-overlay').classList.remove('show'); }
+
+// ===== CHART =====
+function renderBarChart(id, values) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const max = Math.max.apply(null, values);
+  const labels = ['Jan','Fev','Mar','Abr','Mai','Jun'];
+  el.innerHTML = values.map(function(v, i) {
+    const h = Math.round((v / max) * 120);
+    return '<div class="bar-col"><div class="bar' + (i === values.length-1 ? ' accent' : '') + '" style="height:' + h + 'px"></div><div class="bar-label">' + labels[i] + '</div></div>';
+  }).join('');
+}
+
+// ===== PROFESSIONALS =====
+function renderPros() {
+  const grid = document.getElementById('pros-grid');
+  if (!grid) return;
+  grid.innerHTML = PROS.map(function(p) {
+    return '<div class="pro-card"><div class="pro-av">' + p.init + '</div>' +
+      '<div class="pro-name">' + p.name + '</div>' +
+      '<div class="pro-spec">' + p.spec + '</div>' +
+      '<div class="pro-stats">' +
+        '<div><div class="pro-stat-num">' + p.patients + '</div><div class="pro-stat-lbl">Pacientes</div></div>' +
+        '<div><div class="pro-stat-num">' + p.consults + '</div><div class="pro-stat-lbl">Consultas/mês</div></div>' +
+      '</div>' +
+      '<span class="pro-badge">Online</span>' +
+    '</div>';
+  }).join('');
+}
+
+function initClinicAdminPros() {
+  const el = document.getElementById('clinic-admin-pros');
+  if (!el) return;
+  el.innerHTML = PROS.map(function(p) {
+    return '<div class="admin-client-row">' +
+      '<div class="client-avatar">' + p.init + '</div>' +
+      '<div><div class="client-name">' + p.name + '</div><div style="font-size:12px;color:var(--faint);">' + p.spec + '</div></div>' +
+      '<div style="font-size:13px;color:var(--muted);">' + p.patients + ' pacientes</div>' +
+      '<div style="font-size:13px;color:var(--muted);">' + p.consults + ' consultas/mês</div>' +
+      '<span class="status-badge s-scheduled">Ativo</span>' +
+    '</div>';
+  }).join('');
+}
+
+// ===== WHATSAPP PREVIEW =====
+function renderWAPreview() {
+  const el = document.getElementById('wa-msgs-preview');
+  if (!el) return;
+  const msgs = [
+    {text:'Olá! Sou o Praxi. Como posso te ajudar?\n\n1. Marcar uma consulta\n2. Marcar um retorno\n3. Contratar o Praxi',sent:false},
+    {text:'1',sent:true},
+    {text:'Ótimo! Qual é o seu nome completo?',sent:false},
+  ];
+  el.innerHTML = msgs.map(function(m) {
+    return '<div class="wa-msg ' + (m.sent ? 'sent' : 'received') + '">' + m.text.replace(/\n/g,'<br>') + '<div class="wa-time">agora</div></div>';
+  }).join('');
+}
+
+function renderWAQueue() {
+  const el = document.getElementById('wa-queue-list');
+  if (!el) return;
+  el.innerHTML = CLIENTS.slice(0,3).map(function(c) {
+    return '<div class="client-row" style="grid-template-columns:auto 1fr auto;gap:12px;margin-bottom:8px;" onclick="openFicha(\'' + c.name + '\')">' +
+      '<div class="client-avatar">' + c.init + '</div>' +
+      '<div><div class="client-name" style="font-size:14px;">' + c.name + '</div><div style="font-size:12px;color:var(--faint);">Aguardando triagem</div></div>' +
+      '<span class="status-badge s-new">Novo</span>' +
+    '</div>';
+  }).join('');
+}
+
+// ===== COMMUNITY =====
+function renderDiscussions() {
+  const grid = document.getElementById('discussions-grid');
+  if (!grid) return;
+  grid.innerHTML = DISCUSSIONS.map(function(d) {
+    return '<div class="discussion-card" onclick="openDiscDetail(' + d.id + ')">' +
+      '<div class="disc-specialty">' + d.specialty + '</div>' +
+      '<div class="disc-title">' + d.title + '</div>' +
+      '<div class="disc-excerpt">' + d.excerpt + '</div>' +
+      '<div class="disc-footer"><span class="disc-author">' + d.author + '</span>' +
+        '<div class="disc-reactions">' +
+          '<span class="reaction">💎 ' + d.reactions.gem + '</span>' +
+          '<span class="reaction">😱 ' + d.reactions.shock + '</span>' +
+          '<span class="reaction">❤️ ' + d.reactions.heart + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function renderRanking() {
+  const el = document.getElementById('ranking-list');
+  if (!el) return;
+  const sorted = DISCUSSIONS.slice().sort(function(a,b) { return (b.reactions.gem+b.reactions.heart) - (a.reactions.gem+a.reactions.heart); }).slice(0,5);
+  el.innerHTML = sorted.map(function(d, i) {
+    return '<div class="ranking-item">' +
+      '<div class="rank-num">0' + (i+1) + '</div>' +
+      '<div class="rank-info"><div class="rank-title">' + d.title + '</div><div class="rank-specialty">' + d.specialty + '</div></div>' +
+      '<div class="rank-score">💎 ' + (d.reactions.gem + d.reactions.heart) + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function openDiscDetail(id) {
+  const d = DISCUSSIONS.find(function(x) { return x.id === id; });
+  if (!d) return;
+  document.getElementById('dd-specialty').textContent = d.specialty;
+  document.getElementById('dd-title').textContent = d.title;
+  document.getElementById('dd-author').textContent = d.author;
+  document.getElementById('dd-body').textContent = d.excerpt;
+  document.getElementById('r1-count').textContent = d.reactions.gem;
+  document.getElementById('r2-count').textContent = d.reactions.shock;
+  document.getElementById('r3-count').textContent = d.reactions.heart;
+  document.getElementById('dd-comments').innerHTML = d.comments.map(function(c) {
+    return '<div class="comment-item"><div class="comment-avatar">M</div>' +
+      '<div class="comment-body"><div class="comment-author">Médico</div><div class="comment-text">' + c + '</div></div></div>';
+  }).join('');
+  document.getElementById('disc-detail').classList.add('show');
+}
+
+function closeDiscDetail() { document.getElementById('disc-detail').classList.remove('show'); }
+
+function toggleReaction(btn, emoji) { btn.classList.toggle('active'); }
+
+function addComment() {
+  const input = document.getElementById('comment-input');
+  if (!input.value.trim()) return;
+  const comments = document.getElementById('dd-comments');
+  const div = document.createElement('div');
+  div.className = 'comment-item';
+  div.innerHTML = '<div class="comment-avatar">V</div><div class="comment-body"><div class="comment-author">Você</div><div class="comment-text">' + input.value + '</div></div>';
+  comments.appendChild(div);
+  input.value = '';
+}
+
+function openNewDiscussion() { document.getElementById('new-disc-modal').classList.add('show'); }
+function closeNewDisc() { document.getElementById('new-disc-modal').classList.remove('show'); }
+function submitDiscussion() {
+  showToast('Discussão publicada!');
+  closeNewDisc();
+}
+
+// ===== SCHEDULE =====
+function selectDay(el) {
+  document.querySelectorAll('.day-btn').forEach(function(b) { b.classList.remove('selected'); });
+  el.classList.add('selected');
+}
+function selectTime(el) {
+  document.querySelectorAll('.time-slot').forEach(function(b) { b.classList.remove('selected'); });
+  el.classList.add('selected');
+}
+function confirmSchedule() {
+  document.getElementById('schedule-form').style.display = 'none';
+  document.getElementById('schedule-success').classList.add('show');
+}
+
+// ===== REGISTER =====
+let regType = null;
+function selectRegType(type) {
+  regType = type;
+  document.getElementById('type-solo').style.borderColor = type === 'solo' ? 'var(--accent)' : 'var(--border)';
+  document.getElementById('type-clinic').style.borderColor = type === 'clinic' ? 'var(--accent)' : 'var(--border)';
+}
+function regNext(step) {
+  for (let i = 1; i <= 4; i++) {
+    const el = document.getElementById('reg-step-' + i);
+    if (el) el.style.display = i === step ? '' : 'none';
+  }
+  for (let i = 1; i <= 4; i++) {
+    const s = document.getElementById('rs' + i);
+    if (s) { s.className = 'auth-step'; if (i < step) s.classList.add('done'); if (i === step) s.classList.add('active'); }
+  }
 }
 
 // ===== IA WIDGET =====
-let iaOpen=false;
-const IA_REPLIES=['Com base na agenda, você tem 3 consultas amanhã: 09h, 10h30 e 14h.','Ana Lima enviou o hemograma. Os valores estão dentro do esperado.','Encontrei 2 artigos sobre o caso no Google Acadêmico.','Carlos Mendes tem consulta pendente há 15 dias. Envio lembrete?','Próximo horário disponível: segunda-feira às 11h.'];
-let iaIdx=0;
-function toggleIA(){iaOpen=!iaOpen;document.getElementById('ia-popup').classList.toggle('open',iaOpen);}
-function sendIA(){
-  const input=document.getElementById('ia-input');
-  const msgs=document.getElementById('ia-msgs');
-  if(!input.value.trim())return;
-  msgs.innerHTML+=`<div class="ia-msg user">${input.value}</div>`;
-  input.value='';
-  setTimeout(()=>{msgs.innerHTML+=`<div class="ia-msg bot">${IA_REPLIES[iaIdx%IA_REPLIES.length]}</div>`;iaIdx++;msgs.scrollTop=msgs.scrollHeight;},700);
-  msgs.scrollTop=msgs.scrollHeight;
+function toggleIA() {
+  const popup = document.getElementById('ia-popup');
+  popup.classList.toggle('open');
+}
+function sendIA() {
+  const input = document.getElementById('ia-input');
+  const msgs = document.getElementById('ia-msgs');
+  if (!input.value.trim()) return;
+  const userMsg = document.createElement('div');
+  userMsg.className = 'ia-msg user';
+  userMsg.textContent = input.value;
+  msgs.appendChild(userMsg);
+  const val = input.value;
+  input.value = '';
+  msgs.scrollTop = msgs.scrollHeight;
+  setTimeout(function() {
+    const botMsg = document.createElement('div');
+    botMsg.className = 'ia-msg bot';
+    botMsg.textContent = 'Entendido. Analisando "' + val + '"... Para um resultado mais preciso, consulte o histórico do paciente no painel.';
+    msgs.appendChild(botMsg);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 800);
+}
+
+// ===== CLINIC PANEL NAV =====
+const clinicTitles = {
+  'clinic-home':'Profissionais','clinic-agenda':'Agenda Geral',
+  'clinic-clients':'Clientes','clinic-stats':'Estatísticas','clinic-admin':'Administrativo'
+};
+function showClinicPanel(panel, el) {
+  document.querySelectorAll('[id^="cp-"]').forEach(function(p) { p.classList.remove('active'); });
+  const target = document.getElementById('cp-' + panel);
+  if (target) target.classList.add('active');
+  const titleEl = document.getElementById('clinic-title');
+  if (titleEl) titleEl.textContent = clinicTitles[panel] || panel;
+  document.querySelectorAll('#page-clinic .nav-item').forEach(function(n) { n.classList.remove('active'); });
+  if (el) el.classList.add('active');
+  scrollMainToTop();
 }
 
 // ===== INIT =====
-renderCommunity();
-// Garante que home aparece corretamente no load
-document.addEventListener('DOMContentLoaded',()=>{
-  showPage('home');
+window.addEventListener('load', function() {
+  renderCalendar();
+  renderDiscussions();
+  renderRanking();
+  // Se já tinha sessão ativa, redireciona
+  if (authToken && currentUser) {
+    if (currentUser.type === 'clinic') { showPage('clinic'); initClinicDash(); }
+    else { showPage('doctor'); initDoctorDash(); }
+  }
 });
-// fallback se DOMContentLoaded já passou
-if(document.readyState==='complete'||document.readyState==='interactive'){
-  showPage('home');
-}
 </script>
+  
 </body>
 </html>
