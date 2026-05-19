@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Praxi - Painel Clinica</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f4f6f8;color:#1a1a18;}
+.hidden{display:none!important;}
+.wrap{display:flex;flex-direction:row;height:100vh;width:100vw;overflow:hidden;}
+.sidebar{width:240px;min-width:240px;background:white;border-right:1px solid #e5e7eb;display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-top{padding:20px 16px;border-bottom:1px solid #e5e7eb;}
+.logo{font-size:20px;font-weight:700;color:#1a1a18;margin-bottom:14px;letter-spacing:-0.5px;}
+.logo span{color:#1a6b5a;}
+.clinic-name{font-size:14px;font-weight:700;color:#1a1a18;}
+.clinic-sub{font-size:11px;color:#9ca3af;}
+.nav{flex:1;padding:10px 8px;}
+.nitem{display:flex;align-items:center;gap:10px;padding:11px 12px;cursor:pointer;font-size:13px;font-weight:500;color:#6b7280;border-radius:8px;margin-bottom:2px;transition:all .15s;}
+.nitem:hover{background:#f9fafb;color:#1a1a18;}
+.nitem.active{background:#e8f4f0;color:#1a6b5a;font-weight:600;}
+.sfoot{padding:10px 8px;border-top:1px solid #e5e7eb;}
+.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+.topbar{background:white;border-bottom:1px solid #e5e7eb;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.topbar-title{font-size:18px;font-weight:700;}
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.btn-primary{background:#1a6b5a;color:white;}
+.btn-primary:hover{background:#155a4a;}
+.btn-outline{background:white;color:#374151;border:1.5px solid #e5e7eb;}
+.btn-outline:hover{background:#f9fafb;}
+.content{flex:1;padding:24px;}
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* PROFISSIONAIS GRID */
+.pros-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}
+.pro-card{background:white;border-radius:14px;border:1px solid #e5e7eb;padding:22px;cursor:pointer;transition:all .2s;}
+.pro-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.1);transform:translateY(-2px);border-color:#1a6b5a;}
+.pro-avatar{width:52px;height:52px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#1a6b5a;margin-bottom:14px;}
+.pro-name{font-size:15px;font-weight:700;color:#1a1a18;margin-bottom:3px;}
+.pro-spec{font-size:12px;color:#9ca3af;margin-bottom:14px;}
+.pro-stats{display:flex;gap:20px;}
+.pro-stat-num{font-size:22px;font-weight:700;color:#1a1a18;}
+.pro-stat-lbl{font-size:11px;color:#9ca3af;}
+.pro-badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:#dcfce7;color:#166534;margin-top:12px;}
+
+/* AGENDA */
+.agenda-controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.month-nav{display:flex;align-items:center;gap:12px;}
+.month-nav button{width:32px;height:32px;border-radius:50%;border:1.5px solid #e5e7eb;background:white;cursor:pointer;font-size:14px;}
+.month-label{font-size:16px;font-weight:700;}
+.cal-wrap{background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;}
+.cal-days-header{display:grid;grid-template-columns:repeat(7,1fr);background:#f9fafb;border-bottom:1px solid #e5e7eb;}
+.cal-day-lbl{text-align:center;padding:10px;font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);}
+.cal-cell{min-height:90px;padding:8px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;cursor:pointer;transition:background .15s;}
+.cal-cell:nth-child(7n){border-right:none;}
+.cal-cell:hover{background:#f9fafb;}
+.cal-cell.today{background:#f0fdf9;}
+.cal-cell.other{opacity:.4;}
+.cal-num{font-size:13px;font-weight:500;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin-bottom:4px;}
+.cal-cell.today .cal-num{background:#1a6b5a;color:white;}
+.cal-event{font-size:11px;padding:2px 6px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;}
+.ev-consulta{background:#dcfce7;color:#166534;}
+.ev-retorno{background:#fef9c3;color:#854d0e;}
+.ev-reuniao{background:#dbeafe;color:#1d4ed8;}
+.day-detail{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px;margin-top:16px;display:none;}
+.day-detail.show{display:block;}
+.tl-item{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;}
+.tl-time{font-size:12px;color:#9ca3af;width:48px;padding-top:3px;flex-shrink:0;font-weight:500;}
+.tl-line{width:3px;background:#e5e7eb;border-radius:2px;min-height:50px;flex-shrink:0;position:relative;}
+.tl-line::before{content:'';position:absolute;top:0;left:-3px;width:9px;height:9px;border-radius:50%;background:#1a6b5a;border:2px solid white;}
+.tl-card{flex:1;background:#f9fafb;border-radius:8px;padding:10px 12px;border:1px solid #e5e7eb;}
+.tl-card h4{font-size:13px;font-weight:600;margin-bottom:2px;}
+.tl-card p{font-size:12px;color:#6b7280;}
+
+/* CLIENTES */
+.clients-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.clients-count-badge{font-size:13px;color:#6b7280;}
+.clients-count-badge strong{color:#1a1a18;}
+.search-wrap{position:relative;flex:1;}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#9ca3af;}
+.search-inp{width:100%;padding:10px 12px 10px 36px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:white;}
+.search-inp:focus{border-color:#1a6b5a;}
+.client-card{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:16px 20px;cursor:pointer;transition:all .2s;display:grid;grid-template-columns:44px 1fr 1fr 1fr auto;gap:16px;align-items:center;margin-bottom:10px;}
+.client-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);border-color:#1a6b5a;transform:translateY(-1px);}
+.cc-avatar{width:44px;height:44px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;font-weight:700;color:#1a6b5a;font-size:16px;}
+.cc-name{font-size:14px;font-weight:600;}
+.cc-info{font-size:12px;color:#9ca3af;margin-top:2px;}
+.cc-pro{font-size:12px;color:#6b7280;}
+.cc-badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;}
+.badge-agendado{background:#dcfce7;color:#166534;}
+.badge-retorno{background:#fef9c3;color:#854d0e;}
+.badge-novo{background:#dbeafe;color:#1d4ed8;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.stat-card{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px;}
+.stat-label{font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.stat-val{font-size:36px;font-weight:700;color:#1a1a18;}
+.stat-change{font-size:12px;margin-top:6px;}
+.up{color:#1a6b5a;} .down{color:#ef4444;}
+.chart-card{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px;margin-bottom:14px;}
+.chart-title{font-size:13px;font-weight:600;margin-bottom:16px;}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:130px;}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;}
+.bar{width:100%;border-radius:5px 5px 0 0;background:#e8f4f0;transition:all .3s;}
+.bar:hover,.bar.accent{background:#1a6b5a;}
+.bar-lbl{font-size:10px;color:#9ca3af;}
+
+/* ADMIN */
+.admin-section{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px;margin-bottom:16px;}
+.admin-section-title{font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+.pro-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid #f3f4f6;}
+.pro-row:last-child{border-bottom:none;}
+.pro-row-avatar{width:38px;height:38px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#1a6b5a;}
+.pro-row-name{font-size:13px;font-weight:600;flex:1;}
+.pro-row-spec{font-size:11px;color:#9ca3af;}
+.btn-remove{background:#fee2e2;color:#ef4444;border:none;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;}
+
+/* FICHA OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;justify-content:flex-end;}
+.overlay.show{display:flex;}
+.side-panel{background:white;height:100vh;overflow-y:auto;padding:28px;box-shadow:-8px 0 40px rgba(0,0,0,.15);animation:slideIn .25s ease;}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.close-btn{width:32px;height:32px;border-radius:50%;background:#f3f4f6;border:none;cursor:pointer;font-size:15px;}
+.ficha-sec{margin-bottom:20px;}
+.ficha-sec-title{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#9ca3af;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f3f4f6;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.info-item label{font-size:11px;color:#9ca3af;display:block;margin-bottom:2px;}
+.info-item span{font-size:13px;font-weight:500;}
+
+/* ADD PRO MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:center;justify-content:center;}
+.modal-overlay.show{display:flex;}
+.modal{background:white;border-radius:16px;padding:28px;width:100%;max-width:480px;}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:20px;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:12px;font-weight:500;color:#6b7280;margin-bottom:5px;display:block;}
+.form-inp,.form-sel{width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;}
+.form-inp:focus,.form-sel:focus{border-color:#1a6b5a;}
+</style>
+</head>
+<body>
+
+<div id="clinica-page" class="wrap">
+  <div class="sidebar">
+    <div class="sidebar-top">
+      <div class="logo">Praxi<span>.</span></div>
+      <div class="clinic-name" id="clinic-name">Clinica Sao Lucas</div>
+      <div class="clinic-sub">Gestao Central</div>
+    </div>
+    <div class="nav">
+      <div class="nitem active" onclick="showPanel('profissionais',this)">&#127979; Profissionais</div>
+      <div class="nitem" onclick="showPanel('agenda',this)">&#128197; Agenda Geral</div>
+      <div class="nitem" onclick="showPanel('clientes',this)">&#128101; Clientes</div>
+      <div class="nitem" onclick="showPanel('stats',this)">&#128202; Estatisticas</div>
+      <div class="nitem" onclick="showPanel('admin',this)">&#9881;&#65039; Administrativo</div>
+    </div>
+    <div class="sfoot">
+      <div class="nitem" onclick="doLogout()">&#8592; Sair</div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Profissionais</div>
+      <div>
+        <button class="btn btn-primary" id="action-btn" onclick="mainAction()">+ Profissional</button>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- PROFISSIONAIS -->
+      <div id="panel-profissionais" class="panel active">
+        <div class="pros-grid" id="pros-grid"></div>
+      </div>
+
+      <!-- AGENDA -->
+      <div id="panel-agenda" class="panel">
+        <div class="agenda-controls">
+          <div class="month-nav">
+            <button onclick="prevMonth()">&#8249;</button>
+            <div class="month-label" id="month-label"></div>
+            <button onclick="nextMonth()">&#8250;</button>
+          </div>
+        </div>
+        <div class="cal-wrap">
+          <div class="cal-days-header">
+            <div class="cal-day-lbl">Dom</div><div class="cal-day-lbl">Seg</div><div class="cal-day-lbl">Ter</div>
+            <div class="cal-day-lbl">Qua</div><div class="cal-day-lbl">Qui</div><div class="cal-day-lbl">Sex</div><div class="cal-day-lbl">Sab</div>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <div class="day-detail" id="day-detail">
+          <div style="font-size:14px;font-weight:700;margin-bottom:14px;" id="day-title"></div>
+          <div id="day-timeline"></div>
+        </div>
+      </div>
+
+      <!-- CLIENTES -->
+      <div id="panel-clientes" class="panel">
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <div class="search-wrap">
+            <span class="search-icon">&#128269;</span>
+            <input class="search-inp" type="text" placeholder="Buscar paciente..." oninput="filterClients(this.value)">
+          </div>
+          <button class="btn btn-outline">Filtrar</button>
+        </div>
+        <div class="clients-count-badge" id="clients-count" style="margin-bottom:14px;"></div>
+        <div id="clients-grid"></div>
+      </div>
+
+      <!-- STATS -->
+      <div id="panel-stats" class="panel">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">Total Pacientes</div><div class="stat-val">247</div><div class="stat-change up">&#8593; 18%</div></div>
+          <div class="stat-card"><div class="stat-label">Consultas mes</div><div class="stat-val">149</div><div class="stat-change up">&#8593; 12%</div></div>
+          <div class="stat-card"><div class="stat-label">Profissionais</div><div class="stat-val" id="st-pros">5</div><div class="stat-change">Todos ativos</div></div>
+          <div class="stat-card"><div class="stat-label">Taxa retorno</div><div class="stat-val">68%</div><div class="stat-change up">&#8593; 4pp</div></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Consultas por profissional (mes)</div>
+          <div class="bar-chart" id="bar-chart-clinic"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Evolucao mensal da clinica</div>
+          <div class="bar-chart" id="bar-chart-month"></div>
+        </div>
+      </div>
+
+      <!-- ADMIN -->
+      <div id="panel-admin" class="panel">
+        <div class="admin-section">
+          <div class="admin-section-title">
+            <span>Profissionais da Clinica</span>
+            <button class="btn btn-primary" onclick="openAddPro()">+ Adicionar</button>
+          </div>
+          <div id="admin-pros-list"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- PRO FICHA OVERLAY -->
+<div class="overlay" id="pro-overlay" onclick="if(event.target===this)closeProFicha()">
+  <div class="side-panel" style="width:520px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <div style="width:52px;height:52px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#1a6b5a;" id="pro-av">R</div>
+        <div><div style="font-size:19px;font-weight:700;" id="pro-name-title"></div><div style="font-size:13px;color:#9ca3af;" id="pro-spec-title"></div></div>
+      </div>
+      <button class="close-btn" onclick="closeProFicha()">&#10005;</button>
+    </div>
+    <div class="ficha-sec"><div class="ficha-sec-title">Informacoes</div><div class="info-grid" id="pro-info"></div></div>
+    <div class="ficha-sec"><div class="ficha-sec-title">Agenda do profissional</div><div id="pro-agenda-list"></div></div>
+    <div class="ficha-sec"><div class="ficha-sec-title">Pacientes recentes</div><div id="pro-patients-list"></div></div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-primary" style="flex:1;">Ver painel completo</button>
+      <button class="btn btn-outline">Editar perfil</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD PRO MODAL -->
+<div class="modal-overlay" id="add-pro-modal" onclick="if(event.target===this)closeAddPro()">
+  <div class="modal">
+    <div class="modal-title">Adicionar Profissional</div>
+    <div class="form-group"><label class="form-label">Nome completo</label><input class="form-inp" id="new-pro-name" placeholder="Dr. Nome Sobrenome"></div>
+    <div class="form-group"><label class="form-label">Especialidade</label><input class="form-inp" id="new-pro-spec" placeholder="Ex: Cardiologia"></div>
+    <div class="form-group"><label class="form-label">E-mail</label><input class="form-inp" id="new-pro-email" type="email" placeholder="email@clinica.com.br"></div>
+    <div class="form-group"><label class="form-label">CRM</label><input class="form-inp" id="new-pro-crm" placeholder="CRM/SP 000000"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-outline" onclick="closeAddPro()">Cancelar</button>
+      <button class="btn btn-primary" onclick="addPro()">Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var calYear = new Date().getFullYear();
+var calMonth = new Date().getMonth() + 1;
+
+var PROS = [
+  {init:'RA',name:'Dr. Ricardo Alves',spec:'Clinica Geral',patients:148,consults:34,email:'ricardo@clinica.com',crm:'CRM/SP 123456',status:'Ativo'},
+  {init:'MB',name:'Dra. Marina Braga',spec:'Cardiologia',patients:89,consults:21,email:'marina@clinica.com',crm:'CRM/SP 234567',status:'Ativo'},
+  {init:'JC',name:'Dr. Jorge Camargo',spec:'Dermatologia',patients:112,consults:28,email:'jorge@clinica.com',crm:'CRM/SP 345678',status:'Ativo'},
+  {init:'FS',name:'Dra. Fernanda Souza',spec:'Pediatria',patients:201,consults:47,email:'fernanda@clinica.com',crm:'CRM/SP 456789',status:'Ativo'},
+  {init:'TP',name:'Dr. Thiago Peixoto',spec:'Ortopedia',patients:76,consults:19,email:'thiago@clinica.com',crm:'CRM/SP 567890',status:'Ativo'},
+];
+
+var ALL_CLIENTS = [
+  {init:'A',name:'Ana Lima',age:34,city:'Sao Paulo',summary:'Enxaqueca e insonia.',next:'20/05/2026',pro:'Dr. Ricardo Alves',status:'agendado'},
+  {init:'C',name:'Carlos Mendes',age:47,city:'Guarulhos',summary:'Hipertensao controlada.',next:'--',pro:'Dra. Marina Braga',status:'retorno'},
+  {init:'B',name:'Beatriz Santos',age:29,city:'Osasco',summary:'Check-up anual.',next:'15/06/2026',pro:'Dr. Ricardo Alves',status:'agendado'},
+  {init:'R',name:'Rafael Pereira',age:52,city:'Sao Paulo',summary:'Dores lombares.',next:'18/05/2026',pro:'Dr. Thiago Peixoto',status:'agendado'},
+  {init:'L',name:'Luciana Borges',age:38,city:'Sao Paulo',summary:'Ansiedade.',next:'22/05/2026',pro:'Dr. Ricardo Alves',status:'novo'},
+  {init:'M',name:'Mariana Costa',age:31,city:'Sao Paulo',summary:'Dermatite atopica.',next:'25/05/2026',pro:'Dr. Jorge Camargo',status:'agendado'},
+  {init:'P',name:'Pedro Alves',age:8,city:'Osasco',summary:'Bronquiolite recorrente.',next:'21/05/2026',pro:'Dra. Fernanda Souza',status:'agendado'},
+];
+
+var AGENDA_EVENTS = {};
+
+function initAgendaEvents() {
+  AGENDA_EVENTS[calYear+'-'+calMonth+'-8'] = [
+    {label:'Ana Lima (Ricardo)',tipo:'consulta',hora:'09:00'},
+    {label:'Carlos M. (Marina)',tipo:'retorno',hora:'11:00'}
+  ];
+  AGENDA_EVENTS[calYear+'-'+calMonth+'-15'] = [
+    {label:'Beatriz S. (Ricardo)',tipo:'consulta',hora:'14:00'},
+    {label:'Mariana C. (Jorge)',tipo:'consulta',hora:'16:00'}
+  ];
+  AGENDA_EVENTS[calYear+'-'+calMonth+'-19'] = [
+    {label:'Rafael P. (Thiago)',tipo:'consulta',hora:'09:00'},
+    {label:'Pedro A. (Fernanda)',tipo:'consulta',hora:'10:00'},
+    {label:'Reuniao equipe',tipo:'reuniao',hora:'15:00'}
+  ];
+  AGENDA_EVENTS[calYear+'-'+calMonth+'-22'] = [
+    {label:'Luciana B. (Ricardo)',tipo:'consulta',hora:'10:00'}
+  ];
+}
+
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.nitem').forEach(function(n){n.classList.remove('active');});
+  document.getElementById('panel-'+id).classList.add('active');
+  if (el) el.classList.add('active');
+  var titles = {profissionais:'Profissionais',agenda:'Agenda Geral',clientes:'Clientes',stats:'Estatisticas',admin:'Administrativo'};
+  var actions = {profissionais:'+ Profissional',agenda:'',clientes:'+ Novo paciente',stats:'',admin:''};
+  document.getElementById('topbar-title').textContent = titles[id]||id;
+  document.getElementById('action-btn').textContent = actions[id]||'';
+  document.getElementById('action-btn').style.display = actions[id] ? '' : 'none';
+}
+
+function mainAction() {
+  openAddPro();
+}
+
+function doLogout() {
+  window.location.href = 'medico.html';
+}
+
+// PROFISSIONAIS
+function renderPros() {
+  var grid = document.getElementById('pros-grid');
+  if (!grid) return;
+  grid.innerHTML = PROS.map(function(p, i) {
+    return '<div class="pro-card" onclick="openProFicha('+i+')">' +
+      '<div class="pro-avatar">'+p.init+'</div>' +
+      '<div class="pro-name">'+p.name+'</div>' +
+      '<div class="pro-spec">'+p.spec+'</div>' +
+      '<div class="pro-stats">' +
+        '<div><div class="pro-stat-num">'+p.patients+'</div><div class="pro-stat-lbl">pacientes</div></div>' +
+        '<div><div class="pro-stat-num">'+p.consults+'</div><div class="pro-stat-lbl">consultas/mes</div></div>' +
+      '</div>' +
+      '<span class="pro-badge">&#9679; '+p.status+'</span>' +
+    '</div>';
+  }).join('');
+}
+
+function openProFicha(idx) {
+  var p = PROS[idx];
+  if (!p) return;
+  document.getElementById('pro-av').textContent = p.init;
+  document.getElementById('pro-name-title').textContent = p.name;
+  document.getElementById('pro-spec-title').textContent = p.spec;
+  document.getElementById('pro-info').innerHTML =
+    '<div class="info-item"><label>E-mail</label><span>'+p.email+'</span></div>' +
+    '<div class="info-item"><label>CRM</label><span>'+p.crm+'</span></div>' +
+    '<div class="info-item"><label>Pacientes</label><span>'+p.patients+'</span></div>' +
+    '<div class="info-item"><label>Consultas/mes</label><span>'+p.consults+'</span></div>';
+  document.getElementById('pro-agenda-list').innerHTML =
+    '<div style="background:#f9fafb;border-radius:8px;padding:10px 12px;margin-bottom:6px;border:1px solid #f3f4f6;font-size:13px;">19/05 - 09:00 - Consulta Ana Lima</div>' +
+    '<div style="background:#f9fafb;border-radius:8px;padding:10px 12px;margin-bottom:6px;border:1px solid #f3f4f6;font-size:13px;">22/05 - 10:00 - Consulta Luciana Borges</div>';
+  var myClients = ALL_CLIENTS.filter(function(c){return c.pro===p.name;});
+  document.getElementById('pro-patients-list').innerHTML = myClients.slice(0,3).map(function(c) {
+    return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f3f4f6;">' +
+      '<div style="width:32px;height:32px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#1a6b5a;">'+c.init+'</div>' +
+      '<div><div style="font-size:13px;font-weight:600;">'+c.name+'</div><div style="font-size:11px;color:#9ca3af;">'+c.summary+'</div></div>' +
+    '</div>';
+  }).join('') || '<p style="color:#9ca3af;font-size:13px;">Sem pacientes recentes.</p>';
+  document.getElementById('pro-overlay').classList.add('show');
+}
+
+function closeProFicha() { document.getElementById('pro-overlay').classList.remove('show'); }
+
+// AGENDA
+function renderCalendar() {
+  var months = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  var lbl = document.getElementById('month-label');
+  if (lbl) lbl.textContent = months[calMonth-1]+' '+calYear;
+  var grid = document.getElementById('cal-grid');
+  if (!grid) return;
+  var firstDay = new Date(calYear,calMonth-1,1).getDay();
+  var daysInMonth = new Date(calYear,calMonth,0).getDate();
+  var prevDays = new Date(calYear,calMonth-1,0).getDate();
+  var today = new Date();
+  var html = '';
+  for (var i=firstDay-1;i>=0;i--) html += '<div class="cal-cell other"><div class="cal-num">'+(prevDays-i)+'</div></div>';
+  for (var d=1;d<=daysInMonth;d++) {
+    var isToday = d===today.getDate()&&calMonth===today.getMonth()+1&&calYear===today.getFullYear();
+    var key = calYear+'-'+calMonth+'-'+d;
+    var evs = AGENDA_EVENTS[key]||[];
+    var evHtml = evs.slice(0,2).map(function(e){return '<div class="cal-event ev-'+e.tipo+'">'+e.hora+' '+e.label+'</div>';}).join('');
+    if (evs.length>2) evHtml += '<div class="cal-event" style="background:#f3f4f6;color:#6b7280;">+'+(evs.length-2)+' mais</div>';
+    html += '<div class="cal-cell'+(isToday?' today':'')+'" onclick="showDay('+d+',\''+key+'\')"><div class="cal-num">'+d+'</div>'+evHtml+'</div>';
+  }
+  var rem = 42-firstDay-daysInMonth;
+  if (rem<0) rem+=7;
+  for (var j=1;j<=rem;j++) html += '<div class="cal-cell other"><div class="cal-num">'+j+'</div></div>';
+  grid.innerHTML = html;
+}
+
+function showDay(d, key) {
+  var dd = document.getElementById('day-detail');
+  dd.classList.add('show');
+  var months = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('day-title').textContent = d+' de '+months[calMonth-1]+' de '+calYear;
+  var evs = AGENDA_EVENTS[key]||[];
+  var tl = document.getElementById('day-timeline');
+  if (!evs.length) { tl.innerHTML = '<p style="color:#9ca3af;font-size:13px;">Nenhum compromisso.</p>'; return; }
+  tl.innerHTML = evs.map(function(e) {
+    return '<div class="tl-item"><div class="tl-time">'+e.hora+'</div><div class="tl-line"></div><div class="tl-card"><h4>'+e.label+'</h4><p>'+e.tipo+'</p></div></div>';
+  }).join('');
+}
+
+function prevMonth() { calMonth--; if(calMonth<1){calMonth=12;calYear--;} renderCalendar(); }
+function nextMonth() { calMonth++; if(calMonth>12){calMonth=1;calYear++;} renderCalendar(); }
+
+// CLIENTES
+function renderClients(clients) {
+  var grid = document.getElementById('clients-grid');
+  var count = document.getElementById('clients-count');
+  if (count) count.innerHTML = '<strong>'+clients.length+'</strong> pacientes na clinica';
+  if (!grid) return;
+  if (!clients.length) { grid.innerHTML = '<div style="text-align:center;padding:40px;color:#9ca3af;">Nenhum paciente encontrado.</div>'; return; }
+  grid.innerHTML = clients.map(function(c) {
+    var bc = c.status==='agendado'?'badge-agendado':c.status==='retorno'?'badge-retorno':'badge-novo';
+    var bl = c.status==='agendado'?'Agendado':c.status==='retorno'?'Retorno':'Novo';
+    return '<div class="client-card">' +
+      '<div class="cc-avatar">'+c.init+'</div>' +
+      '<div><div class="cc-name">'+c.name+'</div><div class="cc-info">'+c.age+' anos &middot; '+c.city+'</div></div>' +
+      '<div class="cc-pro" style="font-size:12px;color:#6b7280;">'+c.pro+'</div>' +
+      '<div style="font-size:12px;color:#374151;">'+c.next+'</div>' +
+      '<span class="cc-badge '+bc+'">'+bl+'</span>' +
+    '</div>';
+  }).join('');
+}
+
+function filterClients(q) {
+  var filtered = ALL_CLIENTS.filter(function(c){return c.name.toLowerCase().includes(q.toLowerCase())||c.pro.toLowerCase().includes(q.toLowerCase());});
+  renderClients(filtered);
+}
+
+// STATS
+function renderCharts() {
+  var bc = document.getElementById('bar-chart-clinic');
+  if (bc) {
+    var vals = [34,21,28,47,19];
+    var labels = ['Ricardo','Marina','Jorge','Fernanda','Thiago'];
+    var max = Math.max.apply(null,vals);
+    bc.innerHTML = vals.map(function(v,i){
+      return '<div class="bar-col"><div class="bar'+(i===vals.length-1?' accent':'')+'" style="height:'+Math.round((v/max)*120)+'px"></div><div class="bar-lbl">'+labels[i]+'</div></div>';
+    }).join('');
+  }
+  var bm = document.getElementById('bar-chart-month');
+  if (bm) {
+    var mvals = [89,102,118,134,149];
+    var mlabels = ['Jan','Fev','Mar','Abr','Mai'];
+    var mmax = Math.max.apply(null,mvals);
+    bm.innerHTML = mvals.map(function(v,i){
+      return '<div class="bar-col"><div class="bar'+(i===mvals.length-1?' accent':'')+'" style="height:'+Math.round((v/mmax)*120)+'px"></div><div class="bar-lbl">'+mlabels[i]+'</div></div>';
+    }).join('');
+  }
+}
+
+// ADMIN
+function renderAdminPros() {
+  var list = document.getElementById('admin-pros-list');
+  if (!list) return;
+  list.innerHTML = PROS.map(function(p,i){
+    return '<div class="pro-row">' +
+      '<div class="pro-row-avatar">'+p.init+'</div>' +
+      '<div style="flex:1;"><div class="pro-row-name">'+p.name+'</div><div class="pro-row-spec">'+p.spec+' &middot; '+p.crm+'</div></div>' +
+      '<button class="btn-remove" onclick="removePro('+i+')">Remover</button>' +
+    '</div>';
+  }).join('');
+}
+
+function removePro(idx) {
+  if (!confirm('Remover '+PROS[idx].name+' da clinica?')) return;
+  PROS.splice(idx,1);
+  renderPros();
+  renderAdminPros();
+  document.getElementById('st-pros').textContent = PROS.length;
+}
+
+function openAddPro() { document.getElementById('add-pro-modal').classList.add('show'); }
+function closeAddPro() { document.getElementById('add-pro-modal').classList.remove('show'); }
+
+function addPro() {
+  var name = document.getElementById('new-pro-name').value.trim();
+  var spec = document.getElementById('new-pro-spec').value.trim();
+  var email = document.getElementById('new-pro-email').value.trim();
+  var crm = document.getElementById('new-pro-crm').value.trim();
+  if (!name||!spec) { alert('Nome e especialidade sao obrigatorios.'); return; }
+  var init = name.split(' ').slice(0,2).map(function(w){return w[0];}).join('').toUpperCase();
+  PROS.push({init:init,name:name,spec:spec,patients:0,consults:0,email:email||'-',crm:crm||'-',status:'Ativo'});
+  closeAddPro();
+  renderPros();
+  renderAdminPros();
+  document.getElementById('st-pros').textContent = PROS.length;
+  ['new-pro-name','new-pro-spec','new-pro-email','new-pro-crm'].forEach(function(id){document.getElementById(id).value='';});
+}
+
+// INIT
+document.addEventListener('DOMContentLoaded', function() {
+  initAgendaEvents();
+  renderPros();
+  renderClients(ALL_CLIENTS);
+  renderCalendar();
+  renderCharts();
+  renderAdminPros();
+});
+</script>
+</body>
+</html>
