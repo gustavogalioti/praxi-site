@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Praxi Admin</title>
+<style>
+body{margin:0;font-family:'Segoe UI',sans-serif;background:#f8f8f6;}
+.hidden{display:none!important;}
+.wrap{display:flex;flex-direction:row;height:100vh;width:100vw;overflow:hidden;}
+.sidebar{width:240px;min-width:240px;background:white;border-right:1px solid #e0e0e0;display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-top{padding:20px;border-bottom:1px solid #e0e0e0;}
+.logo{font-size:22px;font-weight:700;margin-bottom:14px;color:#1a1a18;}
+.profile{display:flex;align-items:center;gap:10px;}
+.avatar{width:36px;height:36px;border-radius:50%;background:#fee2e2;display:flex;align-items:center;justify-content:center;color:#ef4444;font-weight:700;font-size:14px;}
+.pname{font-size:13px;font-weight:600;}
+.prole{font-size:11px;color:#999;}
+.nav{flex:1;padding:12px 8px;}
+.nitem{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;font-size:14px;color:#666;border-radius:8px;margin-bottom:3px;transition:all .15s;}
+.nitem:hover{background:#f0f9f6;color:#1a6b5a;}
+.nitem.active{background:#e8f4f0;color:#1a6b5a;font-weight:600;}
+.sfoot{padding:12px 8px;border-top:1px solid #e0e0e0;}
+.main{flex:1;overflow-y:auto;padding:28px 32px;}
+.panel{display:none;}
+.panel.active{display:block;}
+h2{font-size:22px;font-weight:700;margin-bottom:20px;color:#1a1a18;}
+.card{background:white;border-radius:12px;border:1px solid #e0e0e0;padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .2s;}
+.card:hover{box-shadow:0 2px 12px rgba(0,0,0,.08);}
+.cavatar{width:40px;height:40px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;font-weight:700;color:#1a6b5a;font-size:16px;flex-shrink:0;}
+.cname{font-size:14px;font-weight:600;}
+.cemail{font-size:12px;color:#999;}
+.badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;}
+.b-active{background:#e8f4f0;color:#1a6b5a;}
+.b-pending{background:#fef3c7;color:#92400e;}
+.b-suspended{background:#fee2e2;color:#ef4444;}
+.btn-approve{background:#1a6b5a;color:white;border:none;padding:7px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;font-weight:500;}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.stat{background:white;border-radius:12px;border:1px solid #e0e0e0;padding:22px;}
+.slabel{font-size:11px;color:#999;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.sval{font-size:38px;font-weight:700;color:#1a1a18;}
+.tabs{display:flex;gap:4px;background:#f2f2f0;padding:3px;border-radius:10px;margin-bottom:20px;width:fit-content;}
+.tab{padding:8px 18px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;border-radius:8px;color:#6b6b68;font-family:inherit;transition:all .2s;}
+.tab.active{background:white;color:#1a1a18;box-shadow:0 1px 3px rgba(0,0,0,.1);}
+.empty{text-align:center;padding:40px;color:#999;font-size:14px;}
+
+/* LOGIN */
+.login-page{display:flex;align-items:center;justify-content:center;height:100vh;background:#f8f8f6;}
+.login-card{background:white;padding:40px;border-radius:16px;width:360px;box-shadow:0 4px 24px rgba(0,0,0,.1);}
+.login-card h2{margin-bottom:6px;font-size:24px;}
+.login-card p{color:#999;font-size:14px;margin-bottom:28px;}
+.inp{width:100%;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:14px;font-family:inherit;outline:none;box-sizing:border-box;margin-bottom:12px;}
+.inp:focus{border-color:#1a6b5a;}
+.btn-login{width:100%;padding:13px;background:#1a1a18;color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;}
+.btn-login:hover{background:#333;}
+.errmsg{color:#ef4444;font-size:13px;margin-top:8px;}
+</style>
+</head>
+<body>
+
+<div id="login-page" class="login-page">
+  <div class="login-card">
+    <h2>Praxi.</h2>
+    <p>Painel Administrativo</p>
+    <input class="inp" id="em" type="email" placeholder="E-mail admin">
+    <input class="inp" id="pw" type="password" placeholder="Senha">
+    <button class="btn-login" onclick="doLogin()">Entrar no painel</button>
+    <div class="errmsg" id="errmsg"></div>
+  </div>
+</div>
+
+<div id="admin-page" class="hidden wrap">
+  <div class="sidebar">
+    <div class="sidebar-top">
+      <div class="logo">Praxi.</div>
+      <div class="profile">
+        <div class="avatar">AD</div>
+        <div><div class="pname">Admin Praxi</div><div class="prole">Acesso total</div></div>
+      </div>
+    </div>
+    <div class="nav">
+      <div class="nitem active" onclick="showPanel('clientes',this)">&#128101; Clientes</div>
+      <div class="nitem" onclick="showPanel('comunidade',this)">&#128172; Comunidade</div>
+      <div class="nitem" onclick="showPanel('stats',this)">&#128202; Visao Geral</div>
+    </div>
+    <div class="sfoot">
+      <div class="nitem" onclick="doLogout()">&#8592; Sair</div>
+    </div>
+  </div>
+  <div class="main">
+    <div id="panel-clientes" class="panel active">
+      <h2>Clientes</h2>
+      <div class="tabs">
+        <button class="tab active" onclick="filterClients('all',this)">Todos</button>
+        <button class="tab" onclick="filterClients('solo',this)">Solo</button>
+        <button class="tab" onclick="filterClients('clinic',this)">Clinica</button>
+        <button class="tab" id="tab-pending" style="display:none" onclick="filterClients('pending',this)">Pendentes</button>
+      </div>
+      <div id="clients-list"><div class="empty">Carregando...</div></div>
+    </div>
+    <div id="panel-comunidade" class="panel">
+      <h2>Comunidade</h2>
+      <div class="empty">Nenhuma postagem.</div>
+    </div>
+    <div id="panel-stats" class="panel">
+      <h2>Visao Geral</h2>
+      <div class="stats" id="stats-grid"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://praxi-bot-production.up.railway.app';
+let token = null;
+let allClients = [];
+
+async function doLogin() {
+  const email = document.getElementById('em').value.trim();
+  const pass = document.getElementById('pw').value.trim();
+  const err = document.getElementById('errmsg');
+  err.textContent = '';
+  if (!email || !pass) { err.textContent = 'Preencha e-mail e senha.'; return; }
+  try {
+    const res = await fetch(API + '/api/auth/login', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email, password: pass})
+    });
+    const data = await res.json();
+    if (data.token) {
+      token = data.token;
+      document.getElementById('login-page').classList.add('hidden');
+      document.getElementById('admin-page').classList.remove('hidden');
+      loadClients();
+    } else {
+      err.textContent = data.error || 'Credenciais invalidas.';
+    }
+  } catch(e) { err.textContent = 'Erro de conexao.'; }
+}
+
+function doLogout() {
+  token = null;
+  document.getElementById('admin-page').classList.add('hidden');
+  document.getElementById('login-page').classList.remove('hidden');
+}
+
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nitem').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  if (id === 'stats') loadStats();
+}
+
+async function loadClients() {
+  try {
+    const res = await fetch(API + '/api/admin/clients', {
+      headers: {'Authorization': 'Bearer ' + token}
+    });
+    const data = await res.json();
+    allClients = data.clients || [];
+    const pending = allClients.filter(c => c.status === 'pending').length;
+    const tabPending = document.getElementById('tab-pending');
+    if (pending > 0) {
+      tabPending.style.display = '';
+      tabPending.textContent = 'Pendentes (' + pending + ')';
+    }
+    renderClients(allClients);
+  } catch(e) {
+    document.getElementById('clients-list').innerHTML = '<div class="empty">Erro ao carregar.</div>';
+  }
+}
+
+function filterClients(filter, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  let filtered = allClients;
+  if (filter === 'solo') filtered = allClients.filter(c => c.type === 'solo');
+  else if (filter === 'clinic') filtered = allClients.filter(c => c.type === 'clinic');
+  else if (filter === 'pending') filtered = allClients.filter(c => c.status === 'pending');
+  renderClients(filtered);
+}
+
+function renderClients(clients) {
+  const list = document.getElementById('clients-list');
+  if (!clients.length) { list.innerHTML = '<div class="empty">Nenhum cliente encontrado.</div>'; return; }
+  list.innerHTML = clients.map(c => {
+    const bclass = c.status === 'active' ? 'b-active' : c.status === 'pending' ? 'b-pending' : 'b-suspended';
+    const blabel = c.status === 'active' ? 'Ativo' : c.status === 'pending' ? 'Pendente' : 'Suspenso';
+    const since = c.createdAt ? new Date(c.createdAt).toLocaleDateString('pt-BR') : '-';
+    return '<div class="card">' +
+      '<div class="cavatar">' + (c.name||'U').charAt(0).toUpperCase() + '</div>' +
+      '<div style="flex:1"><div class="cname">' + (c.name||'-') + '</div><div class="cemail">' + (c.email||'-') + ' &middot; Desde ' + since + '</div></div>' +
+      '<span class="badge ' + bclass + '">' + blabel + '</span>' +
+      (c.status !== 'active' ? '<button class="btn-approve" onclick="event.stopPropagation();approve(\'' + (c.id||'') + '\')">Aprovar</button>' : '') +
+      '</div>';
+  }).join('');
+}
+
+async function approve(id) {
+  try {
+    await fetch(API + '/api/admin/clients/' + id, {
+      method: 'PATCH',
+      headers: {'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+      body: JSON.stringify({status:'active'})
+    });
+    await loadClients();
+  } catch(e) { alert('Erro ao aprovar.'); }
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch(API + '/api/admin/clients', {headers:{'Authorization':'Bearer '+token}});
+    const data = await res.json();
+    const clients = data.clients || [];
+    const total = clients.length;
+    const solo = clients.filter(c => c.type === 'solo').length;
+    const clinic = clients.filter(c => c.type === 'clinic').length;
+    const mrr = clients.filter(c => c.status === 'active').reduce((s,c) => s + (c.type === 'solo' ? 197 : 497), 0);
+    document.getElementById('stats-grid').innerHTML = [
+      ['Total Clientes', total],
+      ['Medicos Solo', solo],
+      ['Clinicas', clinic],
+      ['MRR', 'R$ ' + mrr]
+    ].map(([l,v]) => '<div class="stat"><div class="slabel">'+l+'</div><div class="sval">'+v+'</div></div>').join('');
+  } catch(e) {}
+}
+</script>
+</body>
+</html>
