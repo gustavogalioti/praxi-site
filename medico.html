@@ -818,7 +818,11 @@ function submitDisc() {
 
 // INIT
 document.addEventListener('DOMContentLoaded', function() {
-  setPeriod('mes', document.querySelector('.period-tab.active') || {parentElement:{querySelectorAll:()=>[]}});
+  setPeriod('mes', document.querySelector('.period-tab') || {parentElement:{querySelectorAll:()=>[]}});
+  // Auto-show demo if no login required
+  document.getElementById('login-page').classList.add('hidden');
+  document.getElementById('medico-page').classList.remove('hidden');
+  initMedico();
 });
 </script>
 </body>
