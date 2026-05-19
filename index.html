@@ -772,36 +772,40 @@ footer{padding:36px 48px;border-top:1px solid var(--border);display:flex;justify
 </div>
 
 <!-- ADMIN DASHBOARD -->
-<div id="page-admin" class="page dash-layout-page" style="display:none;">
+<div id="page-admin" class="page dash-layout-page">
   <div class="dash-layout" style="display:flex;flex-direction:row;width:100%;height:100vh;overflow:hidden;">
-    <aside class="sidebar">
+    <aside class="sidebar" style="width:260px;min-width:260px;flex-shrink:0;height:100vh;background:white;border-right:1px solid #e8e8e4;display:flex;flex-direction:column;overflow-y:auto;">
       <div class="sidebar-header">
         <div class="sidebar-logo">Praxi<span>.</span></div>
         <div class="sidebar-profile">
-          <div class="profile-avatar" style="background:#fee2e2;color:var(--red);">AD</div>
+          <div class="profile-avatar" style="background:#fee2e2;color:#ef4444;">AD</div>
           <div><div class="profile-name">Admin Praxi</div><div class="profile-role">Acesso total</div></div>
         </div>
       </div>
-      <nav class="sidebar-nav">
-        <div class="nav-item active" onclick="showPanel('admin-clients','admin',this)"><span class="nav-icon">👥</span>Clientes</div>
-        <div class="nav-item" onclick="showPanel('admin-posts','admin',this)"><span class="nav-icon">💬</span>Comunidade</div>
-        <div class="nav-item" onclick="showPanel('admin-stats','admin',this)"><span class="nav-icon">📊</span>Visão geral</div>
+      <nav style="flex:1;padding:16px 10px;display:flex;flex-direction:column;">
+        <div class="nav-item active" onclick="showAdminPanel('admin-clients',this)" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;margin-bottom:4px;">
+          <span>👥</span>Clientes
+        </div>
+        <div class="nav-item" onclick="showAdminPanel('admin-posts',this)" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;margin-bottom:4px;">
+          <span>💬</span>Comunidade
+        </div>
+        <div class="nav-item" onclick="showAdminPanel('admin-stats',this)" style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:14px;font-weight:500;margin-bottom:4px;">
+          <span>📊</span>Visão geral
+        </div>
       </nav>
-      <div class="sidebar-footer"><button class="btn-logout" onclick="doLogout()">⬅️ &nbsp;Sair</button></div>
-    </aside>
-    <main class="main-content">
-      <div class="topbar">
-        <div class="topbar-title" id="admin-title">Clientes</div>
-        <div class="topbar-actions"><button class="btn-sm-out" style="font-size:12px;">Exportar CSV</button></div>
+      <div style="padding:14px 10px;border-top:1px solid #e8e8e4;">
+        <button onclick="doLogout()" style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;font-size:14px;color:#6b6b68;background:none;border:none;font-family:'DM Sans',sans-serif;width:100%;">⬅️ Sair</button>
       </div>
-      <div class="page-inner">
+    </aside>
+    <main style="flex:1;background:#f8f8f6;height:100vh;overflow-y:auto;">
+      <div style="padding:28px 32px;">
         <div id="ap-admin-clients" class="panel active">
-          <div class="admin-tabs" id="admin-tabs">
+          <div class="admin-tabs" id="admin-tabs" style="margin-bottom:20px;">
             <button class="admin-tab active" onclick="filterAdminClients('all',this)">Todos</button>
             <button class="admin-tab" onclick="filterAdminClients('solo',this)">Solo</button>
             <button class="admin-tab" onclick="filterAdminClients('clinic',this)">Clínica</button>
           </div>
-          <div id="admin-clients-list"><div style="text-align:center;padding:40px;color:var(--faint);">Carregando...</div></div>
+          <div id="admin-clients-list"><div style="text-align:center;padding:40px;color:#9b9b98;">Carregando...</div></div>
         </div>
         <div id="ap-admin-posts" class="panel"><div id="admin-posts-list"></div></div>
         <div id="ap-admin-stats" class="panel"><div class="stats-grid" id="admin-stats-grid"></div></div>
@@ -944,6 +948,17 @@ function setBtn(id, loading, orig) {
 }
 
 // ===== PAGE NAV =====
+function showAdminPanel(panel, el) {
+  ['ap-admin-clients','ap-admin-posts','ap-admin-stats'].forEach(function(id) {
+    const p = document.getElementById(id);
+    if (p) p.classList.remove('active');
+  });
+  const target = document.getElementById(panel);
+  if (target) target.classList.add('active');
+  document.querySelectorAll('#page-admin .nav-item').forEach(function(n) { n.classList.remove('active'); });
+  if (el) el.classList.add('active');
+}
+
 function showPage(id) {
   document.querySelectorAll('.page').forEach(function(p) {
     p.classList.remove('active');
