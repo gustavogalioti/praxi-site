@@ -484,12 +484,16 @@ const DISC_DATA = [
   {id:6,specialty:'Pediatria',title:'Manejo de bronquiolite em lactentes',author:'Dra. Camila Ramos',body:'Diretrizes AAP 2024 derrubam uso rotineiro de beta-agonistas. Como voces estao manejando?',reactions:{gem:21,shock:5,heart:16},comments:[]},
 ];
 
-const AGENDA_EVENTS = {
-  [`${calYear}-${calMonth}-8`]:[{label:'Ana Lima',tipo:'consulta',hora:'09:00'},{label:'Carlos M.',tipo:'retorno',hora:'11:00'}],
-  [`${calYear}-${calMonth}-15`]:[{label:'Beatriz S.',tipo:'consulta',hora:'14:00'}],
-  [`${calYear}-${calMonth}-19`]:[{label:'Rafael P.',tipo:'consulta',hora:'09:00'},{label:'Reuniao equipe',tipo:'reuniao',hora:'15:00'}],
-  [`${calYear}-${calMonth}-22`]:[{label:'Luciana B.',tipo:'consulta',hora:'10:00'}],
-};
+const AGENDA_EVENTS = {};
+
+function initAgendaEvents() {
+  const y = calYear;
+  const m = calMonth;
+  AGENDA_EVENTS[`${y}-${m}-8`] = [{label:'Ana Lima',tipo:'consulta',hora:'09:00'},{label:'Carlos M.',tipo:'retorno',hora:'11:00'}];
+  AGENDA_EVENTS[`${y}-${m}-15`] = [{label:'Beatriz S.',tipo:'consulta',hora:'14:00'}];
+  AGENDA_EVENTS[`${y}-${m}-19`] = [{label:'Rafael P.',tipo:'consulta',hora:'09:00'},{label:'Reuniao equipe',tipo:'reuniao',hora:'15:00'}];
+  AGENDA_EVENTS[`${y}-${m}-22`] = [{label:'Luciana B.',tipo:'consulta',hora:'10:00'}];
+}
 
 // ===== AUTH =====
 function setType(btn, type) {
@@ -537,6 +541,7 @@ function doLogout() {
 
 // ===== INIT =====
 function initMedico() {
+  initAgendaEvents();
   renderCalendar();
   renderClients(CLIENTS_DATA);
   renderBarChart();
