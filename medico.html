@@ -457,17 +457,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f4f6f8;color:#1a1a1
 </div>
 
 <script>
-const API = 'https://praxi-bot-production.up.railway.app';
-let token = null;
-let loginType = 'medico';
-let calYear = new Date().getFullYear();
-let calMonth = new Date().getMonth() + 1;
-let currentView = 'mes';
-let allClients = [];
-let allDiscussions = [...DISC_DATA];
+var API = 'https://praxi-bot-production.up.railway.app';
+var token = null;
+var loginType = 'medico';
+var calYear = new Date().getFullYear();
+var calMonth = new Date().getMonth() + 1;
+var currentView = 'mes';
+var allClients = [];
+var allDiscussions = [];
 
 // ===== MOCK DATA =====
-let CLIENTS_DATA = [
+var CLIENTS_DATA = [
   {id:'p001',init:'A',name:'Ana Lima',age:34,city:'Sao Paulo',email:'ana@email.com',phone:'(11)99001-0001',born:'15/04/1991',meds:'Sertralina 50mg',summary:'1a consulta. Enxaqueca e insonia.',next:'20/05/2026',status:'agendado',history:[{date:'08/05/2026',desc:'1a consulta',notes:'Queixa de enxaqueca cronica e insonia. Pedido exames.'}],docs:['Hemograma.pdf']},
   {id:'p002',init:'C',name:'Carlos Mendes',age:47,city:'Guarulhos',email:'cmendes@email.com',phone:'(11)97002-0002',born:'03/08/1978',meds:'Losartana 50mg',summary:'Retorno. Hipertensao controlada.',next:'--',status:'retorno',history:[{date:'01/04/2026',desc:'1a consulta',notes:'Hipertensao diagnosticada.'},{date:'15/05/2026',desc:'Retorno',notes:'Pressao controlada. Manter medicacao.'}],docs:[]},
   {id:'p003',init:'B',name:'Beatriz Santos',age:29,city:'Osasco',email:'bea@email.com',phone:'(11)96003-0003',born:'22/12/1996',meds:'Nenhum',summary:'Check-up anual. Saudavel.',next:'15/06/2026',status:'agendado',history:[{date:'15/05/2026',desc:'Check-up',notes:'Paciente saudavel. Exames dentro do normal.'}],docs:['Exame_colesterol.pdf']},
@@ -475,7 +475,7 @@ let CLIENTS_DATA = [
   {id:'p005',init:'L',name:'Luciana Borges',age:38,city:'Sao Paulo',email:'lucianab@email.com',phone:'(11)93006-0006',born:'11/09/1987',meds:'Fluoxetina 20mg',summary:'Ansiedade. Encaminhamento psicologo.',next:'22/05/2026',status:'novo',history:[{date:'20/05/2026',desc:'1a consulta',notes:'Ansiedade generalizada. Encaminhada para psicologia.'}],docs:[]},
 ];
 
-let DISC_DATA = [
+var DISC_DATA = [
   {id:1,specialty:'Cardiologia',title:'Correlacao entre FA e AVC em pacientes jovens',author:'Dr. Marcos Oliveira',body:'Estudo recente aponta aumento de 40% nos casos de FA em menores de 45 anos. Alguem tem observado isso na pratica clinica?',reactions:{gem:18,shock:6,heart:12},comments:['Excelente ponto, venho observando isso tambem.','Vejo cada vez mais casos assim no meu consultorio.']},
   {id:2,specialty:'Clinica Geral',title:'Uso de metformina em pre-diabeticos',author:'Dra. Fernanda Costa',body:'Guidelines do ADA 2024 revisam criterios para inicio de metformina em pre-diabeticos. Experiencias de voces?',reactions:{gem:24,shock:3,heart:19},comments:[]},
   {id:3,specialty:'Dermatologia',title:'Protocolo para dermatite atopica refrataria',author:'Dr. Paulo Mendes',body:'Compartilhando serie de casos com dupilumabe. Resultados excelentes em 8 semanas de tratamento.',reactions:{gem:31,shock:9,heart:22},comments:['Tenho usado com otimos resultados tambem.']},
@@ -484,7 +484,7 @@ let DISC_DATA = [
   {id:6,specialty:'Pediatria',title:'Manejo de bronquiolite em lactentes',author:'Dra. Camila Ramos',body:'Diretrizes AAP 2024 derrubam uso rotineiro de beta-agonistas. Como voces estao manejando?',reactions:{gem:21,shock:5,heart:16},comments:[]},
 ];
 
-let AGENDA_EVENTS = {};
+var AGENDA_EVENTS = {};
 
 function initAgendaEvents() {
   const y = calYear;
@@ -541,6 +541,7 @@ function doLogout() {
 
 // ===== INIT =====
 function initMedico() {
+  allDiscussions = DISC_DATA.slice();
   initAgendaEvents();
   renderCalendar();
   renderClients(CLIENTS_DATA);
