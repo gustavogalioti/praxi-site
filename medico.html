@@ -879,8 +879,10 @@ function openNovaConsulta() {
 function closeNovaConsulta() {
   document.getElementById('nova-consulta-modal').classList.remove('show');
 }
-  setPeriod('mes', document.querySelector('.period-tab') || {parentElement:{querySelectorAll:()=>[]}});
-  // Auto-show demo if no login required
+
+document.addEventListener('DOMContentLoaded', function() {
+  setPeriod('mes', document.querySelector('.period-tab') || {parentElement:{querySelectorAll:function(){return[];}}});
+  // Abre painel direto sem login
   document.getElementById('login-page').classList.add('hidden');
   document.getElementById('medico-page').classList.remove('hidden');
   initMedico();
