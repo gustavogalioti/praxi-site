@@ -841,34 +841,34 @@ function submitDisc() {
 }
 
 async function loadClientsFromAPI() {
-  if (!token) return;
   try {
-    const res = await fetch(API + '/api/patients', { headers: {'Authorization': 'Bearer ' + token} });
+    const headers = token ? {'Authorization': 'Bearer ' + token} : {};
+    const res = await fetch(API + '/api/patients', { headers });
     const data = await res.json();
     const patients = data.patients || [];
-    if (patients.length) {
-      const mapped = patients.map(function(p) {
-        return {
-          id: p.id,
-          init: (p.name||'P').charAt(0).toUpperCase(),
-          name: p.name || '-',
-          age: p.dob ? calcAge(p.dob) : '-',
-          city: p.city || '-',
-          email: p.email || '-',
-          phone: p.phone || '-',
-          born: p.dob || '-',
-          meds: p.medications || 'Nenhum',
-          summary: p.objetivo || 'Paciente cadastrado via WhatsApp',
-          next: p.appointmentLabel || (p.appointment ? p.appointment : '--'),
-          status: p.appointment ? 'agendado' : 'novo',
-          history: [{date: p.registeredAt ? new Date(p.registeredAt).toLocaleDateString('pt-BR') : '-', desc: 'Cadastro via WhatsApp', notes: p.objetivo || '-'}],
-          docs: p.exames && p.exames.length ? ['Exame enviado via WhatsApp'] : []
-        };
-      });
-      CLIENTS_DATA.length = 0;
-      mapped.forEach(function(c) { CLIENTS_DATA.push(c); });
-      renderClients(CLIENTS_DATA);
-    }
+    const mapped = patients.map(function(p) {
+      return {
+        id: p.id,
+        init: (p.name||'P').charAt(0).toUpperCase(),
+        name: p.name || '-',
+        age: p.dob ? calcAge(p.dob) : '-',
+        city: p.city || '-',
+        email: p.email || '-',
+        phone: p.phone || '-',
+        born: p.dob || '-',
+        meds: p.medications || 'Nenhum',
+        summary: p.objetivo || 'Cadastrado via WhatsApp',
+        next: p.appointmentLabel || (p.appointment ? p.appointment : '--'),
+        status: p.appointment ? 'agendado' : 'novo',
+        history: [{date: p.registeredAt ? new Date(p.registeredAt).toLocaleDateString('pt-BR') : '-', desc: 'Cadastro via WhatsApp', notes: p.objetivo || '-'}],
+        docs: p.exames && p.exames.length ? ['Exame enviado via WhatsApp'] : []
+      };
+    });
+    CLIENTS_DATA.length = 0;
+    mapped.forEach(function(c) { CLIENTS_DATA.push(c); });
+    renderClients(CLIENTS_DATA);
+    var el = document.getElementById('st-pacientes');
+    if (el) el.textContent = patients.length;
   } catch(e) { console.log('Erro ao carregar pacientes:', e.message); }
 }
 
