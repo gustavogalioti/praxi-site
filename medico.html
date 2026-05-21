@@ -542,13 +542,27 @@ function doLogout() {
 // ===== INIT =====
 function initMedico() {
   allDiscussions = DISC_DATA.slice();
-  initAgendaEvents();
+  // NAO inicializa agenda demo - começa vazia
   renderCalendar();
-  renderClients([]); // começa vazio - dados reais virão do backend
-  renderBarChart();
+  renderClients([]);
+  renderBarChartEmpty();
   renderDiscussions();
   loadAgendaFromAPI();
   loadClientsFromAPI();
+}
+
+function renderBarChartEmpty() {
+  var chart = document.getElementById('bar-chart-med');
+  if (!chart) return;
+  chart.innerHTML = '<div style="width:100%;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:13px;">Nenhum dado ainda</div>';
+}
+
+function zeroDemoStats() {
+  var ids = ['st-pacientes','st-consultas','st-retornos','st-faltas'];
+  ids.forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.textContent = '0';
+  });
 }
 
 // ===== PANELS =====
@@ -735,14 +749,16 @@ function renderBarChart() {
 }
 
 function setPeriod(p, btn) {
-  btn.parentElement.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  const data = {dia:{pac:3,con:4,ret:1,fal:0},semana:{pac:12,con:18,ret:5,fal:1},mes:{pac:48,con:62,ret:18,fal:2}};
-  const d = data[p] || data.mes;
-  document.getElementById('st-pacientes').textContent = d.pac;
-  document.getElementById('st-consultas').textContent = d.con;
-  document.getElementById('st-retornos').textContent = d.ret;
-  document.getElementById('st-faltas').textContent = d.fal;
+  if (btn && btn.parentElement) {
+    btn.parentElement.querySelectorAll('.period-tab').forEach(function(t) { t.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+  // Stats zeradas por padrão - serão populadas com dados reais
+  var el;
+  el = document.getElementById('st-pacientes'); if(el) el.textContent = '0';
+  el = document.getElementById('st-consultas'); if(el) el.textContent = '0';
+  el = document.getElementById('st-retornos'); if(el) el.textContent = '0';
+  el = document.getElementById('st-faltas'); if(el) el.textContent = '0';
 }
 
 // ===== DISCUSSIONS =====
