@@ -407,7 +407,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f4f6f8;color:#1a1a1
     <div class="ficha-sec"><div class="ficha-sec-title">Informacoes</div><div class="info-grid" id="fo-info"></div></div>
     <div class="ficha-sec"><div class="ficha-sec-title">Historico de consultas</div><div id="fo-history"></div></div>
     <div class="ficha-sec"><div class="ficha-sec-title">&#129504; Insights Praxi IA</div><div id="fo-insights"></div></div>
-    <div class="ficha-sec"><div class="ficha-sec-title">Documentos</div><div id="fo-docs"></div><button class="btn btn-outline" style="width:100%;margin-top:8px;">+ Adicionar documento</button></div>
+    <div class="ficha-sec"><div class="ficha-sec-title">Documentos</div><div id="fo-docs"></div><button class="btn btn-outline" style="width:100%;margin-top:8px;" onclick="openUploadDoc()">+ Adicionar documento</button></div>
   </div>
 </div>
 
@@ -544,10 +544,11 @@ function initMedico() {
   allDiscussions = DISC_DATA.slice();
   initAgendaEvents();
   renderCalendar();
-  renderClients(CLIENTS_DATA);
+  renderClients([]); // começa vazio - dados reais virão do backend
   renderBarChart();
   renderDiscussions();
   loadAgendaFromAPI();
+  loadClientsFromAPI();
 }
 
 // ===== PANELS =====
@@ -568,6 +569,7 @@ function medAction() {
   const active = document.querySelector('#medico-page .panel.active');
   if (!active) return;
   if (active.id === 'med-discussoes') openNewDisc();
+  else if (active.id === 'med-agenda' || active.id === 'med-clientes') openNovaConsulta();
 }
 
 // ===== AGENDA =====
@@ -822,8 +824,61 @@ function submitDisc() {
   document.getElementById('disc-body').value = '';
 }
 
-// INIT
-document.addEventListener('DOMContentLoaded', function() {
+async function loadClientsFromAPI() {
+  if (!token) return;
+  try {
+    const res = await fetch(API + '/api/patients', { headers: {'Authorization': 'Bearer ' + token} });
+    const data = await res.json();
+    const patients = data.patients || [];
+    if (patients.length) {
+      const mapped = patients.map(function(p) {
+        return {
+          id: p.id,
+          init: (p.name||'P').charAt(0).toUpperCase(),
+          name: p.name || '-',
+          age: p.dob ? calcAge(p.dob) : '-',
+          city: p.city || '-',
+          email: p.email || '-',
+          phone: p.phone || '-',
+          born: p.dob || '-',
+          meds: p.medications || 'Nenhum',
+          summary: p.objetivo || 'Paciente cadastrado via WhatsApp',
+          next: p.appointmentLabel || (p.appointment ? p.appointment : '--'),
+          status: p.appointment ? 'agendado' : 'novo',
+          history: [{date: p.registeredAt ? new Date(p.registeredAt).toLocaleDateString('pt-BR') : '-', desc: 'Cadastro via WhatsApp', notes: p.objetivo || '-'}],
+          docs: p.exames && p.exames.length ? ['Exame enviado via WhatsApp'] : []
+        };
+      });
+      CLIENTS_DATA.length = 0;
+      mapped.forEach(function(c) { CLIENTS_DATA.push(c); });
+      renderClients(CLIENTS_DATA);
+    }
+  } catch(e) { console.log('Erro ao carregar pacientes:', e.message); }
+}
+
+function calcAge(dob) {
+  if (!dob) return '-';
+  var parts = dob.split('/');
+  var birth;
+  if (parts.length === 3) {
+    birth = new Date(parts[2], parts[1]-1, parts[0]);
+  } else {
+    birth = new Date(dob);
+  }
+  var today = new Date();
+  var age = today.getFullYear() - birth.getFullYear();
+  var m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return isNaN(age) ? '-' : age;
+}
+
+function openNovaConsulta() {
+  document.getElementById('nova-consulta-modal').classList.add('show');
+}
+
+function closeNovaConsulta() {
+  document.getElementById('nova-consulta-modal').classList.remove('show');
+}
   setPeriod('mes', document.querySelector('.period-tab') || {parentElement:{querySelectorAll:()=>[]}});
   // Auto-show demo if no login required
   document.getElementById('login-page').classList.add('hidden');
@@ -831,5 +886,93 @@ document.addEventListener('DOMContentLoaded', function() {
   initMedico();
 });
 </script>
+<!-- NOVA CONSULTA MODAL -->
+<div class="modal-overlay" id="nova-consulta-modal" onclick="if(event.target===this)closeNovaConsulta()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nova Consulta</div>
+      <button class="close-btn" onclick="closeNovaConsulta()">&#10005;</button>
+    </div>
+    <div class="form-group"><label class="form-label">Paciente</label><input class="form-inp" id="nc-paciente" placeholder="Nome do paciente"></div>
+    <div class="form-group"><label class="form-label">Data</label><input class="form-inp" id="nc-data" type="date"></div>
+    <div class="form-group"><label class="form-label">Horario</label><input class="form-inp" id="nc-hora" type="time"></div>
+    <div class="form-group"><label class="form-label">Tipo</label>
+      <select class="form-inp" id="nc-tipo">
+        <option value="consulta">Consulta</option>
+        <option value="retorno">Retorno</option>
+        <option value="reuniao">Reuniao</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Observacoes</label><textarea class="form-ta" id="nc-obs" placeholder="Observacoes opcionais..."></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeNovaConsulta()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarConsulta()">Agendar</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD DOC MODAL -->
+<div class="modal-overlay" id="upload-doc-modal" onclick="if(event.target===this)closeUploadDoc()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Adicionar Documento</div>
+      <button class="close-btn" onclick="closeUploadDoc()">&#10005;</button>
+    </div>
+    <div style="border:2px dashed #e5e7eb;border-radius:10px;padding:32px;text-align:center;margin-bottom:16px;cursor:pointer;" onclick="document.getElementById('doc-file-input').click()">
+      <div style="font-size:32px;margin-bottom:8px;">&#128196;</div>
+      <div style="font-size:14px;font-weight:500;color:#374151;">Clique para selecionar arquivo</div>
+      <div style="font-size:12px;color:#9ca3af;margin-top:4px;">PDF, JPG, PNG — max 10MB</div>
+      <input type="file" id="doc-file-input" style="display:none;" accept=".pdf,.jpg,.jpeg,.png" onchange="handleDocUpload(this)">
+    </div>
+    <div id="doc-upload-status" style="font-size:13px;color:#1a6b5a;text-align:center;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+      <button class="btn btn-outline" onclick="closeUploadDoc()">Cancelar</button>
+      <button class="btn btn-primary" id="doc-upload-btn" onclick="closeUploadDoc()">Concluir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function salvarConsulta() {
+  var pac = document.getElementById('nc-paciente').value.trim();
+  var data = document.getElementById('nc-data').value;
+  var hora = document.getElementById('nc-hora').value;
+  var tipo = document.getElementById('nc-tipo').value;
+  if (!pac || !data || !hora) { alert('Preencha paciente, data e horario.'); return; }
+  var d = new Date(data + 'T' + hora);
+  var key = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+  if (!AGENDA_EVENTS[key]) AGENDA_EVENTS[key] = [];
+  AGENDA_EVENTS[key].push({label: pac, tipo: tipo, hora: hora});
+  renderCalendar();
+  closeNovaConsulta();
+  document.getElementById('nc-paciente').value='';
+  document.getElementById('nc-data').value='';
+  document.getElementById('nc-hora').value='';
+  document.getElementById('nc-obs').value='';
+  showToast('Consulta agendada!');
+}
+
+function showToast(msg) {
+  var t = document.createElement('div');
+  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a6b5a;color:white;padding:12px 24px;border-radius:40px;font-size:14px;font-weight:500;z-index:9999;';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function(){t.remove();}, 3000);
+}
+
+function openUploadDoc() {
+  document.getElementById('upload-doc-modal').classList.add('show');
+}
+function closeUploadDoc() {
+  document.getElementById('upload-doc-modal').classList.remove('show');
+  document.getElementById('doc-upload-status').textContent = '';
+}
+function handleDocUpload(input) {
+  if (!input.files.length) return;
+  var file = input.files[0];
+  document.getElementById('doc-upload-status').textContent = 'Arquivo selecionado: ' + file.name;
+}
+</script>
+
 </body>
 </html>
