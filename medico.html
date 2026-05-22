@@ -583,25 +583,33 @@ function medAction() {
   const active = document.querySelector('#medico-page .panel.active');
   if (!active) return;
   if (active.id === 'med-discussoes') openNewDisc();
-  else if (active.id === 'med-agenda' || active.id === 'med-clientes') openNovaConsulta();
+  else if (active.id === 'med-agenda') openNovaConsulta();
+  else if (active.id === 'med-clientes') openNovoPaciente();
 }
 
 // ===== AGENDA =====
 async function loadAgendaFromAPI() {
-  if (!token) return;
   try {
-    const res = await fetch(API + '/api/agenda', { headers: {'Authorization':'Bearer ' + token} });
+    const headers = token ? {'Authorization':'Bearer ' + token} : {};
+    const res = await fetch(API + '/api/agenda', { headers });
     const data = await res.json();
     const agenda = data.agenda || [];
-    agenda.forEach(item => {
-      if (!item.dataHora) return;
-      const d = new Date(item.dataHora);
-      const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+    agenda.forEach(function(item) {
+      if (!item.dataHora && !item.appointment) return;
+      const dateStr = item.dataHora || item.appointment;
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return;
+      const key = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
       if (!AGENDA_EVENTS[key]) AGENDA_EVENTS[key] = [];
-      AGENDA_EVENTS[key].push({label: item.pacienteNome || 'Consulta', tipo: 'consulta', hora: d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})});
+      const hora = item.appointmentTime || d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      AGENDA_EVENTS[key].push({
+        label: item.pacienteNome || item.name || 'Consulta',
+        tipo: 'consulta',
+        hora: hora
+      });
     });
     renderCalendar();
-  } catch(e) {}
+  } catch(e) { console.log('Erro agenda:', e.message); }
 }
 
 function renderCalendar() {
@@ -888,6 +896,40 @@ function calcAge(dob) {
   return isNaN(age) ? '-' : age;
 }
 
+function openNovoPaciente() {
+  document.getElementById('novo-paciente-modal').classList.add('show');
+}
+function closeNovoPaciente() {
+  document.getElementById('novo-paciente-modal').classList.remove('show');
+}
+async function salvarNovoPaciente() {
+  const nome = document.getElementById('np-nome').value.trim();
+  const nasc = document.getElementById('np-nasc').value.trim();
+  const cidade = document.getElementById('np-cidade').value.trim();
+  const email = document.getElementById('np-email').value.trim();
+  const phone = document.getElementById('np-phone').value.trim();
+  const meds = document.getElementById('np-meds').value.trim();
+  const objetivo = document.getElementById('np-objetivo').value.trim();
+  if (!nome) { alert('Nome obrigatorio.'); return; }
+  const newP = {
+    init: nome.charAt(0).toUpperCase(),
+    name: nome, age: '-', city: cidade || '-',
+    email: email || '-', phone: phone || '-',
+    born: nasc || '-', meds: meds || 'Nenhum',
+    summary: objetivo || 'Cadastrado manualmente',
+    next: '--', status: 'novo',
+    history: [{date: new Date().toLocaleDateString('pt-BR'), desc: 'Cadastro manual', notes: objetivo || '-'}],
+    docs: []
+  };
+  CLIENTS_DATA.push(newP);
+  renderClients(CLIENTS_DATA);
+  closeNovoPaciente();
+  showToast('Paciente cadastrado!');
+  ['np-nome','np-nasc','np-cidade','np-email','np-phone','np-meds','np-objetivo'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.value='';
+  });
+}
+
 function openNovaConsulta() {
   document.getElementById('nova-consulta-modal').classList.add('show');
 }
@@ -904,6 +946,31 @@ document.addEventListener('DOMContentLoaded', function() {
   initMedico();
 });
 </script>
+<!-- NOVO PACIENTE MODAL -->
+<div class="modal-overlay" id="novo-paciente-modal" onclick="if(event.target===this)closeNovoPaciente()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Novo Paciente</div>
+      <button class="close-btn" onclick="closeNovoPaciente()">&#10005;</button>
+    </div>
+    <div class="form-group"><label class="form-label">Nome completo *</label><input class="form-inp" id="np-nome" placeholder="Nome do paciente"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group"><label class="form-label">Data de nascimento</label><input class="form-inp" id="np-nasc" placeholder="DD/MM/AAAA"></div>
+      <div class="form-group"><label class="form-label">Cidade</label><input class="form-inp" id="np-cidade" placeholder="Cidade"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group"><label class="form-label">E-mail</label><input class="form-inp" id="np-email" type="email" placeholder="email@exemplo.com"></div>
+      <div class="form-group"><label class="form-label">Telefone</label><input class="form-inp" id="np-phone" placeholder="(11) 99999-9999"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Medicamentos em uso</label><input class="form-inp" id="np-meds" placeholder="Ex: Losartana 50mg, Metformina..."></div>
+    <div class="form-group"><label class="form-label">Motivo da consulta / Objetivo</label><textarea class="form-ta" id="np-objetivo" placeholder="Descreva o motivo da consulta ou objetivo do paciente..."></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-outline" onclick="closeNovoPaciente()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarNovoPaciente()">Cadastrar paciente</button>
+    </div>
+  </div>
+</div>
+
 <!-- NOVA CONSULTA MODAL -->
 <div class="modal-overlay" id="nova-consulta-modal" onclick="if(event.target===this)closeNovaConsulta()">
   <div class="modal">
