@@ -701,12 +701,13 @@ function renderClients(clients) {
   grid.innerHTML = clients.map((c, idx) => {
     const bclass = c.status === 'agendado' ? 'badge-agendado' : c.status === 'retorno' ? 'badge-retorno' : 'badge-novo';
     const blabel = c.status === 'agendado' ? 'Agendado' : c.status === 'retorno' ? 'Retorno' : 'Novo';
-    return `<div class="client-card" onclick="openFicha(${idx})">
-      <div class="cc-avatar">${c.init}</div>
-      <div><div class="cc-name">${c.name}</div><div class="cc-info">${c.age} anos &middot; ${c.city}</div></div>
-      <div class="cc-summary">${c.summary}</div>
-      <div class="cc-next"><strong>Proxima consulta</strong><span>${c.next}</span></div>
+    return `<div class="client-card">
+      <div class="cc-avatar" onclick="openFicha(${idx})" style="cursor:pointer;">${c.init}</div>
+      <div onclick="openFicha(${idx})" style="cursor:pointer;"><div class="cc-name">${c.name}</div><div class="cc-info">${c.age} anos &middot; ${c.city}</div></div>
+      <div class="cc-summary" onclick="openFicha(${idx})" style="cursor:pointer;">${c.summary}</div>
+      <div class="cc-next" onclick="openFicha(${idx})" style="cursor:pointer;"><strong>Proxima consulta</strong><span>${c.next}</span></div>
       <span class="cc-badge ${bclass}">${blabel}</span>
+      <button onclick="deletarPaciente('${c.id}',${idx})" style="background:#fee2e2;color:#ef4444;border:none;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;">Excluir</button>
     </div>`;
   }).join('');
 }
@@ -714,6 +715,18 @@ function renderClients(clients) {
 function filterClients(q) {
   const filtered = CLIENTS_DATA.filter(c => c.name.toLowerCase().includes(q.toLowerCase()) || c.summary.toLowerCase().includes(q.toLowerCase()));
   renderClients(filtered);
+}
+
+async function deletarPaciente(id, idx) {
+  if (!confirm('Excluir este paciente?')) return;
+  try {
+    if (id && id !== 'undefined') {
+      await fetch(API + '/api/patients/' + id, { method: 'DELETE' });
+    }
+    CLIENTS_DATA.splice(idx, 1);
+    renderClients(CLIENTS_DATA);
+    showToast('Paciente excluido.');
+  } catch(e) { showToast('Erro ao excluir.'); }
 }
 
 function openFicha(idx) {
@@ -911,23 +924,21 @@ async function salvarNovoPaciente() {
   const meds = document.getElementById('np-meds').value.trim();
   const objetivo = document.getElementById('np-objetivo').value.trim();
   if (!nome) { alert('Nome obrigatorio.'); return; }
-  const newP = {
-    init: nome.charAt(0).toUpperCase(),
-    name: nome, age: '-', city: cidade || '-',
-    email: email || '-', phone: phone || '-',
-    born: nasc || '-', meds: meds || 'Nenhum',
-    summary: objetivo || 'Cadastrado manualmente',
-    next: '--', status: 'novo',
-    history: [{date: new Date().toLocaleDateString('pt-BR'), desc: 'Cadastro manual', notes: objetivo || '-'}],
-    docs: []
-  };
-  CLIENTS_DATA.push(newP);
-  renderClients(CLIENTS_DATA);
+  try {
+    const res = await fetch(API + '/api/patients', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({name:nome, dob:nasc, city:cidade, email, phone, medications:meds, objetivo, source:'manual'})
+    });
+    const data = await res.json();
+    if (data.error) { alert('Erro: ' + data.error); return; }
+  } catch(e) { console.log('Erro ao salvar paciente:', e.message); }
   closeNovoPaciente();
   showToast('Paciente cadastrado!');
   ['np-nome','np-nasc','np-cidade','np-email','np-phone','np-meds','np-objetivo'].forEach(function(id){
     var el = document.getElementById(id); if(el) el.value='';
   });
+  loadClientsFromAPI();
 }
 
 function openNovaConsulta() {
@@ -1018,13 +1029,23 @@ document.addEventListener('DOMContentLoaded', function() {
 </div>
 
 <script>
-function salvarConsulta() {
+async function salvarConsulta() {
   var pac = document.getElementById('nc-paciente').value.trim();
   var data = document.getElementById('nc-data').value;
   var hora = document.getElementById('nc-hora').value;
   var tipo = document.getElementById('nc-tipo').value;
   if (!pac || !data || !hora) { alert('Preencha paciente, data e horario.'); return; }
-  var d = new Date(data + 'T' + hora);
+  var dataHora = data + 'T' + hora + ':00';
+  // Salva no backend
+  try {
+    await fetch(API + '/api/agenda', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({pacienteNome: pac, dataHora, tipo})
+    });
+  } catch(e) { console.log('Erro ao salvar agenda:', e.message); }
+  // Atualiza calendário local
+  var d = new Date(dataHora);
   var key = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
   if (!AGENDA_EVENTS[key]) AGENDA_EVENTS[key] = [];
   AGENDA_EVENTS[key].push({label: pac, tipo: tipo, hora: hora});
