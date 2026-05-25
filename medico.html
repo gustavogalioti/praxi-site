@@ -776,19 +776,30 @@ function renderFichaHistory(idx) {
     </div>`;
 }
 
-function registrarHistorico() {
+async function registrarHistorico() {
   const idx = currentFichaIdx;
   if (idx < 0) return;
   const desc = document.getElementById('novo-hist-desc').value.trim();
   const notes = document.getElementById('novo-hist-notes').value.trim();
   if (!desc && !notes) { alert('Preencha pelo menos um campo.'); return; }
   const c = CLIENTS_DATA[idx];
-  if (!c.history) c.history = [];
-  c.history.unshift({
+  const entry = {
     date: new Date().toLocaleDateString('pt-BR'),
     desc: desc || 'Registro',
     notes: notes || ''
-  });
+  };
+  // Salva no backend
+  if (c.id && c.id !== 'undefined') {
+    try {
+      await fetch(API + '/api/patients/' + c.id + '/history', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(entry)
+      });
+    } catch(e) { console.log('Erro ao salvar historico:', e.message); }
+  }
+  if (!c.history) c.history = [];
+  c.history.unshift(entry);
   renderFichaHistory(idx);
   showToast('Registro adicionado!');
 }
