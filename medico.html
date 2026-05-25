@@ -1,767 +1,1468 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Praxi - Painel Medico</title>
+<title>Praxi — Painel Médico</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#f4f6f8;color:#1a1a18;}
-.wrap{display:flex;height:100vh;width:100vw;overflow:hidden;}
-.sidebar{width:240px;min-width:240px;background:white;border-right:1px solid #e5e7eb;display:flex;flex-direction:column;flex-shrink:0;}
-.sidebar-top{padding:20px 16px;border-bottom:1px solid #e5e7eb;}
-.logo{font-size:20px;font-weight:700;margin-bottom:14px;}.logo span{color:#1a6b5a;}
-.profile{display:flex;align-items:center;gap:10px;}
-.av{width:38px;height:38px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;color:#1a6b5a;font-weight:700;font-size:15px;flex-shrink:0;}
-.pname{font-size:13px;font-weight:600;}.prole{font-size:11px;color:#9ca3af;}
-.nav{flex:1;padding:10px 8px;}
-.ni{display:flex;align-items:center;gap:10px;padding:11px 12px;cursor:pointer;font-size:13px;font-weight:500;color:#6b7280;border-radius:8px;margin-bottom:2px;transition:all .15s;}
-.ni:hover{background:#f9fafb;color:#1a1a18;}.ni.active{background:#e8f4f0;color:#1a6b5a;font-weight:600;}
-.sfoot{padding:10px 8px;border-top:1px solid #e5e7eb;}
-.main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
-.topbar{background:white;border-bottom:1px solid #e5e7eb;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.topbar-title{font-size:18px;font-weight:700;}
-.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
-.btn-g{background:#1a6b5a;color:white;}.btn-g:hover{background:#155a4a;}
-.btn-o{background:white;color:#374151;border:1.5px solid #e5e7eb;}.btn-o:hover{background:#f9fafb;}
-.content{flex:1;padding:24px;}
-.panel{display:none;}.panel.active{display:block;}
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
 
-/* CALENDAR */
-.cal-controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.mnav{display:flex;align-items:center;gap:12px;}
-.mnav button{width:32px;height:32px;border-radius:50%;border:1.5px solid #e5e7eb;background:white;cursor:pointer;font-size:14px;}
-.mlabel{font-size:16px;font-weight:700;}
-.vtabs{display:flex;background:#f3f4f6;padding:3px;border-radius:8px;}
-.vtab{padding:6px 14px;border:none;background:none;font-size:12px;font-weight:500;cursor:pointer;border-radius:6px;color:#6b7280;font-family:inherit;}
-.vtab.active{background:white;color:#1a1a18;box-shadow:0 1px 3px rgba(0,0,0,.1);}
-.cal-wrap{background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;}
-.cal-hdr{display:grid;grid-template-columns:repeat(7,1fr);background:#f9fafb;border-bottom:1px solid #e5e7eb;}
-.cal-dl{text-align:center;padding:10px;font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);}
-.cal-cell{min-height:90px;padding:8px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;cursor:pointer;transition:background .15s;}
-.cal-cell:nth-child(7n){border-right:none;}.cal-cell:hover{background:#f9fafb;}
-.cal-cell.today{background:#f0fdf9;}.cal-cell.other{opacity:.4;}
-.cal-num{font-size:13px;font-weight:500;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin-bottom:4px;}
-.cal-cell.today .cal-num{background:#1a6b5a;color:white;}
-.ev{font-size:11px;padding:2px 6px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;}
-.ev-consulta{background:#dcfce7;color:#166534;}.ev-retorno{background:#fef9c3;color:#854d0e;}.ev-reuniao{background:#dbeafe;color:#1d4ed8;}
-.day-det{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px;margin-top:16px;display:none;}
-.day-det.show{display:block;}
-.tl{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;}
-.tl-t{font-size:12px;color:#9ca3af;width:48px;padding-top:3px;flex-shrink:0;font-weight:500;}
-.tl-l{width:3px;background:#e5e7eb;border-radius:2px;min-height:50px;flex-shrink:0;position:relative;}
-.tl-l::before{content:'';position:absolute;top:0;left:-3px;width:9px;height:9px;border-radius:50%;background:#1a6b5a;border:2px solid white;}
-.tl-c{flex:1;background:#f9fafb;border-radius:8px;padding:10px 12px;border:1px solid #e5e7eb;}
-.tl-c h4{font-size:13px;font-weight:600;margin-bottom:2px;}.tl-c p{font-size:12px;color:#6b7280;}
+  :root {
+    --bg: #f5f4f0;
+    --surface: #ffffff;
+    --border: #e5e3dc;
+    --text: #1a1a18;
+    --muted: #7a7870;
+    --accent: #2d5a3d;
+    --accent-light: #e8f0ea;
+    --danger: #c0392b;
+    --danger-light: #fdf0ee;
+    --warning: #e67e22;
+    --warning-light: #fef5ec;
+    --sidebar-w: 220px;
+  }
 
-/* CLIENTS */
-.search-row{display:flex;gap:10px;margin-bottom:16px;}
-.sbox{flex:1;position:relative;}
-.sbox input{width:100%;padding:10px 12px 10px 36px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:white;}
-.sbox input:focus{border-color:#1a6b5a;}
-.sbox::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;}
-.ccount{font-size:13px;color:#9ca3af;margin-bottom:14px;}
-.ccount strong{color:#1a1a18;}
-.ccard{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:16px 20px;transition:all .2s;display:grid;grid-template-columns:44px 1fr 1.2fr 1fr auto auto;gap:14px;align-items:center;margin-bottom:10px;}
-.ccard:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);border-color:#1a6b5a;}
-.cav{width:44px;height:44px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;font-weight:700;color:#1a6b5a;font-size:16px;cursor:pointer;}
-.cname{font-size:14px;font-weight:600;cursor:pointer;}.cinfo{font-size:12px;color:#9ca3af;margin-top:2px;}
-.csummary{font-size:13px;color:#6b7280;line-height:1.4;cursor:pointer;}
-.cnext strong{font-size:10px;font-weight:600;color:#1a6b5a;display:block;text-transform:uppercase;letter-spacing:.5px;}
-.cnext span{font-size:12px;color:#374151;}
-.cbadge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap;}
-.ba{background:#dcfce7;color:#166534;}.br{background:#fef9c3;color:#854d0e;}.bn{background:#dbeafe;color:#1d4ed8;}
-.bdel{background:#fee2e2;color:#ef4444;border:none;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* STATS */
-.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
-.sc{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px;}
-.slbl{font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
-.sval{font-size:36px;font-weight:700;color:#1a1a18;}
-.ptabs{display:flex;gap:4px;background:#f3f4f6;padding:3px;border-radius:8px;width:fit-content;margin-bottom:20px;}
-.ptab{padding:6px 14px;border:none;background:none;font-size:12px;font-weight:500;cursor:pointer;border-radius:6px;color:#6b7280;font-family:inherit;}
-.ptab.active{background:white;color:#1a1a18;box-shadow:0 1px 2px rgba(0,0,0,.1);}
-.cc{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px;margin-bottom:14px;}
-.ct{font-size:13px;font-weight:600;margin-bottom:16px;}
-.bch{display:flex;align-items:flex-end;gap:8px;height:130px;}
-.bc{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;}
-.b{width:100%;border-radius:5px 5px 0 0;background:#e8f4f0;}.b.acc{background:#1a6b5a;}
-.bl{font-size:10px;color:#9ca3af;}
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
 
-/* DISCUSSIONS */
-.dh{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-.dlayout{display:grid;grid-template-columns:1fr 300px;gap:20px;}
-.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-.dcard{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px;cursor:pointer;transition:all .2s;}
-.dcard:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);border-color:#1a6b5a;}
-.dspec{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#1a6b5a;margin-bottom:6px;}
-.dtitle{font-size:14px;font-weight:600;margin-bottom:6px;line-height:1.35;}
-.dexc{font-size:12px;color:#6b7280;line-height:1.5;margin-bottom:12px;}
-.dfoot{display:flex;align-items:center;justify-content:space-between;}
-.dauthor{font-size:11px;color:#9ca3af;}
-.dreac{display:flex;gap:8px;}
-.dreac span{font-size:12px;color:#6b7280;cursor:pointer;}
-.rcard{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px;}
-.rtitle{font-size:13px;font-weight:700;margin-bottom:14px;}
-.ri{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f3f4f6;}
-.ri:last-child{border-bottom:none;}
-.rn{font-size:12px;font-weight:700;color:#9ca3af;width:20px;flex-shrink:0;}
-.rit{font-size:12px;font-weight:600;margin-bottom:2px;}.ris{font-size:11px;color:#9ca3af;}
-.rscore{font-size:12px;font-weight:700;color:#1a6b5a;}
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+    flex-shrink: 0;
+  }
 
-/* OVERLAYS */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;justify-content:flex-end;}
-.overlay.show{display:flex;}
-.fpanel{background:white;width:560px;height:100vh;overflow-y:auto;padding:28px;box-shadow:-8px 0 40px rgba(0,0,0,.15);}
-.fhead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;}
-.fav{width:52px;height:52px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#1a6b5a;}
-.fname{font-size:20px;font-weight:700;}.fsub{font-size:13px;color:#9ca3af;}
-.xbtn{width:32px;height:32px;border-radius:50%;background:#f3f4f6;border:none;cursor:pointer;font-size:15px;}
-.fsec{margin-bottom:22px;}
-.fsec-t{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#9ca3af;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f3f4f6;}
-.igrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.ii label{font-size:11px;color:#9ca3af;display:block;margin-bottom:2px;}
-.ii span{font-size:13px;font-weight:500;}
-.hi{background:#f9fafb;border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid #f3f4f6;}
-.hd{font-size:11px;color:#9ca3af;margin-bottom:4px;}.hdesc{font-size:13px;font-weight:600;}.hnotes{font-size:12px;color:#6b7280;margin-top:3px;}
-.aic{background:linear-gradient(135deg,#f0fdf9,#e8f4f0);border:1px solid #bbf7d0;border-radius:10px;padding:14px;margin-bottom:8px;}
-.ailbl{font-size:10px;font-weight:700;color:#1a6b5a;letter-spacing:.5px;text-transform:uppercase;}
-.aitxt{font-size:13px;color:#374151;line-height:1.55;margin-top:6px;}
-.aisrc{font-size:11px;color:#6b7280;margin-top:5px;}
-.doc-i{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f9fafb;border-radius:8px;border:1px solid #f3f4f6;margin-bottom:6px;cursor:pointer;}
-.doc-i:hover{border-color:#1a6b5a;}
+  .logo {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+  .logo span {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .logo small {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
 
-/* MODALS */
-.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:center;justify-content:center;}
-.modal-ov.show{display:flex;}
-.modal{background:white;border-radius:16px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
-.mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-.mtitle{font-size:18px;font-weight:700;}
-.fg{margin-bottom:14px;}
-.fl{font-size:12px;font-weight:500;color:#6b7280;margin-bottom:5px;display:block;}
-.fi,.fs,.fta{width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#f9fafb;}
-.fi:focus,.fs:focus,.fta:focus{border-color:#1a6b5a;background:white;}
-.fta{resize:vertical;min-height:80px;}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 0;
+    font-size: 14px;
+    color: var(--muted);
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .nav-item:hover { background: var(--bg); color: var(--text); }
+  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-light); font-weight: 500; }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
 
-/* DISC OVERLAY */
-.dov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;justify-content:flex-end;}
-.dov.show{display:flex;}
-.dpanel{background:white;width:580px;height:100vh;overflow-y:auto;padding:28px;box-shadow:-8px 0 40px rgba(0,0,0,.15);}
-.rbtns{display:flex;gap:10px;margin-bottom:20px;}
-.rbtn{display:flex;align-items:center;gap:6px;padding:8px 16px;border:1.5px solid #e5e7eb;border-radius:40px;cursor:pointer;font-size:13px;font-weight:500;background:white;font-family:inherit;}
-.rbtn:hover{border-color:#1a6b5a;}.rbtn.active{border-color:#1a6b5a;background:#e8f4f0;color:#1a6b5a;}
-.cmt{display:flex;gap:10px;margin-bottom:14px;}
-.cmtav{width:32px;height:32px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#1a6b5a;flex-shrink:0;}
-.cmtb{flex:1;background:#f9fafb;border-radius:8px;padding:10px 12px;border:1px solid #f3f4f6;}
-.cmta{font-size:11px;font-weight:600;margin-bottom:3px;}.cmtt{font-size:13px;color:#374151;line-height:1.45;}
-.cinrow{display:flex;gap:8px;margin-top:14px;}
-.cin{flex:1;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;}
-.cin:focus{border-color:#1a6b5a;}
-.csend{background:#1a6b5a;color:white;border:none;padding:10px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;}
+  .sidebar-bottom {
+    margin-top: auto;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .doctor-info { font-size: 13px; }
+  .doctor-info strong { display: block; }
+  .doctor-info span { color: var(--muted); font-size: 12px; }
+  .logout-btn {
+    margin-top: 12px;
+    width: 100%;
+    padding: 8px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .logout-btn:hover { border-color: var(--danger); color: var(--danger); }
 
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a6b5a;color:white;padding:12px 24px;border-radius:40px;font-size:14px;font-weight:500;z-index:9999;}
+  /* ── MAIN ── */
+  #main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 36px;
+  }
+
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .page-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    font-weight: 400;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
+  }
+  .page-sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+  /* ── CARDS ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-value { font-size: 30px; font-weight: 600; margin: 6px 0 2px; color: var(--accent); }
+  .stat-desc { font-size: 12px; color: var(--muted); }
+
+  /* ── AGENDA ── */
+  .agenda-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+  }
+
+  .calendar-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+
+  .cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .cal-header h3 { font-size: 15px; font-weight: 600; }
+  .cal-nav { display: flex; gap: 8px; }
+  .cal-btn {
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    background: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .cal-btn:hover { background: var(--bg); color: var(--text); }
+
+  .cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 8px;
+  }
+
+  .cal-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s;
+  }
+  .cal-day:hover { background: var(--bg); }
+  .cal-day.empty { cursor: default; }
+  .cal-day.today { background: var(--accent); color: white; font-weight: 600; }
+  .cal-day.today:hover { background: var(--accent); opacity: 0.9; }
+  .cal-day.has-event::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .cal-day.today.has-event::after { background: white; }
+  .cal-day.selected { background: var(--accent-light); color: var(--accent); font-weight: 600; border: 1px solid var(--accent); }
+
+  /* Day detail panel */
+  .day-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .day-panel h4 { font-size: 14px; font-weight: 600; margin-bottom: 14px; color: var(--muted); }
+
+  .appointment-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px;
+    background: var(--bg);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border-left: 3px solid var(--accent);
+  }
+  .appt-time { font-size: 12px; font-weight: 600; color: var(--accent); min-width: 45px; }
+  .appt-info strong { font-size: 13px; display: block; }
+  .appt-info span { font-size: 12px; color: var(--muted); }
+  .appt-delete {
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 16px;
+    padding: 2px;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .appt-delete:hover { color: var(--danger); background: var(--danger-light); }
+
+  .no-appts { color: var(--muted); font-size: 13px; text-align: center; padding: 24px 0; }
+
+  /* Add appointment form */
+  .add-appt-btn {
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .add-appt-btn:hover { opacity: 0.88; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 28px;
+    width: 420px;
+    max-width: 95vw;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  }
+  .modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 20px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--accent);
+  }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+  .btn-cancel {
+    padding: 10px 18px;
+    border: 1px solid var(--border);
+    background: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .btn-save {
+    padding: 10px 20px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .btn-danger {
+    padding: 10px 18px;
+    background: var(--danger);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* ── CLIENTES ── */
+  .clients-toolbar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    align-items: center;
+  }
+  .search-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+
+  .clients-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+
+  .client-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .client-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+  .client-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+  .client-phone { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  .client-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+  .tag-green { background: var(--accent-light); color: var(--accent); }
+  .tag-orange { background: var(--warning-light); color: var(--warning); }
+  .tag-red { background: var(--danger-light); color: var(--danger); }
+  .client-delete-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 15px;
+    border-radius: 4px;
+    padding: 4px;
+    transition: all 0.15s;
+    opacity: 0;
+  }
+  .client-card:hover .client-delete-btn { opacity: 1; }
+  .client-delete-btn:hover { color: var(--danger); background: var(--danger-light); }
+
+  /* ── FICHA LATERAL ── */
+  .ficha-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    display: none;
+    z-index: 800;
+  }
+  .ficha-overlay.open { display: block; }
+  .ficha-panel {
+    position: fixed;
+    top: 0; right: 0; bottom: 0;
+    width: 420px;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    z-index: 801;
+    overflow-y: auto;
+    padding: 28px;
+    transform: translateX(100%);
+    transition: transform 0.25s ease;
+  }
+  .ficha-panel.open { transform: translateX(0); }
+  .ficha-close {
+    position: absolute;
+    top: 18px; right: 18px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    width: 30px; height: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted);
+  }
+  .ficha-name { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 4px; margin-top: 8px; }
+  .ficha-phone { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
+  .ficha-section { margin-bottom: 20px; }
+  .ficha-section h4 { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .ficha-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .ficha-row:last-child { border-bottom: none; }
+  .ficha-row span:first-child { color: var(--muted); }
+  .hist-item { padding: 10px; background: var(--bg); border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
+  .hist-item strong { display: block; margin-bottom: 3px; }
+  .hist-item small { color: var(--muted); }
+  .ficha-delete-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 11px;
+    background: var(--danger-light);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.15s;
+  }
+  .ficha-delete-btn:hover { background: var(--danger); color: white; }
+
+  /* ── ESTATÍSTICAS ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .chart-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+
+  /* Bar chart */
+  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+  .bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--accent); opacity: 0.8; transition: opacity 0.15s; min-height: 4px; }
+  .bar:hover { opacity: 1; }
+  .bar-label { font-size: 10px; color: var(--muted); }
+  .bar-val { font-size: 10px; font-weight: 600; }
+
+  /* Donut */
+  .donut-wrap { display: flex; align-items: center; gap: 20px; }
+  .donut-legend { flex: 1; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 8px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  /* ── CONFIG AGENDA ── */
+  .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .config-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .config-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+  .day-toggles { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .day-toggle {
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+    background: none;
+    color: var(--muted);
+  }
+  .day-toggle.active { background: var(--accent); color: white; border-color: var(--accent); }
+  .config-row { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+  .config-row label { font-size: 13px; color: var(--muted); min-width: 80px; }
+  .config-row input, .config-row select {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    background: var(--bg);
+    outline: none;
+  }
+  .config-row input:focus { border-color: var(--accent); }
+  .save-config-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 11px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .save-config-btn:hover { opacity: 0.88; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 28px; left: 50%; transform: translateX(-50%);
+    background: var(--text);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.25s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+  .toast.success { background: var(--accent); }
+  .toast.error { background: var(--danger); }
+
+  /* ── LOADING ── */
+  .loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .spinner {
+    display: inline-block;
+    width: 24px; height: 24px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin-bottom: 10px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state {
+    text-align: center;
+    padding: 48px;
+    color: var(--muted);
+  }
+  .empty-state .icon { font-size: 36px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
 </style>
 </head>
 <body>
 
-<div class="wrap">
-  <div class="sidebar">
-    <div class="sidebar-top">
-      <div class="logo">Praxi<span>.</span></div>
-      <div class="profile">
-        <div class="av" id="med-av">DR</div>
-        <div><div class="pname" id="med-name">Dr. Medico</div><div class="prole" id="med-spec">Clinico Geral</div></div>
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="logo">
+    <span>Praxi</span>
+    <small>Painel Médico</small>
+  </div>
+  <div class="nav-item active" onclick="showPage('agenda')">
+    <span class="nav-icon">📅</span> Agenda
+  </div>
+  <div class="nav-item" onclick="showPage('clientes')">
+    <span class="nav-icon">👥</span> Clientes
+  </div>
+  <div class="nav-item" onclick="showPage('estatisticas')">
+    <span class="nav-icon">📊</span> Estatísticas
+  </div>
+  <div class="nav-item" onclick="showPage('config')">
+    <span class="nav-icon">⚙️</span> Configurações
+  </div>
+  <div class="sidebar-bottom">
+    <div class="doctor-info">
+      <strong id="doc-name">Dr. Gustavo</strong>
+      <span id="doc-crm">CRM 00000</span>
+    </div>
+    <button class="logout-btn" onclick="logout()">Sair</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main id="main">
+
+  <!-- AGENDA -->
+  <div id="page-agenda" class="page active">
+    <h1 class="page-title">Agenda</h1>
+    <p class="page-sub" id="agenda-sub">Carregando consultas...</p>
+
+    <div class="stat-grid" id="agenda-stats">
+      <div class="stat-card">
+        <div class="stat-label">Hoje</div>
+        <div class="stat-value" id="stat-hoje">—</div>
+        <div class="stat-desc">consultas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Esta semana</div>
+        <div class="stat-value" id="stat-semana">—</div>
+        <div class="stat-desc">agendamentos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Este mês</div>
+        <div class="stat-value" id="stat-mes">—</div>
+        <div class="stat-desc">consultas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total</div>
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-desc">no banco</div>
       </div>
     </div>
-    <div class="nav">
-      <div class="ni active" onclick="showPanel('agenda',this)">&#128197; Agenda</div>
-      <div class="ni" onclick="showPanel('clientes',this)">&#128101; Clientes</div>
-      <div class="ni" onclick="showPanel('stats',this)">&#128202; Estatisticas</div>
-      <div class="ni" onclick="showPanel('discussoes',this)">&#128172; Discussoes</div>
+
+    <div class="agenda-grid">
+      <div class="calendar-wrap">
+        <div class="cal-header">
+          <h3 id="cal-month-label"></h3>
+          <div class="cal-nav">
+            <button class="cal-btn" onclick="changeMonth(-1)">‹</button>
+            <button class="cal-btn" onclick="changeMonth(1)">›</button>
+          </div>
+        </div>
+        <div class="cal-weekdays">
+          <div>Dom</div><div>Seg</div><div>Ter</div>
+          <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+        </div>
+        <div class="cal-days" id="cal-days"></div>
+      </div>
+
+      <div class="day-panel">
+        <h4 id="day-panel-title">Selecione um dia</h4>
+        <div id="day-appointments">
+          <div class="no-appts">Clique em um dia no calendário para ver as consultas</div>
+        </div>
+        <button class="add-appt-btn" id="add-appt-btn" style="display:none" onclick="openAddAppt()">
+          + Nova Consulta
+        </button>
+      </div>
     </div>
-    <div class="sfoot"><div class="ni" onclick="location.href='index.html'">&#8592; Sair</div></div>
   </div>
 
-  <div class="main">
-    <div class="topbar">
-      <div class="topbar-title" id="ttitle">Agenda</div>
-      <div id="taction"></div>
+  <!-- CLIENTES -->
+  <div id="page-clientes" class="page">
+    <h1 class="page-title">Clientes</h1>
+    <p class="page-sub">Pacientes cadastrados pelo WhatsApp</p>
+    <div class="clients-toolbar">
+      <input type="text" class="search-input" placeholder="Buscar por nome ou telefone..." oninput="filterClients(this.value)" />
     </div>
-    <div class="content">
-
-      <!-- AGENDA -->
-      <div id="p-agenda" class="panel active">
-        <div class="cal-controls">
-          <div class="mnav">
-            <button onclick="prevMonth()">&#8249;</button>
-            <div class="mlabel" id="mlabel"></div>
-            <button onclick="nextMonth()">&#8250;</button>
-          </div>
-          <div class="vtabs">
-            <button class="vtab active" onclick="setView('mes',this)">Mes</button>
-            <button class="vtab" onclick="setView('semana',this)">Semana</button>
-          </div>
-        </div>
-        <div id="view-mes">
-          <div class="cal-wrap">
-            <div class="cal-hdr">
-              <div class="cal-dl">Dom</div><div class="cal-dl">Seg</div><div class="cal-dl">Ter</div>
-              <div class="cal-dl">Qua</div><div class="cal-dl">Qui</div><div class="cal-dl">Sex</div><div class="cal-dl">Sab</div>
-            </div>
-            <div class="cal-grid" id="cal-grid"></div>
-          </div>
-          <div class="day-det" id="day-det">
-            <div style="font-size:15px;font-weight:700;margin-bottom:16px;" id="day-title"></div>
-            <div id="day-tl"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- CLIENTES -->
-      <div id="p-clientes" class="panel">
-        <div class="search-row">
-          <div class="sbox"><input type="text" placeholder="Buscar paciente..." oninput="filterC(this.value)"></div>
-          <button class="btn btn-o">Filtrar</button>
-        </div>
-        <div class="ccount" id="ccount"></div>
-        <div id="cgrid"></div>
-      </div>
-
-      <!-- STATS -->
-      <div id="p-stats" class="panel">
-        <div class="ptabs">
-          <button class="ptab active" onclick="setPer('dia',this)">Hoje</button>
-          <button class="ptab" onclick="setPer('semana',this)">Semana</button>
-          <button class="ptab" onclick="setPer('mes',this)">Mes</button>
-        </div>
-        <div class="sgrid">
-          <div class="sc"><div class="slbl">Pacientes</div><div class="sval" id="st-pac">0</div></div>
-          <div class="sc"><div class="slbl">Consultas</div><div class="sval" id="st-con">0</div></div>
-          <div class="sc"><div class="slbl">Retornos</div><div class="sval" id="st-ret">0</div></div>
-          <div class="sc"><div class="slbl">Faltas</div><div class="sval" id="st-fal">0</div></div>
-        </div>
-        <div class="cc"><div class="ct">Consultas por mes</div><div class="bch" id="bch"></div></div>
-      </div>
-
-      <!-- DISCUSSOES -->
-      <div id="p-discussoes" class="panel">
-        <div class="dh">
-          <h3 style="font-size:16px;font-weight:700;">Discussoes recentes</h3>
-          <button class="btn btn-g" onclick="openND()">+ Nova discussao</button>
-        </div>
-        <div class="dlayout">
-          <div class="dgrid" id="dgrid"></div>
-          <div><div class="rcard"><div class="rtitle">&#127942; Mais engajadas</div><div id="rlist"></div></div></div>
-        </div>
-      </div>
-
+    <div id="clients-container" class="clients-grid">
+      <div class="loading"><div class="spinner"></div><br>Carregando...</div>
     </div>
   </div>
-</div>
 
-<!-- FICHA -->
-<div class="overlay" id="ficha-ov" onclick="if(event.target===this)closeFicha()">
-  <div class="fpanel">
-    <div class="fhead">
-      <div style="display:flex;align-items:center;gap:14px;">
-        <div class="fav" id="fav">M</div>
-        <div><div class="fname" id="fname"></div><div class="fsub" id="fsub"></div></div>
+  <!-- ESTATÍSTICAS -->
+  <div id="page-estatisticas" class="page">
+    <h1 class="page-title">Estatísticas</h1>
+    <p class="page-sub">Visão geral do seu consultório</p>
+
+    <div class="stat-grid" style="margin-bottom:24px">
+      <div class="stat-card">
+        <div class="stat-label">Pacientes</div>
+        <div class="stat-value" id="est-pacientes">—</div>
+        <div class="stat-desc">cadastrados</div>
       </div>
-      <button class="xbtn" onclick="closeFicha()">&#10005;</button>
-    </div>
-    <div class="fsec"><div class="fsec-t">Informacoes</div><div class="igrid" id="finfo"></div></div>
-    <div class="fsec">
-      <div class="fsec-t">Historico de consultas</div>
-      <div id="fhistory"></div>
-      <div style="margin-top:12px;background:#f9fafb;border-radius:8px;padding:12px;border:1px solid #e5e7eb;">
-        <div style="font-size:11px;font-weight:600;color:#9ca3af;margin-bottom:8px;">REGISTRAR CONSULTA / CONTATO</div>
-        <input id="h-desc" placeholder="Titulo (ex: Retorno, Telefonema...)" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:13px;font-family:inherit;outline:none;margin-bottom:6px;">
-        <textarea id="h-notes" placeholder="Anotacoes..." style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:13px;font-family:inherit;min-height:60px;outline:none;resize:vertical;margin-bottom:6px;"></textarea>
-        <button onclick="saveHistory()" style="background:#1a6b5a;color:white;border:none;padding:8px 16px;border-radius:6px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500;">+ Registrar</button>
+      <div class="stat-card">
+        <div class="stat-label">Consultas</div>
+        <div class="stat-value" id="est-consultas">—</div>
+        <div class="stat-desc">agendadas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Este mês</div>
+        <div class="stat-value" id="est-mes">—</div>
+        <div class="stat-desc">consultas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Hoje</div>
+        <div class="stat-value" id="est-hoje">—</div>
+        <div class="stat-desc">agendadas</div>
       </div>
     </div>
-    <div class="fsec">
-      <div class="fsec-t">&#129504; Insights Praxi IA</div>
-      <div id="finsights"></div>
-    </div>
-    <div class="fsec">
-      <div class="fsec-t">Documentos</div>
-      <div id="fdocs"></div>
-      <button class="btn btn-o" style="width:100%;margin-top:8px;" onclick="openUpload()">+ Adicionar documento</button>
+
+    <div class="stats-grid">
+      <div class="chart-card">
+        <h4>Consultas por mês</h4>
+        <div class="bar-chart" id="bar-chart"></div>
+      </div>
+      <div class="chart-card">
+        <h4>Tipos de atendimento</h4>
+        <div class="donut-wrap">
+          <svg width="100" height="100" viewBox="0 0 100 100" id="donut-svg"></svg>
+          <div class="donut-legend" id="donut-legend"></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h4>Consultas por dia da semana</h4>
+        <div class="bar-chart" id="bar-weekday"></div>
+      </div>
+      <div class="chart-card">
+        <h4>Horários mais populares</h4>
+        <div class="bar-chart" id="bar-hours"></div>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- DISC OVERLAY -->
-<div class="dov" id="dov" onclick="if(event.target===this)closeDisc()">
-  <div class="dpanel">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:16px;"><button class="xbtn" onclick="closeDisc()">&#10005;</button></div>
-    <div class="dspec" id="dp-spec"></div>
-    <div style="font-size:22px;font-weight:700;margin-bottom:4px;" id="dp-title"></div>
-    <div style="font-size:13px;color:#9ca3af;margin-bottom:18px;" id="dp-author"></div>
-    <div style="font-size:14px;line-height:1.7;color:#374151;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #f3f4f6;" id="dp-body"></div>
-    <div class="rbtns">
-      <button class="rbtn" onclick="react(this)">&#128142; <span id="r1">0</span></button>
-      <button class="rbtn" onclick="react(this)">&#128562; <span id="r2">0</span></button>
-      <button class="rbtn" onclick="react(this)">&#10084;&#65039; <span id="r3">0</span></button>
-    </div>
-    <div style="font-size:13px;font-weight:700;margin-bottom:12px;">Comentarios</div>
-    <div id="dp-cmts"></div>
-    <div class="cinrow">
-      <input class="cin" id="cin" placeholder="Adicionar comentario..." onkeydown="if(event.key==='Enter')sendCmt()">
-      <button class="csend" onclick="sendCmt()">Enviar</button>
+  <!-- CONFIG -->
+  <div id="page-config" class="page">
+    <h1 class="page-title">Configurações</h1>
+    <p class="page-sub">Configure sua agenda e disponibilidade</p>
+    <div class="config-grid">
+      <div class="config-card">
+        <h4>Dias de Atendimento</h4>
+        <div class="day-toggles" id="day-toggles"></div>
+        <h4 style="margin-top:16px">Horários</h4>
+        <div class="config-row">
+          <label>Início</label>
+          <input type="time" id="cfg-start" value="09:00">
+        </div>
+        <div class="config-row">
+          <label>Fim</label>
+          <input type="time" id="cfg-end" value="18:00">
+        </div>
+        <div class="config-row">
+          <label>Duração</label>
+          <select id="cfg-duration">
+            <option value="30">30 minutos</option>
+            <option value="45">45 minutos</option>
+            <option value="60" selected>60 minutos</option>
+            <option value="90">90 minutos</option>
+          </select>
+        </div>
+        <button class="save-config-btn" onclick="saveConfig()">Salvar Configurações</button>
+      </div>
+      <div class="config-card">
+        <h4>Informações do Médico</h4>
+        <div class="config-row" style="flex-direction:column; align-items:flex-start; gap:6px">
+          <label style="min-width:auto">Nome</label>
+          <input type="text" id="cfg-nome" placeholder="Dr. Nome Sobrenome">
+        </div>
+        <div class="config-row" style="flex-direction:column; align-items:flex-start; gap:6px">
+          <label style="min-width:auto">CRM</label>
+          <input type="text" id="cfg-crm" placeholder="CRM 00000">
+        </div>
+        <div class="config-row" style="flex-direction:column; align-items:flex-start; gap:6px">
+          <label style="min-width:auto">Especialidade</label>
+          <input type="text" id="cfg-especialidade" placeholder="Clínica Geral">
+        </div>
+        <button class="save-config-btn" style="margin-top:16px" onclick="saveProfile()">Salvar Perfil</button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- NOVA CONSULTA MODAL -->
-<div class="modal-ov" id="nc-modal" onclick="if(event.target===this)closeNC()">
+</main>
+
+<!-- MODAL: Nova Consulta -->
+<div class="modal-overlay" id="modal-appt">
   <div class="modal">
-    <div class="mhead"><div class="mtitle">Nova Consulta</div><button class="xbtn" onclick="closeNC()">&#10005;</button></div>
-    <div class="fg"><label class="fl">Paciente *</label><input class="fi" id="nc-pac" placeholder="Nome do paciente"></div>
-    <div class="g2">
-      <div class="fg"><label class="fl">Data *</label><input class="fi" id="nc-data" type="date"></div>
-      <div class="fg"><label class="fl">Horario *</label><input class="fi" id="nc-hora" type="time"></div>
+    <h3>Nova Consulta</h3>
+    <div class="form-group">
+      <label>Data</label>
+      <input type="date" id="appt-date">
     </div>
-    <div class="fg"><label class="fl">Tipo</label>
-      <select class="fs" id="nc-tipo"><option value="consulta">Consulta</option><option value="retorno">Retorno</option><option value="reuniao">Reuniao</option></select>
+    <div class="form-group">
+      <label>Horário</label>
+      <input type="time" id="appt-time">
     </div>
-    <div class="fg"><label class="fl">Observacoes</label><textarea class="fta" id="nc-obs" placeholder="Opcional..."></textarea></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button class="btn btn-o" onclick="closeNC()">Cancelar</button>
-      <button class="btn btn-g" onclick="saveConsulta()">Agendar</button>
+    <div class="form-group">
+      <label>Nome do Paciente</label>
+      <input type="text" id="appt-patient" placeholder="Nome completo">
+    </div>
+    <div class="form-group">
+      <label>Tipo</label>
+      <select id="appt-type">
+        <option value="consulta">Consulta</option>
+        <option value="retorno">Retorno</option>
+        <option value="exame">Exame</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Observações</label>
+      <textarea id="appt-obs" rows="2" placeholder="Opcional..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-appt')">Cancelar</button>
+      <button class="btn-save" onclick="saveAppointment()">Salvar</button>
     </div>
   </div>
 </div>
 
-<!-- NOVO PACIENTE MODAL -->
-<div class="modal-ov" id="np-modal" onclick="if(event.target===this)closeNP()">
+<!-- MODAL: Confirmar exclusão de paciente -->
+<div class="modal-overlay" id="modal-confirm-delete">
   <div class="modal">
-    <div class="mhead"><div class="mtitle">Novo Paciente</div><button class="xbtn" onclick="closeNP()">&#10005;</button></div>
-    <div class="fg"><label class="fl">Nome completo *</label><input class="fi" id="np-nome" placeholder="Nome do paciente"></div>
-    <div class="g2">
-      <div class="fg"><label class="fl">Nascimento</label><input class="fi" id="np-nasc" placeholder="DD/MM/AAAA"></div>
-      <div class="fg"><label class="fl">Cidade</label><input class="fi" id="np-cidade" placeholder="Cidade"></div>
-    </div>
-    <div class="g2">
-      <div class="fg"><label class="fl">E-mail</label><input class="fi" id="np-email" type="email" placeholder="email@exemplo.com"></div>
-      <div class="fg"><label class="fl">Telefone</label><input class="fi" id="np-fone" placeholder="(11) 99999-9999"></div>
-    </div>
-    <div class="fg"><label class="fl">Medicamentos em uso</label><input class="fi" id="np-meds" placeholder="Ex: Losartana 50mg..."></div>
-    <div class="fg"><label class="fl">Motivo da consulta / Objetivo</label><textarea class="fta" id="np-obj" placeholder="Descreva o motivo..."></textarea></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button class="btn btn-o" onclick="closeNP()">Cancelar</button>
-      <button class="btn btn-g" onclick="savePaciente()">Cadastrar</button>
+    <h3>Excluir paciente?</h3>
+    <p style="font-size:14px; color:var(--muted); margin-bottom:20px">Esta ação não pode ser desfeita. O histórico do paciente será removido permanentemente.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('modal-confirm-delete')">Cancelar</button>
+      <button class="btn-danger" onclick="confirmDeleteClient()">Excluir</button>
     </div>
   </div>
 </div>
 
-<!-- NOVA DISCUSSAO MODAL -->
-<div class="modal-ov" id="nd-modal" onclick="if(event.target===this)closeND()">
-  <div class="modal">
-    <div class="mhead"><div class="mtitle">Nova Discussao</div><button class="xbtn" onclick="closeND()">&#10005;</button></div>
-    <div class="fg"><label class="fl">Especialidade</label>
-      <select class="fs" id="nd-spec"><option>Cardiologia</option><option>Clinica Geral</option><option>Dermatologia</option><option>Neurologia</option><option>Pediatria</option><option>Ortopedia</option><option>Psiquiatria</option></select>
-    </div>
-    <div class="fg"><label class="fl">Titulo</label><input class="fi" id="nd-title" placeholder="Titulo da discussao"></div>
-    <div class="fg"><label class="fl">Conteudo</label><textarea class="fta" id="nd-body" placeholder="Descreva o caso ou tema..."></textarea></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button class="btn btn-o" onclick="closeND()">Cancelar</button>
-      <button class="btn btn-g" onclick="submitDisc()">Publicar</button>
-    </div>
-  </div>
+<!-- Ficha lateral -->
+<div class="ficha-overlay" id="ficha-overlay" onclick="closeFicha()"></div>
+<div class="ficha-panel" id="ficha-panel">
+  <button class="ficha-close" onclick="closeFicha()">✕</button>
+  <div id="ficha-content"></div>
 </div>
 
-<!-- UPLOAD MODAL -->
-<div class="modal-ov" id="up-modal" onclick="if(event.target===this)closeUpload()">
-  <div class="modal" style="max-width:400px;">
-    <div class="mhead"><div class="mtitle">Adicionar Documento</div><button class="xbtn" onclick="closeUpload()">&#10005;</button></div>
-    <div style="border:2px dashed #e5e7eb;border-radius:10px;padding:32px;text-align:center;cursor:pointer;" onclick="document.getElementById('finput').click()">
-      <div style="font-size:32px;margin-bottom:8px;">&#128196;</div>
-      <div style="font-size:14px;font-weight:500;">Clique para selecionar</div>
-      <div style="font-size:12px;color:#9ca3af;margin-top:4px;">PDF, JPG, PNG</div>
-      <input type="file" id="finput" style="display:none;" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFile(this)">
-    </div>
-    <div id="fstatus" style="font-size:13px;color:#1a6b5a;text-align:center;margin-top:10px;"></div>
-    <div style="display:flex;justify-content:flex-end;margin-top:16px;">
-      <button class="btn btn-g" onclick="closeUpload()">Concluir</button>
-    </div>
-  </div>
-</div>
+<!-- Toast -->
+<div class="toast" id="toast"></div>
 
 <script>
-var API = 'https://praxi-bot-production.up.railway.app';
-var calY = new Date().getFullYear();
-var calM = new Date().getMonth() + 1;
-var EVS = {};
-var CLIENTS = [];
-var currentFicha = -1;
+// ─── CONFIG ───────────────────────────────────────────────────
+const API = 'https://praxi-bot-production.up.railway.app';
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const DAYS_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DAYS_FULL = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
 
-var DISCS = [
-  {id:1,spec:'Cardiologia',title:'FA e AVC em pacientes jovens',author:'Dr. Marcos Oliveira',body:'Estudo aponta aumento de 40% nos casos de FA em menores de 45 anos.',reactions:{g:18,s:6,h:12},cmts:['Observo isso tambem na pratica.']},
-  {id:2,spec:'Clinica Geral',title:'Metformina em pre-diabeticos',author:'Dra. Fernanda Costa',body:'Guidelines ADA 2024 revisam criterios para inicio de metformina.',reactions:{g:24,s:3,h:19},cmts:[]},
-  {id:3,spec:'Dermatologia',title:'Dermatite atopica refrataria',author:'Dr. Paulo Mendes',body:'Resultados com dupilumabe em 8 semanas de tratamento.',reactions:{g:31,s:9,h:22},cmts:['Excelentes resultados aqui tambem.']},
-  {id:4,spec:'Neurologia',title:'Sono e progressao do Parkinson',author:'Dra. Amanda Rocha',body:'USP conecta sono REM a biomarcadores da doenca.',reactions:{g:15,s:11,h:8},cmts:[]},
-  {id:5,spec:'Psiquiatria',title:'Ketamina para depressao resistente',author:'Dr. Felipe Gomes',body:'Dados preliminares promissores apos 6 meses.',reactions:{g:9,s:14,h:7},cmts:[]},
-  {id:6,spec:'Pediatria',title:'Bronquiolite em lactentes',author:'Dra. Camila Ramos',body:'AAP 2024 derruba uso rotineiro de beta-agonistas.',reactions:{g:21,s:5,h:16},cmts:[]},
-];
+// ─── STATE ───────────────────────────────────────────────────
+let allAppointments = [];
+let allClients = [];
+let selectedDate = null;
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let pendingDeleteId = null;
+let pendingDeleteType = null; // 'client' | 'appointment'
 
-// TOAST
-function toast(msg, err) {
-  var t = document.createElement('div');
-  t.className = 'toast';
-  t.style.background = err ? '#ef4444' : '#1a6b5a';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(function(){t.remove();}, 3000);
+// ─── INIT ────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadConfig();
+  loadDoctor();
+  renderCalendar();
+  loadAgenda();
+  loadClients();
+  initConfig();
+});
+
+// ─── NAVIGATION ──────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (name === 'estatisticas') buildStats();
 }
 
-// PANELS
-var TITLES = {agenda:'Agenda',clientes:'Clientes',stats:'Estatisticas',discussoes:'Discussoes'};
-function showPanel(id, el) {
-  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('active');});
-  document.getElementById('p-'+id).classList.add('active');
-  if (el) el.classList.add('active');
-  document.getElementById('ttitle').textContent = TITLES[id]||id;
-  var ta = document.getElementById('taction');
-  if (id==='agenda') ta.innerHTML = '<button class="btn btn-g" onclick="openNC()">+ Nova consulta</button>';
-  else if (id==='clientes') ta.innerHTML = '<button class="btn btn-g" onclick="openNP()">+ Novo paciente</button>';
-  else ta.innerHTML = '';
-}
+// ─── DATA HELPERS ────────────────────────────────────────────
 
-// CALENDAR
-function renderCal() {
-  var months = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  document.getElementById('mlabel').textContent = months[calM-1]+' '+calY;
-  var grid = document.getElementById('cal-grid');
-  var first = new Date(calY,calM-1,1).getDay();
-  var days = new Date(calY,calM,0).getDate();
-  var prev = new Date(calY,calM-1,0).getDate();
-  var today = new Date();
-  var html = '';
-  for (var i=first-1;i>=0;i--) html+='<div class="cal-cell other"><div class="cal-num">'+(prev-i)+'</div></div>';
-  for (var d=1;d<=days;d++) {
-    var isT = d===today.getDate()&&calM===today.getMonth()+1&&calY===today.getFullYear();
-    var key = calY+'-'+calM+'-'+d;
-    var evs = EVS[key]||[];
-    var eh = evs.slice(0,2).map(function(e){return '<div class="ev ev-'+e.tipo+'">'+e.hora+' '+e.label+'</div>';}).join('');
-    if (evs.length>2) eh+='<div class="ev" style="background:#f3f4f6;color:#6b7280;">+'+(evs.length-2)+' mais</div>';
-    html+='<div class="cal-cell'+(isT?' today':'')+'" onclick="showDay('+d+',\''+key+'\')"><div class="cal-num">'+d+'</div>'+eh+'</div>';
+/**
+ * Normaliza um item de agenda para { date: "YYYY-MM-DD", time: "HH:MM", ... }
+ * Suporta ambos os formatos do banco:
+ *   1. { dataHora: "2026-05-22T14:00:00.000Z" }  (criado manualmente)
+ *   2. { dataHora: "2026-05-15", appointmentTime: "09:00" }  (criado pelo bot)
+ */
+function normalizeAppointment(item) {
+  let date = '';
+  let time = '';
+
+  if (item.dataHora) {
+    const raw = item.dataHora;
+
+    if (raw.includes('T')) {
+      // Formato ISO completo
+      const d = new Date(raw);
+      date = d.toLocaleDateString('sv-SE'); // YYYY-MM-DD em horário local
+      time = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    } else {
+      // Formato "YYYY-MM-DD" separado da hora
+      date = raw.substring(0, 10);
+      time = item.appointmentTime || item.horario || '00:00';
+    }
+  } else if (item.date) {
+    date = item.date;
+    time = item.time || item.appointmentTime || '00:00';
   }
-  var rem=42-first-days; if(rem<0)rem+=7;
-  for (var j=1;j<=rem;j++) html+='<div class="cal-cell other"><div class="cal-num">'+j+'</div></div>';
-  grid.innerHTML = html;
+
+  return { ...item, _date: date, _time: time };
 }
 
-function showDay(d, key) {
-  var dd = document.getElementById('day-det');
-  dd.classList.add('show');
-  var months = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  document.getElementById('day-title').textContent = d+' de '+months[calM-1]+' de '+calY;
-  var evs = EVS[key]||[];
-  var tl = document.getElementById('day-tl');
-  if (!evs.length){tl.innerHTML='<p style="color:#9ca3af;font-size:13px;">Nenhum compromisso neste dia.</p>';return;}
-  tl.innerHTML = evs.map(function(e){
-    return '<div class="tl"><div class="tl-t">'+e.hora+'</div><div class="tl-l"></div><div class="tl-c"><h4>'+e.label+'</h4><p>'+e.tipo+'</p></div></div>';
-  }).join('');
+function formatDateBR(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  return `${d}/${m}/${y}`;
 }
-function prevMonth(){calM--;if(calM<1){calM=12;calY--;}renderCal();}
-function nextMonth(){calM++;if(calM>12){calM=1;calY++;}renderCal();}
-function setView(v,btn){btn.parentElement.querySelectorAll('.vtab').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');}
 
-// LOAD AGENDA FROM API
-function loadAgenda() {
-  fetch(API+'/api/agenda').then(function(r){return r.json();}).then(function(data){
-    var items = data.agenda||[];
-    EVS = {};
-    items.forEach(function(item){
-      var dateStr = item.dataHora||item.appointment;
-      if (!dateStr) return;
-      var d, hora;
-      if (dateStr.indexOf('T')>=0) {
-        d = new Date(dateStr);
-        hora = item.appointmentTime||d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      } else {
-        var pts = dateStr.split('-');
-        if (pts.length!==3) return;
-        d = new Date(parseInt(pts[0]),parseInt(pts[1])-1,parseInt(pts[2]));
-        hora = item.appointmentTime||'09:00';
-      }
-      if (!d||isNaN(d.getTime())) return;
-      var key = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
-      if (!EVS[key]) EVS[key]=[];
-      var label = item.pacienteNome||item.name||'Consulta';
-      var exists = EVS[key].some(function(e){return e.label===label&&e.hora===hora;});
-      if (!exists) EVS[key].push({label:label,tipo:item.tipo||'consulta',hora:hora});
+function todayStr() {
+  return new Date().toLocaleDateString('sv-SE');
+}
+
+function isThisWeek(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00');
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay());
+  startOfWeek.setHours(0,0,0,0);
+  const endOfWeek = new Date(startOfWeek);
+  endOfWeek.setDate(startOfWeek.getDate() + 7);
+  return d >= startOfWeek && d < endOfWeek;
+}
+
+function isThisMonth(dateStr) {
+  if (!dateStr) return false;
+  const now = new Date();
+  return dateStr.startsWith(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`);
+}
+
+// ─── AGENDA ──────────────────────────────────────────────────
+async function loadAgenda() {
+  try {
+    const res = await fetch(`${API}/api/agenda`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    allAppointments = (Array.isArray(data) ? data : (data.agenda || data.appointments || [])).map(normalizeAppointment);
+    renderCalendar();
+    updateAgendaStats();
+    document.getElementById('agenda-sub').textContent =
+      `${allAppointments.length} consulta(s) encontrada(s) no banco`;
+  } catch (e) {
+    console.error('Erro ao carregar agenda:', e);
+    document.getElementById('agenda-sub').textContent = 'Erro ao conectar com o servidor';
+    showToast('Erro ao carregar agenda', 'error');
+  }
+}
+
+function updateAgendaStats() {
+  const today = todayStr();
+  const hoje = allAppointments.filter(a => a._date === today).length;
+  const semana = allAppointments.filter(a => isThisWeek(a._date)).length;
+  const mes = allAppointments.filter(a => isThisMonth(a._date)).length;
+  document.getElementById('stat-hoje').textContent = hoje;
+  document.getElementById('stat-semana').textContent = semana;
+  document.getElementById('stat-mes').textContent = mes;
+  document.getElementById('stat-total').textContent = allAppointments.length;
+}
+
+// ─── CALENDAR ────────────────────────────────────────────────
+function renderCalendar() {
+  const label = `${MONTHS[calMonth]} ${calYear}`;
+  document.getElementById('cal-month-label').textContent = label;
+
+  const container = document.getElementById('cal-days');
+  container.innerHTML = '';
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = todayStr();
+
+  // days with appointments this month
+  const monthStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}`;
+  const daysWithAppts = new Set(
+    allAppointments
+      .filter(a => a._date && a._date.startsWith(monthStr))
+      .map(a => parseInt(a._date.split('-')[2]))
+  );
+
+  // Empty cells
+  for (let i = 0; i < firstDay; i++) {
+    const el = document.createElement('div');
+    el.className = 'cal-day empty';
+    container.appendChild(el);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const el = document.createElement('div');
+    el.className = 'cal-day';
+    el.textContent = d;
+    if (dateStr === today) el.classList.add('today');
+    if (daysWithAppts.has(d)) el.classList.add('has-event');
+    if (dateStr === selectedDate) el.classList.add('selected');
+    el.onclick = () => selectDay(dateStr);
+    container.appendChild(el);
+  }
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+}
+
+function selectDay(dateStr) {
+  selectedDate = dateStr;
+  renderCalendar(); // atualiza selected highlight
+  renderDayPanel(dateStr);
+  document.getElementById('add-appt-btn').style.display = 'block';
+}
+
+function renderDayPanel(dateStr) {
+  const title = document.getElementById('day-panel-title');
+  const container = document.getElementById('day-appointments');
+
+  const [y, m, d] = dateStr.split('-');
+  const dayOfWeek = new Date(dateStr + 'T12:00:00').getDay();
+  title.textContent = `${DAYS_FULL[dayOfWeek]}, ${d}/${m}/${y}`;
+
+  const appts = allAppointments
+    .filter(a => a._date === dateStr)
+    .sort((a, b) => a._time.localeCompare(b._time));
+
+  if (appts.length === 0) {
+    container.innerHTML = '<div class="no-appts">Sem consultas neste dia</div>';
+    return;
+  }
+
+  container.innerHTML = appts.map(a => `
+    <div class="appointment-item">
+      <div class="appt-time">${a._time}</div>
+      <div class="appt-info">
+        <strong>${a.patientName || a.nome || a.name || 'Paciente'}</strong>
+        <span>${a.type || a.tipo || 'Consulta'}</span>
+      </div>
+      <button class="appt-delete" title="Cancelar consulta"
+        onclick="deleteAppointment('${a._id || a.id}', event)">🗑</button>
+    </div>
+  `).join('');
+}
+
+async function deleteAppointment(id, evt) {
+  evt.stopPropagation();
+  if (!id || id === 'undefined') { showToast('ID inválido', 'error'); return; }
+  if (!confirm('Cancelar esta consulta?')) return;
+  try {
+    const res = await fetch(`${API}/api/agenda/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    allAppointments = allAppointments.filter(a => (a._id || a.id) !== id);
+    renderCalendar();
+    if (selectedDate) renderDayPanel(selectedDate);
+    updateAgendaStats();
+    showToast('Consulta cancelada', 'success');
+  } catch (e) {
+    console.error(e);
+    showToast('Erro ao cancelar consulta', 'error');
+  }
+}
+
+function openAddAppt() {
+  const modal = document.getElementById('modal-appt');
+  document.getElementById('appt-date').value = selectedDate || todayStr();
+  document.getElementById('appt-time').value = '';
+  document.getElementById('appt-patient').value = '';
+  document.getElementById('appt-type').value = 'consulta';
+  document.getElementById('appt-obs').value = '';
+  modal.classList.add('open');
+}
+
+async function saveAppointment() {
+  const date = document.getElementById('appt-date').value;
+  const time = document.getElementById('appt-time').value;
+  const name = document.getElementById('appt-patient').value.trim();
+  const type = document.getElementById('appt-type').value;
+  const obs  = document.getElementById('appt-obs').value.trim();
+
+  if (!date || !time || !name) { showToast('Preencha data, horário e nome', 'error'); return; }
+
+  const body = {
+    dataHora: `${date}T${time}:00.000Z`,
+    patientName: name,
+    type,
+    observacoes: obs
+  };
+
+  try {
+    const res = await fetch(`${API}/api/agenda`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     });
-    renderCal();
-  }).catch(function(e){console.log('Agenda err:',e.message);renderCal();});
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const saved = await res.json();
+    allAppointments.push(normalizeAppointment(saved.appointment || saved));
+    renderCalendar();
+    if (selectedDate === date) renderDayPanel(date);
+    updateAgendaStats();
+    closeModal('modal-appt');
+    showToast('Consulta agendada!', 'success');
+  } catch (e) {
+    console.error(e);
+    showToast('Erro ao salvar consulta', 'error');
+  }
 }
 
-// SAVE CONSULTA
-function openNC(){document.getElementById('nc-modal').classList.add('show');}
-function closeNC(){document.getElementById('nc-modal').classList.remove('show');}
-function saveConsulta(){
-  var pac = document.getElementById('nc-pac').value.trim();
-  var data = document.getElementById('nc-data').value;
-  var hora = document.getElementById('nc-hora').value;
-  var tipo = document.getElementById('nc-tipo').value;
-  var obs = document.getElementById('nc-obs').value.trim();
-  if (!pac||!data||!hora){alert('Preencha paciente, data e horario.');return;}
-  var dataHora = data+'T'+hora+':00.000Z';
-  fetch(API+'/api/agenda',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pacienteNome:pac,dataHora:dataHora,tipo:tipo,obs:obs})})
-    .then(function(){
-      loadAgenda();
-      closeNC();
-      ['nc-pac','nc-data','nc-hora','nc-obs'].forEach(function(id){document.getElementById(id).value='';});
-      toast('Consulta agendada!');
-    }).catch(function(){
-      // salva local mesmo se API falhar
-      var d = new Date(data+'T'+hora);
-      var key = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
-      if (!EVS[key]) EVS[key]=[];
-      EVS[key].push({label:pac,tipo:tipo,hora:hora});
-      renderCal();
-      closeNC();
-      toast('Consulta salva localmente.');
-    });
-}
-
-// CLIENTS
-function loadClients() {
-  fetch(API+'/api/patients').then(function(r){return r.json();}).then(function(data){
-    var pts = data.patients||[];
-    CLIENTS = pts.map(function(p){
-      var dob = p.dob||'';
-      var age = '-';
-      if (dob) {
-        var pts2 = dob.split('/');
-        var b;
-        if (pts2.length===3) b=new Date(pts2[2],pts2[1]-1,pts2[0]);
-        else b=new Date(dob);
-        if (!isNaN(b.getTime())) {
-          var a=new Date().getFullYear()-b.getFullYear();
-          if (new Date().getMonth()<b.getMonth()||(new Date().getMonth()===b.getMonth()&&new Date().getDate()<b.getDate())) a--;
-          age=a;
-        }
-      }
-      return {
-        _id: p._id||'', id: p.id||p._id||'',
-        init:(p.name||'P').charAt(0).toUpperCase(),
-        name:p.name||'-',age:age,city:p.city||'-',
-        email:p.email||'-',phone:p.phone||'-',born:dob||'-',
-        meds:p.medications||'Nenhum',
-        summary:p.objetivo||'Cadastrado via WhatsApp',
-        next:p.appointmentLabel||(p.appointment?p.appointment:'--'),
-        status:p.appointment?'agendado':'novo',
-        history:p.history||[{date:p.registeredAt?new Date(p.registeredAt).toLocaleDateString('pt-BR'):'-',desc:'Cadastro',notes:p.objetivo||'-'}],
-        docs:(p.exames&&p.exames.length)?['Exame via WhatsApp']:[]
-      };
-    });
-    renderClients(CLIENTS);
-  }).catch(function(e){console.log('Clients err:',e.message);});
+// ─── CLIENTES ────────────────────────────────────────────────
+async function loadClients() {
+  try {
+    const res = await fetch(`${API}/api/patients`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    allClients = Array.isArray(data) ? data : (data.patients || data.clientes || []);
+    renderClients(allClients);
+  } catch (e) {
+    console.error(e);
+    document.getElementById('clients-container').innerHTML =
+      '<div class="empty-state"><div class="icon">⚠️</div><p>Erro ao carregar clientes</p></div>';
+  }
 }
 
 function renderClients(list) {
-  var grid = document.getElementById('cgrid');
-  var count = document.getElementById('ccount');
-  if (count) count.innerHTML='<strong>'+list.length+'</strong> pacientes';
-  if (!list.length){grid.innerHTML='<div style="text-align:center;padding:40px;color:#9ca3af;">Nenhum paciente encontrado.</div>';return;}
-  grid.innerHTML = list.map(function(c,idx){
-    var realIdx = CLIENTS.indexOf(c);
-    var bc=c.status==='agendado'?'ba':c.status==='retorno'?'br':'bn';
-    var bl=c.status==='agendado'?'Agendado':c.status==='retorno'?'Retorno':'Novo';
-    return '<div class="ccard">'+
-      '<div class="cav" onclick="openFicha('+realIdx+')">'+c.init+'</div>'+
-      '<div onclick="openFicha('+realIdx+')" style="cursor:pointer"><div class="cname">'+c.name+'</div><div class="cinfo">'+c.age+' anos &middot; '+c.city+'</div></div>'+
-      '<div class="csummary" onclick="openFicha('+realIdx+')" style="cursor:pointer">'+c.summary+'</div>'+
-      '<div class="cnext" onclick="openFicha('+realIdx+')" style="cursor:pointer"><strong>Proxima consulta</strong><span>'+c.next+'</span></div>'+
-      '<span class="cbadge '+bc+'">'+bl+'</span>'+
-      '<button class="bdel" onclick="delPaciente(\''+c.id+'\','+realIdx+')">Excluir</button>'+
-    '</div>';
-  }).join('');
-}
-
-function filterC(q) {
-  var f=CLIENTS.filter(function(c){return c.name.toLowerCase().includes(q.toLowerCase())||c.summary.toLowerCase().includes(q.toLowerCase());});
-  renderClients(f);
-}
-
-function delPaciente(id, idx) {
-  if (!confirm('Excluir este paciente?')) return;
-  fetch(API+'/api/patients/'+id,{method:'DELETE'}).then(function(){
-    CLIENTS.splice(idx,1);
-    renderClients(CLIENTS);
-    toast('Paciente excluido.');
-  }).catch(function(){toast('Erro ao excluir.',true);});
-}
-
-// NOVO PACIENTE
-function openNP(){document.getElementById('np-modal').classList.add('show');}
-function closeNP(){document.getElementById('np-modal').classList.remove('show');}
-function savePaciente(){
-  var nome=document.getElementById('np-nome').value.trim();
-  if (!nome){alert('Nome obrigatorio.');return;}
-  var body={name:nome,dob:document.getElementById('np-nasc').value,city:document.getElementById('np-cidade').value,
-    email:document.getElementById('np-email').value,phone:document.getElementById('np-fone').value,
-    medications:document.getElementById('np-meds').value,objetivo:document.getElementById('np-obj').value,source:'manual'};
-  fetch(API+'/api/patients',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
-    .then(function(){
-      closeNP();
-      ['np-nome','np-nasc','np-cidade','np-email','np-fone','np-meds','np-obj'].forEach(function(id){document.getElementById(id).value='';});
-      toast('Paciente cadastrado!');
-      loadClients();
-    }).catch(function(){toast('Erro ao cadastrar.',true);});
-}
-
-// FICHA
-function openFicha(idx) {
-  var c = CLIENTS[idx];
-  if (!c) return;
-  currentFicha = idx;
-  document.getElementById('fav').textContent = c.init;
-  document.getElementById('fname').textContent = c.name;
-  document.getElementById('fsub').textContent = c.age+' anos &middot; '+c.city;
-  document.getElementById('finfo').innerHTML =
-    '<div class="ii"><label>Nascimento</label><span>'+c.born+'</span></div>'+
-    '<div class="ii"><label>E-mail</label><span>'+c.email+'</span></div>'+
-    '<div class="ii"><label>Telefone</label><span>'+c.phone+'</span></div>'+
-    '<div class="ii"><label>Medicamentos</label><span>'+c.meds+'</span></div>';
-  renderHistory(idx);
-  document.getElementById('finsights').innerHTML =
-    '<div class="aic"><div class="ailbl">&#10024; Insight Praxi IA</div>'+
-    '<div class="aitxt">Com base no historico de '+c.name+', recomenda-se acompanhamento continuo. Evidencias 2024 sugerem monitoramento trimestral.</div>'+
-    '<div class="aisrc">&#128218; Literatura clinica 2024 &middot; Google Academico</div></div>';
-  document.getElementById('fdocs').innerHTML = c.docs.length?
-    c.docs.map(function(d){return '<div class="doc-i"><span>&#128196;</span><div><div style="font-size:13px;font-weight:500;">'+d+'</div><div style="font-size:11px;color:#9ca3af;">Enviado via WhatsApp</div></div></div>';}).join(''):
-    '<p style="color:#9ca3af;font-size:13px;">Nenhum documento.</p>';
-  document.getElementById('ficha-ov').classList.add('show');
-}
-
-function renderHistory(idx) {
-  var c = CLIENTS[idx];
-  var h = (c.history||[]).map(function(h){
-    return '<div class="hi"><div class="hd">'+h.date+'</div><div class="hdesc">'+h.desc+'</div><div class="hnotes">'+h.notes+'</div></div>';
-  }).join('');
-  document.getElementById('fhistory').innerHTML = h||'<p style="color:#9ca3af;font-size:13px;">Sem historico.</p>';
-}
-
-function closeFicha(){document.getElementById('ficha-ov').classList.remove('show');}
-
-function saveHistory() {
-  var idx = currentFicha;
-  if (idx<0) return;
-  var desc = document.getElementById('h-desc').value.trim();
-  var notes = document.getElementById('h-notes').value.trim();
-  if (!desc&&!notes){alert('Preencha pelo menos um campo.');return;}
-  var c = CLIENTS[idx];
-  var entry = {date:new Date().toLocaleDateString('pt-BR'),desc:desc||'Registro',notes:notes||''};
-  var pid = c.id||c._id;
-  if (pid) {
-    fetch(API+'/api/patients/'+pid+'/history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(entry)})
-      .then(function(){})
-      .catch(function(e){console.log('History err:',e.message);});
+  const container = document.getElementById('clients-container');
+  if (!list || list.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">👤</div><p>Nenhum cliente cadastrado ainda</p></div>';
+    return;
   }
-  if (!c.history) c.history=[];
-  c.history.unshift(entry);
-  renderHistory(idx);
-  document.getElementById('h-desc').value='';
-  document.getElementById('h-notes').value='';
-  toast('Registro adicionado!');
-}
-
-// UPLOAD
-function openUpload(){document.getElementById('up-modal').classList.add('show');}
-function closeUpload(){document.getElementById('up-modal').classList.remove('show');document.getElementById('fstatus').textContent='';}
-function handleFile(inp){if(inp.files.length)document.getElementById('fstatus').textContent='Selecionado: '+inp.files[0].name;}
-
-// STATS
-function setPer(p,btn){
-  btn.parentElement.querySelectorAll('.ptab').forEach(function(t){t.classList.remove('active');});
-  btn.classList.add('active');
-  var total = CLIENTS.length;
-  document.getElementById('st-pac').textContent=total;
-  document.getElementById('st-con').textContent=total>0?Math.floor(total*1.3):0;
-  document.getElementById('st-ret').textContent=total>0?Math.floor(total*0.4):0;
-  document.getElementById('st-fal').textContent=0;
-}
-function renderBarChart(){
-  var ch=document.getElementById('bch');
-  var vals=[0,0,0,0,0,0,0,0,0,0,0,CLIENTS.length];
-  var lbls=['Jun','Jul','Ago','Set','Out','Nov','Dez','Jan','Fev','Mar','Abr','Mai'];
-  var max=Math.max.apply(null,vals)||1;
-  ch.innerHTML=vals.map(function(v,i){
-    return '<div class="bc"><div class="b'+(i===vals.length-1?' acc':'')+'" style="height:'+Math.round((v/max)*120)+'px;min-height:4px;"></div><div class="bl">'+lbls[i]+'</div></div>';
+  container.innerHTML = list.map(c => {
+    const name = c.name || c.nome || c.patientName || 'Sem nome';
+    const phone = c.phone || c.telefone || c.whatsapp || '';
+    const meds = c.medications || c.medicamentos || '';
+    return `
+      <div class="client-card" onclick="openFicha('${c._id || c.id}')">
+        <button class="client-delete-btn" onclick="askDeleteClient('${c._id || c.id}', event)" title="Excluir">🗑</button>
+        <div class="client-name">${name}</div>
+        <div class="client-phone">${phone || 'Sem telefone'}</div>
+        <div class="client-tags">
+          <span class="tag tag-green">Ativo</span>
+          ${meds && meds !== 'nenhum' ? '<span class="tag tag-orange">Med. em uso</span>' : ''}
+        </div>
+      </div>
+    `;
   }).join('');
 }
 
-// DISCUSSIONS
-function renderDiscs(){
-  var grid=document.getElementById('dgrid');
-  grid.innerHTML=DISCS.map(function(d){
-    return '<div class="dcard" onclick="openDisc('+d.id+')">'+
-      '<div class="dspec">'+d.spec+'</div>'+
-      '<div class="dtitle">'+d.title+'</div>'+
-      '<div class="dexc">'+d.body.substring(0,100)+'...</div>'+
-      '<div class="dfoot"><span class="dauthor">'+d.author+'</span>'+
-      '<div class="dreac"><span>&#128142;'+d.reactions.g+'</span><span>&#128562;'+d.reactions.s+'</span><span>&#10084;'+d.reactions.h+'</span></div>'+
-      '</div></div>';
-  }).join('');
-  var sorted=[...DISCS].sort(function(a,b){return (b.reactions.g+b.reactions.h)-(a.reactions.g+a.reactions.h);});
-  document.getElementById('rlist').innerHTML=sorted.slice(0,5).map(function(d,i){
-    return '<div class="ri"><div class="rn">0'+(i+1)+'</div><div style="flex:1"><div class="rit">'+d.title+'</div><div class="ris">'+d.spec+'</div></div><div class="rscore">&#128142;'+(d.reactions.g+d.reactions.h)+'</div></div>';
-  }).join('');
-}
-function openDisc(id){
-  var d=DISCS.find(function(x){return x.id===id;});
-  if (!d) return;
-  document.getElementById('dp-spec').textContent=d.spec;
-  document.getElementById('dp-title').textContent=d.title;
-  document.getElementById('dp-author').textContent=d.author;
-  document.getElementById('dp-body').textContent=d.body;
-  document.getElementById('r1').textContent=d.reactions.g;
-  document.getElementById('r2').textContent=d.reactions.s;
-  document.getElementById('r3').textContent=d.reactions.h;
-  document.getElementById('dp-cmts').innerHTML=d.cmts.map(function(c){
-    return '<div class="cmt"><div class="cmtav">M</div><div class="cmtb"><div class="cmta">Medico</div><div class="cmtt">'+c+'</div></div></div>';
-  }).join('');
-  document.getElementById('dov').classList.add('show');
-}
-function closeDisc(){document.getElementById('dov').classList.remove('show');}
-function react(btn){btn.classList.toggle('active');var s=btn.querySelector('span');s.textContent=parseInt(s.textContent)+(btn.classList.contains('active')?1:-1);}
-function sendCmt(){
-  var inp=document.getElementById('cin');
-  if (!inp.value.trim()) return;
-  var cmts=document.getElementById('dp-cmts');
-  cmts.innerHTML+='<div class="cmt"><div class="cmtav" style="background:#dbeafe;color:#1d4ed8;">VC</div><div class="cmtb"><div class="cmta">Voce</div><div class="cmtt">'+inp.value+'</div></div></div>';
-  inp.value='';
-}
-function openND(){document.getElementById('nd-modal').classList.add('show');}
-function closeND(){document.getElementById('nd-modal').classList.remove('show');}
-function submitDisc(){
-  var title=document.getElementById('nd-title').value.trim();
-  var body=document.getElementById('nd-body').value.trim();
-  if (!title||!body){alert('Preencha titulo e conteudo.');return;}
-  DISCS.unshift({id:DISCS.length+1,spec:document.getElementById('nd-spec').value,title:title,author:'Voce',body:body,reactions:{g:0,s:0,h:0},cmts:[]});
-  closeND();
-  renderDiscs();
-  document.getElementById('nd-title').value='';
-  document.getElementById('nd-body').value='';
-  toast('Discussao publicada!');
+function filterClients(q) {
+  const filtered = q
+    ? allClients.filter(c => {
+        const name = (c.name || c.nome || '').toLowerCase();
+        const phone = (c.phone || c.telefone || '').toLowerCase();
+        return name.includes(q.toLowerCase()) || phone.includes(q.toLowerCase());
+      })
+    : allClients;
+  renderClients(filtered);
 }
 
-// INIT
-document.addEventListener('DOMContentLoaded', function() {
-  loadAgenda();
-  loadClients();
-  renderDiscs();
-  document.getElementById('taction').innerHTML='<button class="btn btn-g" onclick="openNC()">+ Nova consulta</button>';
-  setPer('mes', document.querySelector('.ptab'));
-});
+function askDeleteClient(id, evt) {
+  evt.stopPropagation();
+  pendingDeleteId = id;
+  pendingDeleteType = 'client';
+  document.getElementById('modal-confirm-delete').classList.add('open');
+}
+
+async function confirmDeleteClient() {
+  if (!pendingDeleteId) return;
+  try {
+    const res = await fetch(`${API}/api/patients/${pendingDeleteId}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    allClients = allClients.filter(c => (c._id || c.id) !== pendingDeleteId);
+    renderClients(allClients);
+    closeModal('modal-confirm-delete');
+    closeFicha();
+    showToast('Paciente excluído', 'success');
+  } catch (e) {
+    console.error(e);
+    showToast('Erro ao excluir paciente', 'error');
+    closeModal('modal-confirm-delete');
+  }
+  pendingDeleteId = null;
+}
+
+// ─── FICHA ───────────────────────────────────────────────────
+function openFicha(id) {
+  const c = allClients.find(x => (x._id || x.id) === id);
+  if (!c) return;
+
+  const name = c.name || c.nome || 'Sem nome';
+  const phone = c.phone || c.telefone || '';
+  const dob = c.dob || c.dataNascimento || '';
+  const city = c.city || c.cidade || '';
+  const email = c.email || '';
+  const meds = c.medications || c.medicamentos || 'Nenhum';
+  const hist = c.history || c.historico || [];
+
+  const patientAppts = allAppointments
+    .filter(a => (a.patientPhone === phone || a.patientName === name))
+    .sort((a, b) => b._date.localeCompare(a._date))
+    .slice(0, 5);
+
+  document.getElementById('ficha-content').innerHTML = `
+    <div class="ficha-name">${name}</div>
+    <div class="ficha-phone">${phone || 'Sem telefone'}</div>
+
+    <div class="ficha-section">
+      <h4>Informações</h4>
+      ${dob ? `<div class="ficha-row"><span>Nascimento</span><span>${dob}</span></div>` : ''}
+      ${city ? `<div class="ficha-row"><span>Cidade</span><span>${city}</span></div>` : ''}
+      ${email ? `<div class="ficha-row"><span>Email</span><span>${email}</span></div>` : ''}
+      <div class="ficha-row"><span>Medicamentos</span><span>${meds}</span></div>
+    </div>
+
+    ${patientAppts.length > 0 ? `
+    <div class="ficha-section">
+      <h4>Consultas</h4>
+      ${patientAppts.map(a => `
+        <div class="hist-item">
+          <strong>${a._time} — ${a.type || 'Consulta'}</strong>
+          <small>${formatDateBR(a._date)}</small>
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    ${hist.length > 0 ? `
+    <div class="ficha-section">
+      <h4>Histórico</h4>
+      ${hist.map(h => `
+        <div class="hist-item">
+          <strong>${h.type || 'Entrada'}</strong>
+          <small>${h.date || ''}</small>
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    <button class="ficha-delete-btn" onclick="askDeleteClient('${id}', event)">
+      🗑 Excluir este paciente
+    </button>
+  `;
+
+  document.getElementById('ficha-overlay').classList.add('open');
+  document.getElementById('ficha-panel').classList.add('open');
+}
+
+function closeFicha() {
+  document.getElementById('ficha-overlay').classList.remove('open');
+  document.getElementById('ficha-panel').classList.remove('open');
+}
+
+// ─── ESTATÍSTICAS ────────────────────────────────────────────
+function buildStats() {
+  const today = todayStr();
+  const nowMonth = today.substring(0, 7);
+
+  document.getElementById('est-pacientes').textContent = allClients.length;
+  document.getElementById('est-consultas').textContent = allAppointments.length;
+  document.getElementById('est-mes').textContent = allAppointments.filter(a => isThisMonth(a._date)).length;
+  document.getElementById('est-hoje').textContent = allAppointments.filter(a => a._date === today).length;
+
+  buildBarChart();
+  buildDonut();
+  buildWeekdayChart();
+  buildHoursChart();
+}
+
+function buildBarChart() {
+  const now = new Date();
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({
+      label: MONTHS[d.getMonth()].substring(0, 3),
+      key: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`
+    });
+  }
+
+  const counts = months.map(m => ({
+    label: m.label,
+    val: allAppointments.filter(a => a._date && a._date.startsWith(m.key)).length
+  }));
+
+  const max = Math.max(...counts.map(c => c.val), 1);
+  document.getElementById('bar-chart').innerHTML = counts.map(c => `
+    <div class="bar-col">
+      <div class="bar-val">${c.val}</div>
+      <div class="bar" style="height:${(c.val/max*100)}%"></div>
+      <div class="bar-label">${c.label}</div>
+    </div>
+  `).join('');
+}
+
+function buildDonut() {
+  const tipos = {};
+  allAppointments.forEach(a => {
+    const t = a.type || a.tipo || 'Consulta';
+    tipos[t] = (tipos[t] || 0) + 1;
+  });
+
+  const colors = ['#2d5a3d', '#7ab59a', '#e8f0ea', '#b5cfc0', '#4a8a62'];
+  const entries = Object.entries(tipos);
+  const total = entries.reduce((s, [,v]) => s + v, 0) || 1;
+
+  // SVG donut
+  let offset = 0;
+  const radius = 40, cx = 50, cy = 50;
+  const circumference = 2 * Math.PI * radius;
+
+  const segments = entries.map(([label, val], i) => {
+    const pct = val / total;
+    const dash = pct * circumference;
+    const gap = circumference - dash;
+    const seg = `<circle r="${radius}" cx="${cx}" cy="${cy}" fill="none" stroke="${colors[i % colors.length]}"
+      stroke-width="16" stroke-dasharray="${dash} ${gap}"
+      stroke-dashoffset="${-offset * circumference}" transform="rotate(-90 50 50)"/>`;
+    offset += pct;
+    return seg;
+  });
+
+  document.getElementById('donut-svg').innerHTML = segments.join('') ||
+    `<circle r="40" cx="50" cy="50" fill="none" stroke="#e5e3dc" stroke-width="16"/>`;
+
+  document.getElementById('donut-legend').innerHTML = entries.map(([label, val], i) => `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${colors[i % colors.length]}"></div>
+      <span>${label} (${val})</span>
+    </div>
+  `).join('') || '<div style="font-size:13px;color:var(--muted)">Sem dados</div>';
+}
+
+function buildWeekdayChart() {
+  const days = [0,1,2,3,4,5,6];
+  const counts = days.map(d => ({
+    label: DAYS_PT[d],
+    val: allAppointments.filter(a => {
+      if (!a._date) return false;
+      return new Date(a._date + 'T12:00:00').getDay() === d;
+    }).length
+  }));
+  const max = Math.max(...counts.map(c => c.val), 1);
+  document.getElementById('bar-weekday').innerHTML = counts.map(c => `
+    <div class="bar-col">
+      <div class="bar-val">${c.val}</div>
+      <div class="bar" style="height:${(c.val/max*100)}%; opacity:0.7"></div>
+      <div class="bar-label">${c.label}</div>
+    </div>
+  `).join('');
+}
+
+function buildHoursChart() {
+  const slots = ['08','09','10','11','12','13','14','15','16','17'];
+  const counts = slots.map(h => ({
+    label: `${h}h`,
+    val: allAppointments.filter(a => a._time && a._time.startsWith(h)).length
+  }));
+  const max = Math.max(...counts.map(c => c.val), 1);
+  document.getElementById('bar-hours').innerHTML = counts.map(c => `
+    <div class="bar-col">
+      <div class="bar-val">${c.val || ''}</div>
+      <div class="bar" style="height:${(c.val/max*100)}%; opacity:0.6"></div>
+      <div class="bar-label">${c.label}</div>
+    </div>
+  `).join('');
+}
+
+// ─── CONFIG ──────────────────────────────────────────────────
+const DAYS_CONFIG = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+let selectedDays = [1,2,3,4,5]; // Seg-Sex default
+
+function initConfig() {
+  const container = document.getElementById('day-toggles');
+  container.innerHTML = DAYS_CONFIG.map((d, i) => `
+    <button class="day-toggle ${selectedDays.includes(i) ? 'active' : ''}"
+      onclick="toggleDay(${i}, this)">${d}</button>
+  `).join('');
+}
+
+function toggleDay(i, el) {
+  if (selectedDays.includes(i)) {
+    selectedDays = selectedDays.filter(d => d !== i);
+    el.classList.remove('active');
+  } else {
+    selectedDays.push(i);
+    el.classList.add('active');
+  }
+}
+
+function loadConfig() {
+  const cfg = JSON.parse(localStorage.getItem('praxi_config') || '{}');
+  if (cfg.days) selectedDays = cfg.days;
+  if (cfg.start) document.getElementById('cfg-start') && (document.getElementById('cfg-start').value = cfg.start);
+  if (cfg.end) document.getElementById('cfg-end') && (document.getElementById('cfg-end').value = cfg.end);
+  if (cfg.duration) document.getElementById('cfg-duration') && (document.getElementById('cfg-duration').value = cfg.duration);
+}
+
+function loadDoctor() {
+  const cfg = JSON.parse(localStorage.getItem('praxi_config') || '{}');
+  if (cfg.nome) document.getElementById('doc-name').textContent = cfg.nome;
+  if (cfg.crm) document.getElementById('doc-crm').textContent = cfg.crm;
+  if (cfg.nome) document.getElementById('cfg-nome') && (document.getElementById('cfg-nome').value = cfg.nome);
+  if (cfg.crm) document.getElementById('cfg-crm') && (document.getElementById('cfg-crm').value = cfg.crm);
+  if (cfg.especialidade) document.getElementById('cfg-especialidade') && (document.getElementById('cfg-especialidade').value = cfg.especialidade);
+}
+
+async function saveConfig() {
+  const cfg = JSON.parse(localStorage.getItem('praxi_config') || '{}');
+  cfg.days = selectedDays;
+  cfg.start = document.getElementById('cfg-start').value;
+  cfg.end = document.getElementById('cfg-end').value;
+  cfg.duration = document.getElementById('cfg-duration').value;
+  localStorage.setItem('praxi_config', JSON.stringify(cfg));
+
+  // Envia pro servidor tb
+  try {
+    await fetch(`${API}/api/config`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dias: selectedDays, horaInicio: cfg.start, horaFim: cfg.end, duracaoConsulta: parseInt(cfg.duration) })
+    });
+  } catch (e) { /* silencioso — salvo localmente de qualquer forma */ }
+
+  showToast('Configurações salvas!', 'success');
+}
+
+function saveProfile() {
+  const cfg = JSON.parse(localStorage.getItem('praxi_config') || '{}');
+  cfg.nome = document.getElementById('cfg-nome').value;
+  cfg.crm = document.getElementById('cfg-crm').value;
+  cfg.especialidade = document.getElementById('cfg-especialidade').value;
+  localStorage.setItem('praxi_config', JSON.stringify(cfg));
+  loadDoctor();
+  showToast('Perfil salvo!', 'success');
+}
+
+// ─── UTILS ───────────────────────────────────────────────────
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+function logout() {
+  if (confirm('Sair do painel?')) {
+    window.location.href = 'index.html';
+  }
+}
 </script>
 </body>
 </html>
