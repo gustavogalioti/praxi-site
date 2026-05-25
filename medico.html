@@ -595,18 +595,27 @@ async function loadAgendaFromAPI() {
     const data = await res.json();
     const agenda = data.agenda || [];
     agenda.forEach(function(item) {
-      if (!item.dataHora && !item.appointment) return;
       const dateStr = item.dataHora || item.appointment;
-      const d = new Date(dateStr);
-      if (isNaN(d.getTime())) return;
+      if (!dateStr) return;
+      var d, hora;
+      if (dateStr.indexOf('T') >= 0) {
+        // ISO completo: 2026-05-22T14:00:00.000Z
+        d = new Date(dateStr);
+        hora = item.appointmentTime || d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      } else {
+        // Data simples: 2026-05-15
+        const parts = dateStr.split('-');
+        if (parts.length === 3) {
+          d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+        } else return;
+        hora = item.appointmentTime || '09:00';
+      }
+      if (!d || isNaN(d.getTime())) return;
       const key = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
       if (!AGENDA_EVENTS[key]) AGENDA_EVENTS[key] = [];
-      const hora = item.appointmentTime || d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      AGENDA_EVENTS[key].push({
-        label: item.pacienteNome || item.name || 'Consulta',
-        tipo: 'consulta',
-        hora: hora
-      });
+      const label = item.pacienteNome || item.name || 'Consulta';
+      const jaExiste = AGENDA_EVENTS[key].some(function(e){ return e.label === label && e.hora === hora; });
+      if (!jaExiste) AGENDA_EVENTS[key].push({label, tipo: item.tipo || 'consulta', hora});
     });
     renderCalendar();
   } catch(e) { console.log('Erro agenda:', e.message); }
