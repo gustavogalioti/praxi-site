@@ -720,8 +720,11 @@ function filterClients(q) {
 async function deletarPaciente(id, idx) {
   if (!confirm('Excluir este paciente?')) return;
   try {
-    if (id && id !== 'undefined') {
-      await fetch(API + '/api/patients/' + id, { method: 'DELETE' });
+    const pid = id && id !== 'undefined' ? id : null;
+    if (pid) {
+      const res = await fetch(API + '/api/patients/' + pid, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.error) { showToast('Erro ao excluir.'); return; }
     }
     CLIENTS_DATA.splice(idx, 1);
     renderClients(CLIENTS_DATA);
@@ -729,7 +732,10 @@ async function deletarPaciente(id, idx) {
   } catch(e) { showToast('Erro ao excluir.'); }
 }
 
+var currentFichaIdx = -1;
+
 function openFicha(idx) {
+  currentFichaIdx = idx;
   const c = CLIENTS_DATA[idx];
   if (!c) return;
   document.getElementById('fo-av').textContent = c.init;
@@ -740,12 +746,7 @@ function openFicha(idx) {
     <div class="info-item"><label>E-mail</label><span>${c.email}</span></div>
     <div class="info-item"><label>Telefone</label><span>${c.phone}</span></div>
     <div class="info-item"><label>Medicamentos</label><span>${c.meds}</span></div>`;
-  document.getElementById('fo-history').innerHTML = c.history.map(h => `
-    <div class="history-item">
-      <div class="history-date">${h.date}</div>
-      <div class="history-desc">${h.desc}</div>
-      <div class="history-notes">${h.notes}</div>
-    </div>`).join('');
+  renderFichaHistory(idx);
   document.getElementById('fo-insights').innerHTML = `
     <div class="ai-card">
       <div class="ai-label">&#10024; Insight Praxi IA</div>
@@ -755,6 +756,41 @@ function openFicha(idx) {
   document.getElementById('fo-docs').innerHTML = c.docs.length ? c.docs.map(d => `
     <div class="doc-item"><div class="doc-icon">&#128196;</div><div><div class="doc-name">${d}</div><div class="doc-date">Enviado via WhatsApp</div></div></div>`).join('') : '<p style="color:#9ca3af;font-size:13px;">Nenhum documento anexado.</p>';
   document.getElementById('ficha-overlay').classList.add('show');
+}
+
+function renderFichaHistory(idx) {
+  const c = CLIENTS_DATA[idx];
+  if (!c) return;
+  const histHtml = (c.history||[]).map(h => `
+    <div class="history-item">
+      <div class="history-date">${h.date} ${h.tipo ? '&middot; '+h.tipo : ''}</div>
+      <div class="history-desc">${h.desc}</div>
+      <div class="history-notes">${h.notes}</div>
+    </div>`).join('');
+  document.getElementById('fo-history').innerHTML = histHtml + `
+    <div style="margin-top:12px;background:#f9fafb;border-radius:8px;padding:12px;border:1px solid #e5e7eb;">
+      <div style="font-size:11px;font-weight:600;color:#9ca3af;margin-bottom:8px;">REGISTRAR CONSULTA / CONTATO</div>
+      <input id="novo-hist-desc" placeholder="Titulo (ex: Retorno, Telefonema...)" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:13px;font-family:inherit;outline:none;margin-bottom:6px;">
+      <textarea id="novo-hist-notes" placeholder="Anotacoes da consulta ou contato..." style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:13px;font-family:inherit;min-height:60px;outline:none;resize:vertical;margin-bottom:6px;"></textarea>
+      <button onclick="registrarHistorico()" style="background:#1a6b5a;color:white;border:none;padding:8px 16px;border-radius:6px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500;">+ Registrar</button>
+    </div>`;
+}
+
+function registrarHistorico() {
+  const idx = currentFichaIdx;
+  if (idx < 0) return;
+  const desc = document.getElementById('novo-hist-desc').value.trim();
+  const notes = document.getElementById('novo-hist-notes').value.trim();
+  if (!desc && !notes) { alert('Preencha pelo menos um campo.'); return; }
+  const c = CLIENTS_DATA[idx];
+  if (!c.history) c.history = [];
+  c.history.unshift({
+    date: new Date().toLocaleDateString('pt-BR'),
+    desc: desc || 'Registro',
+    notes: notes || ''
+  });
+  renderFichaHistory(idx);
+  showToast('Registro adicionado!');
 }
 
 function closeFicha() { document.getElementById('ficha-overlay').classList.remove('show'); }
@@ -869,7 +905,7 @@ async function loadClientsFromAPI() {
     const patients = data.patients || [];
     const mapped = patients.map(function(p) {
       return {
-        id: p.id,
+        id: p.id || p._id,
         init: (p.name||'P').charAt(0).toUpperCase(),
         name: p.name || '-',
         age: p.dob ? calcAge(p.dob) : '-',
