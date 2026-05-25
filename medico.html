@@ -7,386 +7,253 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#f4f6f8;color:#1a1a18;}
-.hidden{display:none!important;}
-
-/* LAYOUT */
-.wrap{display:flex;flex-direction:row;height:100vh;width:100vw;overflow:hidden;}
-
-/* SIDEBAR */
+.wrap{display:flex;height:100vh;width:100vw;overflow:hidden;}
 .sidebar{width:240px;min-width:240px;background:white;border-right:1px solid #e5e7eb;display:flex;flex-direction:column;flex-shrink:0;}
 .sidebar-top{padding:20px 16px;border-bottom:1px solid #e5e7eb;}
-.logo{font-size:20px;font-weight:700;color:#1a1a18;margin-bottom:14px;letter-spacing:-0.5px;}
-.logo span{color:#1a6b5a;}
+.logo{font-size:20px;font-weight:700;margin-bottom:14px;}.logo span{color:#1a6b5a;}
 .profile{display:flex;align-items:center;gap:10px;}
-.avatar{width:38px;height:38px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;color:#1a6b5a;font-weight:700;font-size:15px;flex-shrink:0;}
-.pname{font-size:13px;font-weight:600;color:#1a1a18;}
-.prole{font-size:11px;color:#9ca3af;}
+.av{width:38px;height:38px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;color:#1a6b5a;font-weight:700;font-size:15px;flex-shrink:0;}
+.pname{font-size:13px;font-weight:600;}.prole{font-size:11px;color:#9ca3af;}
 .nav{flex:1;padding:10px 8px;}
-.nitem{display:flex;align-items:center;gap:10px;padding:11px 12px;cursor:pointer;font-size:13px;font-weight:500;color:#6b7280;border-radius:8px;margin-bottom:2px;transition:all .15s;}
-.nitem:hover{background:#f9fafb;color:#1a1a18;}
-.nitem.active{background:#e8f4f0;color:#1a6b5a;font-weight:600;}
-.nitem .icon{font-size:16px;width:20px;text-align:center;}
+.ni{display:flex;align-items:center;gap:10px;padding:11px 12px;cursor:pointer;font-size:13px;font-weight:500;color:#6b7280;border-radius:8px;margin-bottom:2px;transition:all .15s;}
+.ni:hover{background:#f9fafb;color:#1a1a18;}.ni.active{background:#e8f4f0;color:#1a6b5a;font-weight:600;}
 .sfoot{padding:10px 8px;border-top:1px solid #e5e7eb;}
-
-/* MAIN */
 .main{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
 .topbar{background:white;border-bottom:1px solid #e5e7eb;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.topbar-title{font-size:18px;font-weight:700;color:#1a1a18;}
-.topbar-actions{display:flex;gap:10px;align-items:center;}
+.topbar-title{font-size:18px;font-weight:700;}
 .btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
-.btn-primary{background:#1a6b5a;color:white;}
-.btn-primary:hover{background:#155a4a;}
-.btn-outline{background:white;color:#374151;border:1.5px solid #e5e7eb;}
-.btn-outline:hover{background:#f9fafb;}
+.btn-g{background:#1a6b5a;color:white;}.btn-g:hover{background:#155a4a;}
+.btn-o{background:white;color:#374151;border:1.5px solid #e5e7eb;}.btn-o:hover{background:#f9fafb;}
 .content{flex:1;padding:24px;}
+.panel{display:none;}.panel.active{display:block;}
 
-/* PANEL */
-.panel{display:none;}
-.panel.active{display:block;}
-
-/* AGENDA */
-.agenda-controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.month-nav{display:flex;align-items:center;gap:12px;}
-.month-nav button{width:32px;height:32px;border-radius:50%;border:1.5px solid #e5e7eb;background:white;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.month-nav button:hover{background:#f9fafb;}
-.month-label{font-size:16px;font-weight:700;color:#1a1a18;}
-.view-tabs{display:flex;background:#f3f4f6;padding:3px;border-radius:8px;}
-.view-tab{padding:6px 14px;border:none;background:none;font-size:12px;font-weight:500;cursor:pointer;border-radius:6px;color:#6b7280;font-family:inherit;transition:all .15s;}
-.view-tab.active{background:white;color:#1a1a18;box-shadow:0 1px 3px rgba(0,0,0,.1);}
+/* CALENDAR */
+.cal-controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.mnav{display:flex;align-items:center;gap:12px;}
+.mnav button{width:32px;height:32px;border-radius:50%;border:1.5px solid #e5e7eb;background:white;cursor:pointer;font-size:14px;}
+.mlabel{font-size:16px;font-weight:700;}
+.vtabs{display:flex;background:#f3f4f6;padding:3px;border-radius:8px;}
+.vtab{padding:6px 14px;border:none;background:none;font-size:12px;font-weight:500;cursor:pointer;border-radius:6px;color:#6b7280;font-family:inherit;}
+.vtab.active{background:white;color:#1a1a18;box-shadow:0 1px 3px rgba(0,0,0,.1);}
 .cal-wrap{background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;}
-.cal-days-header{display:grid;grid-template-columns:repeat(7,1fr);background:#f9fafb;border-bottom:1px solid #e5e7eb;}
-.cal-day-lbl{text-align:center;padding:10px;font-size:11px;font-weight:600;color:#9ca3af;letter-spacing:.5px;text-transform:uppercase;}
+.cal-hdr{display:grid;grid-template-columns:repeat(7,1fr);background:#f9fafb;border-bottom:1px solid #e5e7eb;}
+.cal-dl{text-align:center;padding:10px;font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);}
-.cal-cell{min-height:90px;padding:8px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;cursor:pointer;transition:background .15s;position:relative;}
-.cal-cell:nth-child(7n){border-right:none;}
-.cal-cell:hover{background:#f9fafb;}
-.cal-cell.today{background:#f0fdf9;}
-.cal-cell.other{opacity:.4;}
+.cal-cell{min-height:90px;padding:8px;border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;cursor:pointer;transition:background .15s;}
+.cal-cell:nth-child(7n){border-right:none;}.cal-cell:hover{background:#f9fafb;}
+.cal-cell.today{background:#f0fdf9;}.cal-cell.other{opacity:.4;}
 .cal-num{font-size:13px;font-weight:500;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin-bottom:4px;}
 .cal-cell.today .cal-num{background:#1a6b5a;color:white;}
-.cal-event{font-size:11px;padding:2px 6px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;}
-.ev-consulta{background:#dcfce7;color:#166534;}
-.ev-retorno{background:#fef9c3;color:#854d0e;}
-.ev-reuniao{background:#dbeafe;color:#1d4ed8;}
-
-/* DAY DETAIL */
-.day-detail{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px;margin-top:16px;display:none;}
-.day-detail.show{display:block;}
-.day-detail-title{font-size:15px;font-weight:700;margin-bottom:16px;color:#1a1a18;}
-.tl-item{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;}
-.tl-time{font-size:12px;color:#9ca3af;width:48px;padding-top:3px;flex-shrink:0;font-weight:500;}
-.tl-line{width:3px;background:#e5e7eb;border-radius:2px;min-height:50px;position:relative;flex-shrink:0;}
-.tl-line::before{content:'';position:absolute;top:0;left:-3px;width:9px;height:9px;border-radius:50%;background:#1a6b5a;border:2px solid white;box-shadow:0 0 0 2px #e8f4f0;}
-.tl-card{flex:1;background:#f9fafb;border-radius:8px;padding:10px 12px;border:1px solid #e5e7eb;}
-.tl-card h4{font-size:13px;font-weight:600;margin-bottom:2px;}
-.tl-card p{font-size:12px;color:#6b7280;}
-
-/* WEEK VIEW */
-.week-grid{background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;}
-.week-header{display:grid;grid-template-columns:60px repeat(7,1fr);background:#f9fafb;border-bottom:1px solid #e5e7eb;}
-.week-day-col{text-align:center;padding:10px 4px;font-size:12px;}
-.week-day-name{font-weight:600;color:#6b7280;text-transform:uppercase;font-size:10px;}
-.week-day-num{font-size:18px;font-weight:700;color:#1a1a18;margin-top:2px;}
-.week-day-num.today{background:#1a6b5a;color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;margin:2px auto 0;}
-.week-body{display:grid;grid-template-columns:60px repeat(7,1fr);max-height:500px;overflow-y:auto;}
-.week-time{padding:8px 8px 8px 4px;font-size:11px;color:#9ca3af;text-align:right;border-right:1px solid #f3f4f6;height:60px;display:flex;align-items:flex-start;justify-content:flex-end;}
-.week-slot{border-right:1px solid #f3f4f6;border-bottom:1px solid #f3f4f6;height:60px;padding:2px;position:relative;}
-.week-event{background:#dcfce7;color:#166534;font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;margin-bottom:1px;overflow:hidden;}
+.ev{font-size:11px;padding:2px 6px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;}
+.ev-consulta{background:#dcfce7;color:#166534;}.ev-retorno{background:#fef9c3;color:#854d0e;}.ev-reuniao{background:#dbeafe;color:#1d4ed8;}
+.day-det{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px;margin-top:16px;display:none;}
+.day-det.show{display:block;}
+.tl{display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;}
+.tl-t{font-size:12px;color:#9ca3af;width:48px;padding-top:3px;flex-shrink:0;font-weight:500;}
+.tl-l{width:3px;background:#e5e7eb;border-radius:2px;min-height:50px;flex-shrink:0;position:relative;}
+.tl-l::before{content:'';position:absolute;top:0;left:-3px;width:9px;height:9px;border-radius:50%;background:#1a6b5a;border:2px solid white;}
+.tl-c{flex:1;background:#f9fafb;border-radius:8px;padding:10px 12px;border:1px solid #e5e7eb;}
+.tl-c h4{font-size:13px;font-weight:600;margin-bottom:2px;}.tl-c p{font-size:12px;color:#6b7280;}
 
 /* CLIENTS */
-.clients-search{display:flex;gap:10px;margin-bottom:20px;}
-.search-box{flex:1;position:relative;}
-.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#9ca3af;font-size:14px;}
-.search-inp{width:100%;padding:10px 12px 10px 36px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:white;}
-.search-inp:focus{border-color:#1a6b5a;}
-.clients-count{font-size:13px;color:#9ca3af;margin-bottom:14px;}
-.clients-count strong{color:#1a1a18;}
-.cards-grid{display:flex;flex-direction:column;gap:10px;}
-.client-card{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:16px 20px;cursor:pointer;transition:all .2s;display:grid;grid-template-columns:44px 1fr 1.2fr 1fr auto;gap:16px;align-items:center;}
-.client-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);border-color:#1a6b5a;transform:translateY(-1px);}
-.cc-avatar{width:44px;height:44px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;font-weight:700;color:#1a6b5a;font-size:16px;}
-.cc-name{font-size:14px;font-weight:600;color:#1a1a18;}
-.cc-info{font-size:12px;color:#9ca3af;margin-top:2px;}
-.cc-summary{font-size:13px;color:#6b7280;line-height:1.4;}
-.cc-next strong{font-size:10px;font-weight:600;color:#1a6b5a;display:block;text-transform:uppercase;letter-spacing:.5px;}
-.cc-next span{font-size:12px;color:#374151;}
-.cc-badge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap;}
-.badge-agendado{background:#dcfce7;color:#166534;}
-.badge-retorno{background:#fef9c3;color:#854d0e;}
-.badge-novo{background:#dbeafe;color:#1d4ed8;}
-
-/* FICHA OVERLAY */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;justify-content:flex-end;}
-.overlay.show{display:flex;}
-.ficha-panel{background:white;width:560px;height:100vh;overflow-y:auto;padding:28px;box-shadow:-8px 0 40px rgba(0,0,0,.15);animation:slideIn .25s ease;}
-@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
-.ficha-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;}
-.ficha-avatar{width:52px;height:52px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#1a6b5a;}
-.ficha-name{font-size:20px;font-weight:700;color:#1a1a18;}
-.ficha-sub{font-size:13px;color:#9ca3af;}
-.close-btn{width:32px;height:32px;border-radius:50%;background:#f3f4f6;border:none;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
-.ficha-sec{margin-bottom:22px;}
-.ficha-sec-title{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#9ca3af;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f3f4f6;}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.info-item label{font-size:11px;color:#9ca3af;display:block;margin-bottom:2px;}
-.info-item span{font-size:13px;font-weight:500;color:#1a1a18;}
-.history-item{background:#f9fafb;border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid #f3f4f6;}
-.history-date{font-size:11px;color:#9ca3af;margin-bottom:4px;}
-.history-desc{font-size:13px;font-weight:600;color:#1a1a18;}
-.history-notes{font-size:12px;color:#6b7280;margin-top:3px;}
-.ai-card{background:linear-gradient(135deg,#f0fdf9,#e8f4f0);border:1px solid #bbf7d0;border-radius:10px;padding:14px;margin-bottom:8px;}
-.ai-label{font-size:10px;font-weight:700;color:#1a6b5a;letter-spacing:.5px;text-transform:uppercase;}
-.ai-text{font-size:13px;color:#374151;line-height:1.55;margin-top:6px;}
-.ai-source{font-size:11px;color:#6b7280;margin-top:5px;}
-.doc-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f9fafb;border-radius:8px;border:1px solid #f3f4f6;margin-bottom:6px;cursor:pointer;transition:all .15s;}
-.doc-item:hover{border-color:#1a6b5a;}
-.doc-icon{font-size:18px;}
-.doc-name{font-size:13px;font-weight:500;}
-.doc-date{font-size:11px;color:#9ca3af;}
-.ficha-actions{display:flex;gap:8px;margin-top:16px;}
+.search-row{display:flex;gap:10px;margin-bottom:16px;}
+.sbox{flex:1;position:relative;}
+.sbox input{width:100%;padding:10px 12px 10px 36px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;background:white;}
+.sbox input:focus{border-color:#1a6b5a;}
+.sbox::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;}
+.ccount{font-size:13px;color:#9ca3af;margin-bottom:14px;}
+.ccount strong{color:#1a1a18;}
+.ccard{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:16px 20px;transition:all .2s;display:grid;grid-template-columns:44px 1fr 1.2fr 1fr auto auto;gap:14px;align-items:center;margin-bottom:10px;}
+.ccard:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);border-color:#1a6b5a;}
+.cav{width:44px;height:44px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;font-weight:700;color:#1a6b5a;font-size:16px;cursor:pointer;}
+.cname{font-size:14px;font-weight:600;cursor:pointer;}.cinfo{font-size:12px;color:#9ca3af;margin-top:2px;}
+.csummary{font-size:13px;color:#6b7280;line-height:1.4;cursor:pointer;}
+.cnext strong{font-size:10px;font-weight:600;color:#1a6b5a;display:block;text-transform:uppercase;letter-spacing:.5px;}
+.cnext span{font-size:12px;color:#374151;}
+.cbadge{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap;}
+.ba{background:#dcfce7;color:#166534;}.br{background:#fef9c3;color:#854d0e;}.bn{background:#dbeafe;color:#1d4ed8;}
+.bdel{background:#fee2e2;color:#ef4444;border:none;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;}
 
 /* STATS */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
-.stat-card{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px;}
-.stat-label{font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
-.stat-val{font-size:36px;font-weight:700;color:#1a1a18;letter-spacing:-1px;}
-.stat-change{font-size:12px;margin-top:6px;}
-.up{color:#1a6b5a;} .down{color:#ef4444;}
-.chart-row{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;}
-.chart-card{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px;}
-.chart-title{font-size:13px;font-weight:600;margin-bottom:16px;color:#374151;}
-.bar-chart{display:flex;align-items:flex-end;gap:8px;height:130px;}
-.bar-col{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;}
-.bar{width:100%;border-radius:5px 5px 0 0;background:#e8f4f0;transition:all .3s;cursor:pointer;}
-.bar:hover,.bar.accent{background:#1a6b5a;}
-.bar-lbl{font-size:10px;color:#9ca3af;}
-.period-tabs{display:flex;gap:4px;background:#f3f4f6;padding:3px;border-radius:8px;width:fit-content;margin-bottom:20px;}
-.period-tab{padding:6px 14px;border:none;background:none;font-size:12px;font-weight:500;cursor:pointer;border-radius:6px;color:#6b7280;font-family:inherit;transition:all .15s;}
-.period-tab.active{background:white;color:#1a1a18;box-shadow:0 1px 2px rgba(0,0,0,.1);}
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.sc{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px;}
+.slbl{font-size:10px;font-weight:600;color:#9ca3af;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.sval{font-size:36px;font-weight:700;color:#1a1a18;}
+.ptabs{display:flex;gap:4px;background:#f3f4f6;padding:3px;border-radius:8px;width:fit-content;margin-bottom:20px;}
+.ptab{padding:6px 14px;border:none;background:none;font-size:12px;font-weight:500;cursor:pointer;border-radius:6px;color:#6b7280;font-family:inherit;}
+.ptab.active{background:white;color:#1a1a18;box-shadow:0 1px 2px rgba(0,0,0,.1);}
+.cc{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:20px;margin-bottom:14px;}
+.ct{font-size:13px;font-weight:600;margin-bottom:16px;}
+.bch{display:flex;align-items:flex-end;gap:8px;height:130px;}
+.bc{display:flex;flex-direction:column;align-items:center;gap:5px;flex:1;}
+.b{width:100%;border-radius:5px 5px 0 0;background:#e8f4f0;}.b.acc{background:#1a6b5a;}
+.bl{font-size:10px;color:#9ca3af;}
 
 /* DISCUSSIONS */
-.disc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-.disc-layout{display:grid;grid-template-columns:1fr 300px;gap:20px;}
-.disc-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
-.disc-card{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px;cursor:pointer;transition:all .2s;}
-.disc-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-1px);border-color:#1a6b5a;}
-.disc-specialty{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#1a6b5a;margin-bottom:6px;}
-.disc-title{font-size:14px;font-weight:600;color:#1a1a18;margin-bottom:6px;line-height:1.35;}
-.disc-excerpt{font-size:12px;color:#6b7280;line-height:1.5;margin-bottom:12px;}
-.disc-footer{display:flex;align-items:center;justify-content:space-between;}
-.disc-author{font-size:11px;color:#9ca3af;}
-.disc-reactions{display:flex;gap:8px;}
-.reaction{font-size:12px;color:#6b7280;cursor:pointer;padding:2px 6px;border-radius:4px;transition:background .15s;}
-.reaction:hover{background:#f3f4f6;}
-.ranking-card{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px;}
-.ranking-title{font-size:13px;font-weight:700;color:#1a1a18;margin-bottom:14px;}
-.rank-item{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f3f4f6;}
-.rank-item:last-child{border-bottom:none;}
-.rank-num{font-size:12px;font-weight:700;color:#9ca3af;width:20px;flex-shrink:0;padding-top:1px;}
-.rank-info{flex:1;}
-.rank-t{font-size:12px;font-weight:600;color:#1a1a18;margin-bottom:2px;}
-.rank-s{font-size:11px;color:#9ca3af;}
-.rank-score{font-size:12px;font-weight:700;color:#1a6b5a;}
+.dh{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.dlayout{display:grid;grid-template-columns:1fr 300px;gap:20px;}
+.dgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.dcard{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px;cursor:pointer;transition:all .2s;}
+.dcard:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);border-color:#1a6b5a;}
+.dspec{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#1a6b5a;margin-bottom:6px;}
+.dtitle{font-size:14px;font-weight:600;margin-bottom:6px;line-height:1.35;}
+.dexc{font-size:12px;color:#6b7280;line-height:1.5;margin-bottom:12px;}
+.dfoot{display:flex;align-items:center;justify-content:space-between;}
+.dauthor{font-size:11px;color:#9ca3af;}
+.dreac{display:flex;gap:8px;}
+.dreac span{font-size:12px;color:#6b7280;cursor:pointer;}
+.rcard{background:white;border-radius:12px;border:1px solid #e5e7eb;padding:18px;}
+.rtitle{font-size:13px;font-weight:700;margin-bottom:14px;}
+.ri{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f3f4f6;}
+.ri:last-child{border-bottom:none;}
+.rn{font-size:12px;font-weight:700;color:#9ca3af;width:20px;flex-shrink:0;}
+.rit{font-size:12px;font-weight:600;margin-bottom:2px;}.ris{font-size:11px;color:#9ca3af;}
+.rscore{font-size:12px;font-weight:700;color:#1a6b5a;}
 
-/* DISC DETAIL */
-.disc-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;justify-content:flex-end;}
-.disc-overlay.show{display:flex;}
-.disc-panel{background:white;width:580px;height:100vh;overflow-y:auto;padding:28px;box-shadow:-8px 0 40px rgba(0,0,0,.15);animation:slideIn .25s ease;}
-.disc-panel-specialty{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#1a6b5a;margin-bottom:6px;}
-.disc-panel-title{font-size:22px;font-weight:700;color:#1a1a18;margin-bottom:4px;line-height:1.25;}
-.disc-panel-author{font-size:13px;color:#9ca3af;margin-bottom:18px;}
-.disc-panel-body{font-size:14px;line-height:1.7;color:#374151;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #f3f4f6;}
-.reactions-row{display:flex;gap:10px;margin-bottom:20px;}
-.react-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border:1.5px solid #e5e7eb;border-radius:40px;cursor:pointer;font-size:13px;font-weight:500;background:white;transition:all .15s;font-family:inherit;}
-.react-btn:hover{border-color:#1a6b5a;}
-.react-btn.active{border-color:#1a6b5a;background:#e8f4f0;color:#1a6b5a;}
-.comments-title{font-size:13px;font-weight:700;margin-bottom:12px;}
-.comment{display:flex;gap:10px;margin-bottom:14px;}
-.comment-av{width:32px;height:32px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#1a6b5a;flex-shrink:0;}
-.comment-body{flex:1;background:#f9fafb;border-radius:8px;padding:10px 12px;border:1px solid #f3f4f6;}
-.comment-author{font-size:11px;font-weight:600;margin-bottom:3px;}
-.comment-text{font-size:13px;color:#374151;line-height:1.45;}
-.comment-input-row{display:flex;gap:8px;margin-top:14px;}
-.comment-inp{flex:1;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;}
-.comment-inp:focus{border-color:#1a6b5a;}
-.btn-send{background:#1a6b5a;color:white;border:none;padding:10px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;}
+/* OVERLAYS */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;justify-content:flex-end;}
+.overlay.show{display:flex;}
+.fpanel{background:white;width:560px;height:100vh;overflow-y:auto;padding:28px;box-shadow:-8px 0 40px rgba(0,0,0,.15);}
+.fhead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;}
+.fav{width:52px;height:52px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;color:#1a6b5a;}
+.fname{font-size:20px;font-weight:700;}.fsub{font-size:13px;color:#9ca3af;}
+.xbtn{width:32px;height:32px;border-radius:50%;background:#f3f4f6;border:none;cursor:pointer;font-size:15px;}
+.fsec{margin-bottom:22px;}
+.fsec-t{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#9ca3af;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f3f4f6;}
+.igrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ii label{font-size:11px;color:#9ca3af;display:block;margin-bottom:2px;}
+.ii span{font-size:13px;font-weight:500;}
+.hi{background:#f9fafb;border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid #f3f4f6;}
+.hd{font-size:11px;color:#9ca3af;margin-bottom:4px;}.hdesc{font-size:13px;font-weight:600;}.hnotes{font-size:12px;color:#6b7280;margin-top:3px;}
+.aic{background:linear-gradient(135deg,#f0fdf9,#e8f4f0);border:1px solid #bbf7d0;border-radius:10px;padding:14px;margin-bottom:8px;}
+.ailbl{font-size:10px;font-weight:700;color:#1a6b5a;letter-spacing:.5px;text-transform:uppercase;}
+.aitxt{font-size:13px;color:#374151;line-height:1.55;margin-top:6px;}
+.aisrc{font-size:11px;color:#6b7280;margin-top:5px;}
+.doc-i{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#f9fafb;border-radius:8px;border:1px solid #f3f4f6;margin-bottom:6px;cursor:pointer;}
+.doc-i:hover{border-color:#1a6b5a;}
 
-/* NEW DISC MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:center;justify-content:center;}
-.modal-overlay.show{display:flex;}
-.modal{background:white;border-radius:16px;padding:28px;width:100%;max-width:520px;}
-.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-.modal-title{font-size:18px;font-weight:700;}
-.form-group{margin-bottom:14px;}
-.form-label{font-size:12px;font-weight:500;color:#6b7280;margin-bottom:5px;display:block;}
-.form-inp,.form-sel,.form-ta{width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#f9fafb;}
-.form-inp:focus,.form-sel:focus,.form-ta:focus{border-color:#1a6b5a;background:white;}
-.form-ta{resize:vertical;min-height:100px;}
+/* MODALS */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:none;align-items:center;justify-content:center;}
+.modal-ov.show{display:flex;}
+.modal{background:white;border-radius:16px;padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;}
+.mhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.mtitle{font-size:18px;font-weight:700;}
+.fg{margin-bottom:14px;}
+.fl{font-size:12px;font-weight:500;color:#6b7280;margin-bottom:5px;display:block;}
+.fi,.fs,.fta{width:100%;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;background:#f9fafb;}
+.fi:focus,.fs:focus,.fta:focus{border-color:#1a6b5a;background:white;}
+.fta{resize:vertical;min-height:80px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 
-/* LOGIN */
-.login-page{display:flex;align-items:center;justify-content:center;height:100vh;background:#f4f6f8;}
-.login-card{background:white;padding:40px;border-radius:16px;width:380px;box-shadow:0 4px 24px rgba(0,0,0,.1);}
-.login-logo{font-size:24px;font-weight:700;color:#1a1a18;margin-bottom:4px;}
-.login-logo span{color:#1a6b5a;}
-.login-sub{color:#9ca3af;font-size:14px;margin-bottom:28px;}
-.login-inp{width:100%;padding:12px 14px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;display:block;}
-.login-inp:focus{border-color:#1a6b5a;}
-.login-btn{width:100%;padding:13px;background:#1a1a18;color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;}
-.login-btn:hover{background:#333;}
-.login-err{color:#ef4444;font-size:13px;margin-top:8px;}
-.type-toggle{display:grid;grid-template-columns:1fr 1fr;background:#f3f4f6;padding:3px;border-radius:10px;margin-bottom:20px;}
-.type-btn{padding:10px;border:none;background:none;font-size:13px;font-weight:500;cursor:pointer;border-radius:8px;color:#6b7280;font-family:inherit;transition:all .15s;}
-.type-btn.active{background:white;color:#1a1a18;box-shadow:0 1px 3px rgba(0,0,0,.1);}
+/* DISC OVERLAY */
+.dov{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;justify-content:flex-end;}
+.dov.show{display:flex;}
+.dpanel{background:white;width:580px;height:100vh;overflow-y:auto;padding:28px;box-shadow:-8px 0 40px rgba(0,0,0,.15);}
+.rbtns{display:flex;gap:10px;margin-bottom:20px;}
+.rbtn{display:flex;align-items:center;gap:6px;padding:8px 16px;border:1.5px solid #e5e7eb;border-radius:40px;cursor:pointer;font-size:13px;font-weight:500;background:white;font-family:inherit;}
+.rbtn:hover{border-color:#1a6b5a;}.rbtn.active{border-color:#1a6b5a;background:#e8f4f0;color:#1a6b5a;}
+.cmt{display:flex;gap:10px;margin-bottom:14px;}
+.cmtav{width:32px;height:32px;border-radius:50%;background:#e8f4f0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#1a6b5a;flex-shrink:0;}
+.cmtb{flex:1;background:#f9fafb;border-radius:8px;padding:10px 12px;border:1px solid #f3f4f6;}
+.cmta{font-size:11px;font-weight:600;margin-bottom:3px;}.cmtt{font-size:13px;color:#374151;line-height:1.45;}
+.cinrow{display:flex;gap:8px;margin-top:14px;}
+.cin{flex:1;padding:10px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;font-family:inherit;outline:none;}
+.cin:focus{border-color:#1a6b5a;}
+.csend{background:#1a6b5a;color:white;border:none;padding:10px 16px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a6b5a;color:white;padding:12px 24px;border-radius:40px;font-size:14px;font-weight:500;z-index:9999;}
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="login-page" class="login-page">
-  <div class="login-card">
-    <div class="login-logo">Praxi<span>.</span></div>
-    <div class="login-sub">Acesse seu painel profissional</div>
-    <div class="type-toggle">
-      <button class="type-btn active" onclick="setType(this,'medico')">Medico</button>
-      <button class="type-btn" onclick="setType(this,'clinica')">Clinica</button>
-    </div>
-    <input class="login-inp" id="login-email" type="email" placeholder="E-mail">
-    <input class="login-inp" id="login-pass" type="password" placeholder="Senha">
-    <button class="login-btn" onclick="doLogin()">Entrar</button>
-    <div class="login-err" id="login-err"></div>
-    <div style="text-align:center;margin-top:16px;font-size:13px;color:#9ca3af;">
-      <a href="admin.html" style="color:#6b7280;text-decoration:none;">Acesso administrativo</a>
-    </div>
-  </div>
-</div>
-
-<!-- PAINEL MEDICO -->
-<div id="medico-page" class="hidden wrap">
+<div class="wrap">
   <div class="sidebar">
     <div class="sidebar-top">
       <div class="logo">Praxi<span>.</span></div>
       <div class="profile">
-        <div class="avatar" id="med-avatar">DR</div>
-        <div>
-          <div class="pname" id="med-name">Dr. Medico</div>
-          <div class="prole" id="med-spec">Clinico Geral</div>
-        </div>
+        <div class="av" id="med-av">DR</div>
+        <div><div class="pname" id="med-name">Dr. Medico</div><div class="prole" id="med-spec">Clinico Geral</div></div>
       </div>
     </div>
     <div class="nav">
-      <div class="nitem active" onclick="showMedPanel('agenda',this)"><span class="icon">&#128197;</span>Agenda</div>
-      <div class="nitem" onclick="showMedPanel('clientes',this)"><span class="icon">&#128101;</span>Clientes</div>
-      <div class="nitem" onclick="showMedPanel('stats',this)"><span class="icon">&#128202;</span>Estatisticas</div>
-      <div class="nitem" onclick="showMedPanel('discussoes',this)"><span class="icon">&#128172;</span>Discussoes</div>
+      <div class="ni active" onclick="showPanel('agenda',this)">&#128197; Agenda</div>
+      <div class="ni" onclick="showPanel('clientes',this)">&#128101; Clientes</div>
+      <div class="ni" onclick="showPanel('stats',this)">&#128202; Estatisticas</div>
+      <div class="ni" onclick="showPanel('discussoes',this)">&#128172; Discussoes</div>
     </div>
-    <div class="sfoot">
-      <div class="nitem" onclick="doLogout()"><span class="icon">&#8592;</span>Sair</div>
-    </div>
+    <div class="sfoot"><div class="ni" onclick="location.href='index.html'">&#8592; Sair</div></div>
   </div>
+
   <div class="main">
     <div class="topbar">
-      <div class="topbar-title" id="med-topbar-title">Agenda</div>
-      <div class="topbar-actions">
-        <button class="btn btn-primary" id="med-action-btn" onclick="medAction()">+ Nova consulta</button>
-      </div>
+      <div class="topbar-title" id="ttitle">Agenda</div>
+      <div id="taction"></div>
     </div>
     <div class="content">
 
       <!-- AGENDA -->
-      <div id="med-agenda" class="panel active">
-        <div class="agenda-controls">
-          <div class="month-nav">
+      <div id="p-agenda" class="panel active">
+        <div class="cal-controls">
+          <div class="mnav">
             <button onclick="prevMonth()">&#8249;</button>
-            <div class="month-label" id="month-label"></div>
+            <div class="mlabel" id="mlabel"></div>
             <button onclick="nextMonth()">&#8250;</button>
           </div>
-          <div class="view-tabs">
-            <button class="view-tab active" onclick="setView('mes',this)">Mes</button>
-            <button class="view-tab" onclick="setView('semana',this)">Semana</button>
+          <div class="vtabs">
+            <button class="vtab active" onclick="setView('mes',this)">Mes</button>
+            <button class="vtab" onclick="setView('semana',this)">Semana</button>
           </div>
         </div>
         <div id="view-mes">
           <div class="cal-wrap">
-            <div class="cal-days-header">
-              <div class="cal-day-lbl">Dom</div><div class="cal-day-lbl">Seg</div><div class="cal-day-lbl">Ter</div>
-              <div class="cal-day-lbl">Qua</div><div class="cal-day-lbl">Qui</div><div class="cal-day-lbl">Sex</div><div class="cal-day-lbl">Sab</div>
+            <div class="cal-hdr">
+              <div class="cal-dl">Dom</div><div class="cal-dl">Seg</div><div class="cal-dl">Ter</div>
+              <div class="cal-dl">Qua</div><div class="cal-dl">Qui</div><div class="cal-dl">Sex</div><div class="cal-dl">Sab</div>
             </div>
             <div class="cal-grid" id="cal-grid"></div>
           </div>
-          <div class="day-detail" id="day-detail">
-            <div class="day-detail-title" id="day-detail-title"></div>
-            <div id="day-timeline"></div>
-          </div>
-        </div>
-        <div id="view-semana" style="display:none;">
-          <div class="week-grid">
-            <div class="week-header">
-              <div></div>
-              <div id="week-cols"></div>
-            </div>
-            <div class="week-body" id="week-body"></div>
+          <div class="day-det" id="day-det">
+            <div style="font-size:15px;font-weight:700;margin-bottom:16px;" id="day-title"></div>
+            <div id="day-tl"></div>
           </div>
         </div>
       </div>
 
       <!-- CLIENTES -->
-      <div id="med-clientes" class="panel">
-        <div class="clients-search">
-          <div class="search-box">
-            <span class="search-icon">&#128269;</span>
-            <input class="search-inp" type="text" placeholder="Buscar paciente..." oninput="filterClients(this.value)">
-          </div>
-          <button class="btn btn-outline">Filtrar</button>
+      <div id="p-clientes" class="panel">
+        <div class="search-row">
+          <div class="sbox"><input type="text" placeholder="Buscar paciente..." oninput="filterC(this.value)"></div>
+          <button class="btn btn-o">Filtrar</button>
         </div>
-        <div class="clients-count" id="clients-count"></div>
-        <div class="cards-grid" id="clients-grid"></div>
+        <div class="ccount" id="ccount"></div>
+        <div id="cgrid"></div>
       </div>
 
       <!-- STATS -->
-      <div id="med-stats" class="panel">
-        <div class="period-tabs">
-          <button class="period-tab active" onclick="setPeriod('dia',this)">Hoje</button>
-          <button class="period-tab" onclick="setPeriod('semana',this)">Semana</button>
-          <button class="period-tab" onclick="setPeriod('mes',this)">Mes</button>
+      <div id="p-stats" class="panel">
+        <div class="ptabs">
+          <button class="ptab active" onclick="setPer('dia',this)">Hoje</button>
+          <button class="ptab" onclick="setPer('semana',this)">Semana</button>
+          <button class="ptab" onclick="setPer('mes',this)">Mes</button>
         </div>
-        <div class="stats-grid">
-          <div class="stat-card"><div class="stat-label">Pacientes</div><div class="stat-val" id="st-pacientes">0</div><div class="stat-change up" id="st-pac-change"></div></div>
-          <div class="stat-card"><div class="stat-label">Consultas</div><div class="stat-val" id="st-consultas">0</div><div class="stat-change up" id="st-con-change"></div></div>
-          <div class="stat-card"><div class="stat-label">Retornos</div><div class="stat-val" id="st-retornos">0</div></div>
-          <div class="stat-card"><div class="stat-label">Faltas</div><div class="stat-val" id="st-faltas">0</div><div class="stat-change down" id="st-fal-change"></div></div>
+        <div class="sgrid">
+          <div class="sc"><div class="slbl">Pacientes</div><div class="sval" id="st-pac">0</div></div>
+          <div class="sc"><div class="slbl">Consultas</div><div class="sval" id="st-con">0</div></div>
+          <div class="sc"><div class="slbl">Retornos</div><div class="sval" id="st-ret">0</div></div>
+          <div class="sc"><div class="slbl">Faltas</div><div class="sval" id="st-fal">0</div></div>
         </div>
-        <div class="chart-row">
-          <div class="chart-card"><div class="chart-title">Consultas por mes</div><div class="bar-chart" id="bar-chart-med"></div></div>
-          <div class="chart-card">
-            <div class="chart-title">Tipos de consulta</div>
-            <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
-              <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:13px;color:#6b7280;">Primeira consulta</span><span style="font-size:13px;font-weight:600;color:#1a6b5a;">45%</span></div>
-              <div style="height:6px;background:#f3f4f6;border-radius:3px;"><div style="height:100%;width:45%;background:#1a6b5a;border-radius:3px;"></div></div>
-              <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:13px;color:#6b7280;">Retorno</span><span style="font-size:13px;font-weight:600;color:#eab308;">30%</span></div>
-              <div style="height:6px;background:#f3f4f6;border-radius:3px;"><div style="height:100%;width:30%;background:#eab308;border-radius:3px;"></div></div>
-              <div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:13px;color:#6b7280;">Check-up</span><span style="font-size:13px;font-weight:600;color:#3b82f6;">25%</span></div>
-              <div style="height:6px;background:#f3f4f6;border-radius:3px;"><div style="height:100%;width:25%;background:#3b82f6;border-radius:3px;"></div></div>
-            </div>
-          </div>
-        </div>
+        <div class="cc"><div class="ct">Consultas por mes</div><div class="bch" id="bch"></div></div>
       </div>
 
       <!-- DISCUSSOES -->
-      <div id="med-discussoes" class="panel">
-        <div class="disc-header">
+      <div id="p-discussoes" class="panel">
+        <div class="dh">
           <h3 style="font-size:16px;font-weight:700;">Discussoes recentes</h3>
-          <button class="btn btn-primary" onclick="openNewDisc()">+ Nova discussao</button>
+          <button class="btn btn-g" onclick="openND()">+ Nova discussao</button>
         </div>
-        <div class="disc-layout">
-          <div>
-            <div class="disc-grid" id="disc-grid"></div>
-          </div>
-          <div>
-            <div class="ranking-card">
-              <div class="ranking-title">&#127942; Mais engajadas</div>
-              <div id="ranking-list"></div>
-            </div>
-          </div>
+        <div class="dlayout">
+          <div class="dgrid" id="dgrid"></div>
+          <div><div class="rcard"><div class="rtitle">&#127942; Mais engajadas</div><div id="rlist"></div></div></div>
         </div>
       </div>
 
@@ -394,747 +261,506 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f4f6f8;color:#1a1a1
   </div>
 </div>
 
-<!-- FICHA OVERLAY -->
-<div class="overlay" id="ficha-overlay" onclick="if(event.target===this)closeFicha()">
-  <div class="ficha-panel">
-    <div class="ficha-header">
+<!-- FICHA -->
+<div class="overlay" id="ficha-ov" onclick="if(event.target===this)closeFicha()">
+  <div class="fpanel">
+    <div class="fhead">
       <div style="display:flex;align-items:center;gap:14px;">
-        <div class="ficha-avatar" id="fo-av">M</div>
-        <div><div class="ficha-name" id="fo-name"></div><div class="ficha-sub" id="fo-sub"></div></div>
+        <div class="fav" id="fav">M</div>
+        <div><div class="fname" id="fname"></div><div class="fsub" id="fsub"></div></div>
       </div>
-      <button class="close-btn" onclick="closeFicha()">&#10005;</button>
+      <button class="xbtn" onclick="closeFicha()">&#10005;</button>
     </div>
-    <div class="ficha-sec"><div class="ficha-sec-title">Informacoes</div><div class="info-grid" id="fo-info"></div></div>
-    <div class="ficha-sec"><div class="ficha-sec-title">Historico de consultas</div><div id="fo-history"></div></div>
-    <div class="ficha-sec"><div class="ficha-sec-title">&#129504; Insights Praxi IA</div><div id="fo-insights"></div></div>
-    <div class="ficha-sec"><div class="ficha-sec-title">Documentos</div><div id="fo-docs"></div><button class="btn btn-outline" style="width:100%;margin-top:8px;" onclick="openUploadDoc()">+ Adicionar documento</button></div>
-  </div>
-</div>
-
-<!-- DISC DETAIL OVERLAY -->
-<div class="disc-overlay" id="disc-overlay" onclick="if(event.target===this)closeDisc()">
-  <div class="disc-panel">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:16px;"><button class="close-btn" onclick="closeDisc()">&#10005;</button></div>
-    <div class="disc-panel-specialty" id="dp-specialty"></div>
-    <div class="disc-panel-title" id="dp-title"></div>
-    <div class="disc-panel-author" id="dp-author"></div>
-    <div class="disc-panel-body" id="dp-body"></div>
-    <div class="reactions-row">
-      <button class="react-btn" onclick="toggleReact(this)">&#128142; <span id="r1">0</span></button>
-      <button class="react-btn" onclick="toggleReact(this)">&#128562; <span id="r2">0</span></button>
-      <button class="react-btn" onclick="toggleReact(this)">&#10084;&#65039; <span id="r3">0</span></button>
+    <div class="fsec"><div class="fsec-t">Informacoes</div><div class="igrid" id="finfo"></div></div>
+    <div class="fsec">
+      <div class="fsec-t">Historico de consultas</div>
+      <div id="fhistory"></div>
+      <div style="margin-top:12px;background:#f9fafb;border-radius:8px;padding:12px;border:1px solid #e5e7eb;">
+        <div style="font-size:11px;font-weight:600;color:#9ca3af;margin-bottom:8px;">REGISTRAR CONSULTA / CONTATO</div>
+        <input id="h-desc" placeholder="Titulo (ex: Retorno, Telefonema...)" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:13px;font-family:inherit;outline:none;margin-bottom:6px;">
+        <textarea id="h-notes" placeholder="Anotacoes..." style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:13px;font-family:inherit;min-height:60px;outline:none;resize:vertical;margin-bottom:6px;"></textarea>
+        <button onclick="saveHistory()" style="background:#1a6b5a;color:white;border:none;padding:8px 16px;border-radius:6px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500;">+ Registrar</button>
+      </div>
     </div>
-    <div class="comments-title">Comentarios</div>
-    <div id="dp-comments"></div>
-    <div class="comment-input-row">
-      <input class="comment-inp" id="comment-inp" placeholder="Adicionar comentario..." onkeydown="if(event.key==='Enter')sendComment()">
-      <button class="btn-send" onclick="sendComment()">Enviar</button>
+    <div class="fsec">
+      <div class="fsec-t">&#129504; Insights Praxi IA</div>
+      <div id="finsights"></div>
+    </div>
+    <div class="fsec">
+      <div class="fsec-t">Documentos</div>
+      <div id="fdocs"></div>
+      <button class="btn btn-o" style="width:100%;margin-top:8px;" onclick="openUpload()">+ Adicionar documento</button>
     </div>
   </div>
 </div>
 
-<!-- NEW DISC MODAL -->
-<div class="modal-overlay" id="new-disc-modal" onclick="if(event.target===this)closeNewDisc()">
+<!-- DISC OVERLAY -->
+<div class="dov" id="dov" onclick="if(event.target===this)closeDisc()">
+  <div class="dpanel">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:16px;"><button class="xbtn" onclick="closeDisc()">&#10005;</button></div>
+    <div class="dspec" id="dp-spec"></div>
+    <div style="font-size:22px;font-weight:700;margin-bottom:4px;" id="dp-title"></div>
+    <div style="font-size:13px;color:#9ca3af;margin-bottom:18px;" id="dp-author"></div>
+    <div style="font-size:14px;line-height:1.7;color:#374151;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid #f3f4f6;" id="dp-body"></div>
+    <div class="rbtns">
+      <button class="rbtn" onclick="react(this)">&#128142; <span id="r1">0</span></button>
+      <button class="rbtn" onclick="react(this)">&#128562; <span id="r2">0</span></button>
+      <button class="rbtn" onclick="react(this)">&#10084;&#65039; <span id="r3">0</span></button>
+    </div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:12px;">Comentarios</div>
+    <div id="dp-cmts"></div>
+    <div class="cinrow">
+      <input class="cin" id="cin" placeholder="Adicionar comentario..." onkeydown="if(event.key==='Enter')sendCmt()">
+      <button class="csend" onclick="sendCmt()">Enviar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOVA CONSULTA MODAL -->
+<div class="modal-ov" id="nc-modal" onclick="if(event.target===this)closeNC()">
   <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Nova Discussao</div>
-      <button class="close-btn" onclick="closeNewDisc()">&#10005;</button>
+    <div class="mhead"><div class="mtitle">Nova Consulta</div><button class="xbtn" onclick="closeNC()">&#10005;</button></div>
+    <div class="fg"><label class="fl">Paciente *</label><input class="fi" id="nc-pac" placeholder="Nome do paciente"></div>
+    <div class="g2">
+      <div class="fg"><label class="fl">Data *</label><input class="fi" id="nc-data" type="date"></div>
+      <div class="fg"><label class="fl">Horario *</label><input class="fi" id="nc-hora" type="time"></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Especialidade</label>
-      <select class="form-sel" id="disc-specialty">
-        <option>Cardiologia</option><option>Clinica Geral</option><option>Dermatologia</option>
-        <option>Neurologia</option><option>Pediatria</option><option>Ortopedia</option><option>Psiquiatria</option>
-      </select>
+    <div class="fg"><label class="fl">Tipo</label>
+      <select class="fs" id="nc-tipo"><option value="consulta">Consulta</option><option value="retorno">Retorno</option><option value="reuniao">Reuniao</option></select>
     </div>
-    <div class="form-group"><label class="form-label">Titulo</label><input class="form-inp" id="disc-title" placeholder="Titulo da discussao"></div>
-    <div class="form-group"><label class="form-label">Conteudo</label><textarea class="form-ta" id="disc-body" placeholder="Descreva o caso ou tema..."></textarea></div>
+    <div class="fg"><label class="fl">Observacoes</label><textarea class="fta" id="nc-obs" placeholder="Opcional..."></textarea></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button class="btn btn-outline" onclick="closeNewDisc()">Cancelar</button>
-      <button class="btn btn-primary" onclick="submitDisc()">Publicar</button>
+      <button class="btn btn-o" onclick="closeNC()">Cancelar</button>
+      <button class="btn btn-g" onclick="saveConsulta()">Agendar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOVO PACIENTE MODAL -->
+<div class="modal-ov" id="np-modal" onclick="if(event.target===this)closeNP()">
+  <div class="modal">
+    <div class="mhead"><div class="mtitle">Novo Paciente</div><button class="xbtn" onclick="closeNP()">&#10005;</button></div>
+    <div class="fg"><label class="fl">Nome completo *</label><input class="fi" id="np-nome" placeholder="Nome do paciente"></div>
+    <div class="g2">
+      <div class="fg"><label class="fl">Nascimento</label><input class="fi" id="np-nasc" placeholder="DD/MM/AAAA"></div>
+      <div class="fg"><label class="fl">Cidade</label><input class="fi" id="np-cidade" placeholder="Cidade"></div>
+    </div>
+    <div class="g2">
+      <div class="fg"><label class="fl">E-mail</label><input class="fi" id="np-email" type="email" placeholder="email@exemplo.com"></div>
+      <div class="fg"><label class="fl">Telefone</label><input class="fi" id="np-fone" placeholder="(11) 99999-9999"></div>
+    </div>
+    <div class="fg"><label class="fl">Medicamentos em uso</label><input class="fi" id="np-meds" placeholder="Ex: Losartana 50mg..."></div>
+    <div class="fg"><label class="fl">Motivo da consulta / Objetivo</label><textarea class="fta" id="np-obj" placeholder="Descreva o motivo..."></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-o" onclick="closeNP()">Cancelar</button>
+      <button class="btn btn-g" onclick="savePaciente()">Cadastrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOVA DISCUSSAO MODAL -->
+<div class="modal-ov" id="nd-modal" onclick="if(event.target===this)closeND()">
+  <div class="modal">
+    <div class="mhead"><div class="mtitle">Nova Discussao</div><button class="xbtn" onclick="closeND()">&#10005;</button></div>
+    <div class="fg"><label class="fl">Especialidade</label>
+      <select class="fs" id="nd-spec"><option>Cardiologia</option><option>Clinica Geral</option><option>Dermatologia</option><option>Neurologia</option><option>Pediatria</option><option>Ortopedia</option><option>Psiquiatria</option></select>
+    </div>
+    <div class="fg"><label class="fl">Titulo</label><input class="fi" id="nd-title" placeholder="Titulo da discussao"></div>
+    <div class="fg"><label class="fl">Conteudo</label><textarea class="fta" id="nd-body" placeholder="Descreva o caso ou tema..."></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-o" onclick="closeND()">Cancelar</button>
+      <button class="btn btn-g" onclick="submitDisc()">Publicar</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="modal-ov" id="up-modal" onclick="if(event.target===this)closeUpload()">
+  <div class="modal" style="max-width:400px;">
+    <div class="mhead"><div class="mtitle">Adicionar Documento</div><button class="xbtn" onclick="closeUpload()">&#10005;</button></div>
+    <div style="border:2px dashed #e5e7eb;border-radius:10px;padding:32px;text-align:center;cursor:pointer;" onclick="document.getElementById('finput').click()">
+      <div style="font-size:32px;margin-bottom:8px;">&#128196;</div>
+      <div style="font-size:14px;font-weight:500;">Clique para selecionar</div>
+      <div style="font-size:12px;color:#9ca3af;margin-top:4px;">PDF, JPG, PNG</div>
+      <input type="file" id="finput" style="display:none;" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFile(this)">
+    </div>
+    <div id="fstatus" style="font-size:13px;color:#1a6b5a;text-align:center;margin-top:10px;"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+      <button class="btn btn-g" onclick="closeUpload()">Concluir</button>
     </div>
   </div>
 </div>
 
 <script>
 var API = 'https://praxi-bot-production.up.railway.app';
-var token = null;
-var loginType = 'medico';
-var calYear = new Date().getFullYear();
-var calMonth = new Date().getMonth() + 1;
-var currentView = 'mes';
-var allClients = [];
-var allDiscussions = [];
+var calY = new Date().getFullYear();
+var calM = new Date().getMonth() + 1;
+var EVS = {};
+var CLIENTS = [];
+var currentFicha = -1;
 
-// ===== MOCK DATA =====
-var CLIENTS_DATA = [
-  {id:'p001',init:'A',name:'Ana Lima',age:34,city:'Sao Paulo',email:'ana@email.com',phone:'(11)99001-0001',born:'15/04/1991',meds:'Sertralina 50mg',summary:'1a consulta. Enxaqueca e insonia.',next:'20/05/2026',status:'agendado',history:[{date:'08/05/2026',desc:'1a consulta',notes:'Queixa de enxaqueca cronica e insonia. Pedido exames.'}],docs:['Hemograma.pdf']},
-  {id:'p002',init:'C',name:'Carlos Mendes',age:47,city:'Guarulhos',email:'cmendes@email.com',phone:'(11)97002-0002',born:'03/08/1978',meds:'Losartana 50mg',summary:'Retorno. Hipertensao controlada.',next:'--',status:'retorno',history:[{date:'01/04/2026',desc:'1a consulta',notes:'Hipertensao diagnosticada.'},{date:'15/05/2026',desc:'Retorno',notes:'Pressao controlada. Manter medicacao.'}],docs:[]},
-  {id:'p003',init:'B',name:'Beatriz Santos',age:29,city:'Osasco',email:'bea@email.com',phone:'(11)96003-0003',born:'22/12/1996',meds:'Nenhum',summary:'Check-up anual. Saudavel.',next:'15/06/2026',status:'agendado',history:[{date:'15/05/2026',desc:'Check-up',notes:'Paciente saudavel. Exames dentro do normal.'}],docs:['Exame_colesterol.pdf']},
-  {id:'p004',init:'R',name:'Rafael Pereira',age:52,city:'Sao Paulo',email:'rafaelp@email.com',phone:'(11)95004-0004',born:'07/07/1973',meds:'Ibuprofeno SOS',summary:'1a consulta. Dores lombares.',next:'18/05/2026',status:'agendado',history:[{date:'10/05/2026',desc:'1a consulta',notes:'Lombalgia cronica. Solicitado RX.'}],docs:['RX_lombar.pdf']},
-  {id:'p005',init:'L',name:'Luciana Borges',age:38,city:'Sao Paulo',email:'lucianab@email.com',phone:'(11)93006-0006',born:'11/09/1987',meds:'Fluoxetina 20mg',summary:'Ansiedade. Encaminhamento psicologo.',next:'22/05/2026',status:'novo',history:[{date:'20/05/2026',desc:'1a consulta',notes:'Ansiedade generalizada. Encaminhada para psicologia.'}],docs:[]},
+var DISCS = [
+  {id:1,spec:'Cardiologia',title:'FA e AVC em pacientes jovens',author:'Dr. Marcos Oliveira',body:'Estudo aponta aumento de 40% nos casos de FA em menores de 45 anos.',reactions:{g:18,s:6,h:12},cmts:['Observo isso tambem na pratica.']},
+  {id:2,spec:'Clinica Geral',title:'Metformina em pre-diabeticos',author:'Dra. Fernanda Costa',body:'Guidelines ADA 2024 revisam criterios para inicio de metformina.',reactions:{g:24,s:3,h:19},cmts:[]},
+  {id:3,spec:'Dermatologia',title:'Dermatite atopica refrataria',author:'Dr. Paulo Mendes',body:'Resultados com dupilumabe em 8 semanas de tratamento.',reactions:{g:31,s:9,h:22},cmts:['Excelentes resultados aqui tambem.']},
+  {id:4,spec:'Neurologia',title:'Sono e progressao do Parkinson',author:'Dra. Amanda Rocha',body:'USP conecta sono REM a biomarcadores da doenca.',reactions:{g:15,s:11,h:8},cmts:[]},
+  {id:5,spec:'Psiquiatria',title:'Ketamina para depressao resistente',author:'Dr. Felipe Gomes',body:'Dados preliminares promissores apos 6 meses.',reactions:{g:9,s:14,h:7},cmts:[]},
+  {id:6,spec:'Pediatria',title:'Bronquiolite em lactentes',author:'Dra. Camila Ramos',body:'AAP 2024 derruba uso rotineiro de beta-agonistas.',reactions:{g:21,s:5,h:16},cmts:[]},
 ];
 
-var DISC_DATA = [
-  {id:1,specialty:'Cardiologia',title:'Correlacao entre FA e AVC em pacientes jovens',author:'Dr. Marcos Oliveira',body:'Estudo recente aponta aumento de 40% nos casos de FA em menores de 45 anos. Alguem tem observado isso na pratica clinica?',reactions:{gem:18,shock:6,heart:12},comments:['Excelente ponto, venho observando isso tambem.','Vejo cada vez mais casos assim no meu consultorio.']},
-  {id:2,specialty:'Clinica Geral',title:'Uso de metformina em pre-diabeticos',author:'Dra. Fernanda Costa',body:'Guidelines do ADA 2024 revisam criterios para inicio de metformina em pre-diabeticos. Experiencias de voces?',reactions:{gem:24,shock:3,heart:19},comments:[]},
-  {id:3,specialty:'Dermatologia',title:'Protocolo para dermatite atopica refrataria',author:'Dr. Paulo Mendes',body:'Compartilhando serie de casos com dupilumabe. Resultados excelentes em 8 semanas de tratamento.',reactions:{gem:31,shock:9,heart:22},comments:['Tenho usado com otimos resultados tambem.']},
-  {id:4,specialty:'Neurologia',title:'Impacto do sono na progressao do Parkinson',author:'Dra. Amanda Rocha',body:'Pesquisa da USP conecta qualidade do sono REM a biomarcadores de progressao da doenca.',reactions:{gem:15,shock:11,heart:8},comments:[]},
-  {id:5,specialty:'Psiquiatria',title:'Ketamina intranasal para depressao resistente',author:'Dr. Felipe Gomes',body:'Apos 6 meses com pacientes refratarios, compartilhando dados preliminares muito promissores.',reactions:{gem:9,shock:14,heart:7},comments:[]},
-  {id:6,specialty:'Pediatria',title:'Manejo de bronquiolite em lactentes',author:'Dra. Camila Ramos',body:'Diretrizes AAP 2024 derrubam uso rotineiro de beta-agonistas. Como voces estao manejando?',reactions:{gem:21,shock:5,heart:16},comments:[]},
-];
-
-var AGENDA_EVENTS = {};
-
-function initAgendaEvents() {
-  const y = calYear;
-  const m = calMonth;
-  AGENDA_EVENTS[`${y}-${m}-8`] = [{label:'Ana Lima',tipo:'consulta',hora:'09:00'},{label:'Carlos M.',tipo:'retorno',hora:'11:00'}];
-  AGENDA_EVENTS[`${y}-${m}-15`] = [{label:'Beatriz S.',tipo:'consulta',hora:'14:00'}];
-  AGENDA_EVENTS[`${y}-${m}-19`] = [{label:'Rafael P.',tipo:'consulta',hora:'09:00'},{label:'Reuniao equipe',tipo:'reuniao',hora:'15:00'}];
-  AGENDA_EVENTS[`${y}-${m}-22`] = [{label:'Luciana B.',tipo:'consulta',hora:'10:00'}];
-}
-
-// ===== AUTH =====
-function setType(btn, type) {
-  loginType = type;
-  btn.parentElement.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass = document.getElementById('login-pass').value.trim();
-  const err = document.getElementById('login-err');
-  err.textContent = '';
-  if (!email || !pass) { err.textContent = 'Preencha e-mail e senha.'; return; }
-  try {
-    const res = await fetch(API + '/api/auth/login', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({email, password: pass})
-    });
-    const data = await res.json();
-    if (data.token) {
-      token = data.token;
-      const user = data.client || {};
-      document.getElementById('login-page').classList.add('hidden');
-      if (loginType === 'clinica' || user.type === 'clinic') {
-        window.location.href = 'clinica.html?token=' + token;
-      } else {
-        document.getElementById('medico-page').classList.remove('hidden');
-        if (user.name) document.getElementById('med-name').textContent = user.name;
-        if (user.specialty) document.getElementById('med-spec').textContent = user.specialty;
-        if (user.name) document.getElementById('med-avatar').textContent = user.name.charAt(0).toUpperCase();
-        initMedico();
-      }
-    } else {
-      err.textContent = data.error || 'Credenciais invalidas.';
-    }
-  } catch(e) { err.textContent = 'Erro de conexao.'; }
-}
-
-function doLogout() {
-  token = null;
-  document.getElementById('medico-page').classList.add('hidden');
-  document.getElementById('login-page').classList.remove('hidden');
-}
-
-// ===== INIT =====
-function initMedico() {
-  allDiscussions = DISC_DATA.slice();
-  // NAO inicializa agenda demo - começa vazia
-  renderCalendar();
-  renderClients([]);
-  renderBarChartEmpty();
-  renderDiscussions();
-  loadAgendaFromAPI();
-  loadClientsFromAPI();
-}
-
-function renderBarChartEmpty() {
-  var chart = document.getElementById('bar-chart-med');
-  if (!chart) return;
-  chart.innerHTML = '<div style="width:100%;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:13px;">Nenhum dado ainda</div>';
-}
-
-function zeroDemoStats() {
-  var ids = ['st-pacientes','st-consultas','st-retornos','st-faltas'];
-  ids.forEach(function(id) {
-    var el = document.getElementById(id);
-    if (el) el.textContent = '0';
-  });
-}
-
-// ===== PANELS =====
-const PANEL_TITLES = {agenda:'Agenda',clientes:'Clientes',stats:'Estatisticas',discussoes:'Discussoes'};
-const PANEL_ACTIONS = {agenda:'+ Nova consulta',clientes:'+ Novo paciente',stats:'',discussoes:'+ Nova discussao'};
-
-function showMedPanel(id, el) {
-  document.querySelectorAll('#medico-page .panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('#medico-page .nitem').forEach(n => n.classList.remove('active'));
-  document.getElementById('med-' + id).classList.add('active');
-  if (el) el.classList.add('active');
-  document.getElementById('med-topbar-title').textContent = PANEL_TITLES[id] || id;
-  document.getElementById('med-action-btn').textContent = PANEL_ACTIONS[id] || '';
-  document.getElementById('med-action-btn').style.display = PANEL_ACTIONS[id] ? '' : 'none';
-}
-
-function medAction() {
-  const active = document.querySelector('#medico-page .panel.active');
-  if (!active) return;
-  if (active.id === 'med-discussoes') openNewDisc();
-  else if (active.id === 'med-agenda') openNovaConsulta();
-  else if (active.id === 'med-clientes') openNovoPaciente();
-}
-
-// ===== AGENDA =====
-async function loadAgendaFromAPI() {
-  try {
-    const headers = token ? {'Authorization':'Bearer ' + token} : {};
-    const res = await fetch(API + '/api/agenda', { headers });
-    const data = await res.json();
-    const agenda = data.agenda || [];
-    agenda.forEach(function(item) {
-      const dateStr = item.dataHora || item.appointment;
-      if (!dateStr) return;
-      var d, hora;
-      if (dateStr.indexOf('T') >= 0) {
-        // ISO completo: 2026-05-22T14:00:00.000Z
-        d = new Date(dateStr);
-        hora = item.appointmentTime || d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      } else {
-        // Data simples: 2026-05-15
-        const parts = dateStr.split('-');
-        if (parts.length === 3) {
-          d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-        } else return;
-        hora = item.appointmentTime || '09:00';
-      }
-      if (!d || isNaN(d.getTime())) return;
-      const key = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
-      if (!AGENDA_EVENTS[key]) AGENDA_EVENTS[key] = [];
-      const label = item.pacienteNome || item.name || 'Consulta';
-      const jaExiste = AGENDA_EVENTS[key].some(function(e){ return e.label === label && e.hora === hora; });
-      if (!jaExiste) AGENDA_EVENTS[key].push({label, tipo: item.tipo || 'consulta', hora});
-    });
-    renderCalendar();
-  } catch(e) { console.log('Erro agenda:', e.message); }
-}
-
-function renderCalendar() {
-  const months = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const lbl = document.getElementById('month-label');
-  if (lbl) lbl.textContent = months[calMonth-1] + ' ' + calYear;
-  const grid = document.getElementById('cal-grid');
-  if (!grid) return;
-  const firstDay = new Date(calYear, calMonth-1, 1).getDay();
-  const daysInMonth = new Date(calYear, calMonth, 0).getDate();
-  const prevDays = new Date(calYear, calMonth-1, 0).getDate();
-  const today = new Date();
-  let html = '';
-  for (let i = firstDay-1; i >= 0; i--) {
-    html += '<div class="cal-cell other"><div class="cal-num">' + (prevDays-i) + '</div></div>';
-  }
-  for (let d = 1; d <= daysInMonth; d++) {
-    const isToday = d === today.getDate() && calMonth === today.getMonth()+1 && calYear === today.getFullYear();
-    const key = `${calYear}-${calMonth}-${d}`;
-    const evs = AGENDA_EVENTS[key] || [];
-    const evHtml = evs.slice(0,2).map(e => `<div class="cal-event ev-${e.tipo}">${e.hora} ${e.label}</div>`).join('') + (evs.length > 2 ? `<div class="cal-event" style="background:#f3f4f6;color:#6b7280;">+${evs.length-2} mais</div>` : '');
-    html += `<div class="cal-cell${isToday?' today':''}" onclick="showDay(${d},'${key}')"><div class="cal-num">${d}</div>${evHtml}</div>`;
-  }
-  let rem = 42 - firstDay - daysInMonth;
-  if (rem < 0) rem += 7;
-  for (let j = 1; j <= rem; j++) html += '<div class="cal-cell other"><div class="cal-num">' + j + '</div></div>';
-  grid.innerHTML = html;
-}
-
-function showDay(d, key) {
-  const dd = document.getElementById('day-detail');
-  dd.classList.add('show');
-  const months = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  document.getElementById('day-detail-title').textContent = d + ' de ' + months[calMonth-1] + ' de ' + calYear;
-  const evs = AGENDA_EVENTS[key] || [];
-  const tl = document.getElementById('day-timeline');
-  if (!evs.length) { tl.innerHTML = '<p style="color:#9ca3af;font-size:13px;">Nenhum compromisso neste dia.</p>'; return; }
-  tl.innerHTML = evs.map(e => `<div class="tl-item"><div class="tl-time">${e.hora}</div><div class="tl-line"></div><div class="tl-card"><h4>${e.label}</h4><p>${e.tipo.charAt(0).toUpperCase()+e.tipo.slice(1)}</p></div></div>`).join('');
-}
-
-function prevMonth() { calMonth--; if (calMonth < 1) { calMonth = 12; calYear--; } renderCalendar(); }
-function nextMonth() { calMonth++; if (calMonth > 12) { calMonth = 1; calYear++; } renderCalendar(); }
-
-function setView(view, btn) {
-  currentView = view;
-  btn.parentElement.querySelectorAll('.view-tab').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('view-mes').style.display = view === 'mes' ? '' : 'none';
-  document.getElementById('view-semana').style.display = view === 'semana' ? '' : 'none';
-  if (view === 'semana') renderWeek();
-}
-
-function renderWeek() {
-  const today = new Date();
-  const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay());
-  const days = ['Dom','Seg','Ter','Qua','Qui','Sex','Sab'];
-  let colsHtml = '';
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(startOfWeek); d.setDate(startOfWeek.getDate() + i);
-    const isToday = d.toDateString() === today.toDateString();
-    const num = d.getDate();
-    colsHtml += `<div class="week-day-col"><div class="week-day-name">${days[i]}</div><div class="week-day-num${isToday?' today':''}">${num}</div></div>`;
-  }
-  document.getElementById('week-cols').style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);grid-column:2;';
-  document.getElementById('week-cols').innerHTML = colsHtml;
-  const hours = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
-  let bodyHtml = '';
-  hours.forEach(h => {
-    bodyHtml += `<div class="week-time">${h}</div>`;
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(startOfWeek); d.setDate(startOfWeek.getDate() + i);
-      const key = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
-      const evs = (AGENDA_EVENTS[key] || []).filter(e => e.hora === h);
-      bodyHtml += `<div class="week-slot">${evs.map(e=>`<div class="week-event">${e.label}</div>`).join('')}</div>`;
-    }
-  });
-  document.getElementById('week-body').style.cssText = 'display:grid;grid-template-columns:60px repeat(7,1fr);max-height:500px;overflow-y:auto;';
-  document.getElementById('week-body').innerHTML = bodyHtml;
-}
-
-// ===== CLIENTS =====
-function renderClients(clients) {
-  const grid = document.getElementById('clients-grid');
-  const count = document.getElementById('clients-count');
-  if (count) count.innerHTML = '<strong>' + clients.length + '</strong> pacientes cadastrados';
-  if (!grid) return;
-  if (!clients.length) { grid.innerHTML = '<div style="text-align:center;padding:40px;color:#9ca3af;">Nenhum paciente encontrado.</div>'; return; }
-  grid.innerHTML = clients.map((c, idx) => {
-    const bclass = c.status === 'agendado' ? 'badge-agendado' : c.status === 'retorno' ? 'badge-retorno' : 'badge-novo';
-    const blabel = c.status === 'agendado' ? 'Agendado' : c.status === 'retorno' ? 'Retorno' : 'Novo';
-    return `<div class="client-card">
-      <div class="cc-avatar" onclick="openFicha(${idx})" style="cursor:pointer;">${c.init}</div>
-      <div onclick="openFicha(${idx})" style="cursor:pointer;"><div class="cc-name">${c.name}</div><div class="cc-info">${c.age} anos &middot; ${c.city}</div></div>
-      <div class="cc-summary" onclick="openFicha(${idx})" style="cursor:pointer;">${c.summary}</div>
-      <div class="cc-next" onclick="openFicha(${idx})" style="cursor:pointer;"><strong>Proxima consulta</strong><span>${c.next}</span></div>
-      <span class="cc-badge ${bclass}">${blabel}</span>
-      <button onclick="deletarPaciente('${c.id}',${idx})" style="background:#fee2e2;color:#ef4444;border:none;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer;font-family:inherit;">Excluir</button>
-    </div>`;
-  }).join('');
-}
-
-function filterClients(q) {
-  const filtered = CLIENTS_DATA.filter(c => c.name.toLowerCase().includes(q.toLowerCase()) || c.summary.toLowerCase().includes(q.toLowerCase()));
-  renderClients(filtered);
-}
-
-async function deletarPaciente(id, idx) {
-  if (!confirm('Excluir este paciente?')) return;
-  try {
-    const pid = id && id !== 'undefined' ? id : null;
-    if (pid) {
-      const res = await fetch(API + '/api/patients/' + pid, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.error) { showToast('Erro ao excluir.'); return; }
-    }
-    CLIENTS_DATA.splice(idx, 1);
-    renderClients(CLIENTS_DATA);
-    showToast('Paciente excluido.');
-  } catch(e) { showToast('Erro ao excluir.'); }
-}
-
-var currentFichaIdx = -1;
-
-function openFicha(idx) {
-  currentFichaIdx = idx;
-  const c = CLIENTS_DATA[idx];
-  if (!c) return;
-  document.getElementById('fo-av').textContent = c.init;
-  document.getElementById('fo-name').textContent = c.name;
-  document.getElementById('fo-sub').textContent = c.age + ' anos &middot; ' + c.city;
-  document.getElementById('fo-info').innerHTML = `
-    <div class="info-item"><label>Nascimento</label><span>${c.born}</span></div>
-    <div class="info-item"><label>E-mail</label><span>${c.email}</span></div>
-    <div class="info-item"><label>Telefone</label><span>${c.phone}</span></div>
-    <div class="info-item"><label>Medicamentos</label><span>${c.meds}</span></div>`;
-  renderFichaHistory(idx);
-  document.getElementById('fo-insights').innerHTML = `
-    <div class="ai-card">
-      <div class="ai-label">&#10024; Insight Praxi IA</div>
-      <div class="ai-text">Com base no historico de ${c.name}, recomenda-se acompanhamento continuo e revisao dos medicamentos em uso. Evidencias recentes sugerem monitoramento trimestral para casos similares.</div>
-      <div class="ai-source">&#128218; Fonte: literatura clinica 2024 &middot; Google Academico</div>
-    </div>`;
-  document.getElementById('fo-docs').innerHTML = c.docs.length ? c.docs.map(d => `
-    <div class="doc-item"><div class="doc-icon">&#128196;</div><div><div class="doc-name">${d}</div><div class="doc-date">Enviado via WhatsApp</div></div></div>`).join('') : '<p style="color:#9ca3af;font-size:13px;">Nenhum documento anexado.</p>';
-  document.getElementById('ficha-overlay').classList.add('show');
-}
-
-function renderFichaHistory(idx) {
-  const c = CLIENTS_DATA[idx];
-  if (!c) return;
-  const histHtml = (c.history||[]).map(h => `
-    <div class="history-item">
-      <div class="history-date">${h.date} ${h.tipo ? '&middot; '+h.tipo : ''}</div>
-      <div class="history-desc">${h.desc}</div>
-      <div class="history-notes">${h.notes}</div>
-    </div>`).join('');
-  document.getElementById('fo-history').innerHTML = histHtml + `
-    <div style="margin-top:12px;background:#f9fafb;border-radius:8px;padding:12px;border:1px solid #e5e7eb;">
-      <div style="font-size:11px;font-weight:600;color:#9ca3af;margin-bottom:8px;">REGISTRAR CONSULTA / CONTATO</div>
-      <input id="novo-hist-desc" placeholder="Titulo (ex: Retorno, Telefonema...)" style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:13px;font-family:inherit;outline:none;margin-bottom:6px;">
-      <textarea id="novo-hist-notes" placeholder="Anotacoes da consulta ou contato..." style="width:100%;padding:8px 10px;border:1.5px solid #e5e7eb;border-radius:6px;font-size:13px;font-family:inherit;min-height:60px;outline:none;resize:vertical;margin-bottom:6px;"></textarea>
-      <button onclick="registrarHistorico()" style="background:#1a6b5a;color:white;border:none;padding:8px 16px;border-radius:6px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:500;">+ Registrar</button>
-    </div>`;
-}
-
-async function registrarHistorico() {
-  const idx = currentFichaIdx;
-  if (idx < 0) return;
-  const desc = document.getElementById('novo-hist-desc').value.trim();
-  const notes = document.getElementById('novo-hist-notes').value.trim();
-  if (!desc && !notes) { alert('Preencha pelo menos um campo.'); return; }
-  const c = CLIENTS_DATA[idx];
-  const entry = {
-    date: new Date().toLocaleDateString('pt-BR'),
-    desc: desc || 'Registro',
-    notes: notes || ''
-  };
-  // Salva no backend
-  if (c.id && c.id !== 'undefined') {
-    try {
-      await fetch(API + '/api/patients/' + c.id + '/history', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify(entry)
-      });
-    } catch(e) { console.log('Erro ao salvar historico:', e.message); }
-  }
-  if (!c.history) c.history = [];
-  c.history.unshift(entry);
-  renderFichaHistory(idx);
-  showToast('Registro adicionado!');
-}
-
-function closeFicha() { document.getElementById('ficha-overlay').classList.remove('show'); }
-
-// ===== STATS =====
-function renderBarChart() {
-  const chart = document.getElementById('bar-chart-med');
-  if (!chart) return;
-  const vals = [8,12,9,15,11,14,18,13,16,20,17,22];
-  const labels = ['Jun','Jul','Ago','Set','Out','Nov','Dez','Jan','Fev','Mar','Abr','Mai'];
-  const max = Math.max(...vals);
-  chart.innerHTML = vals.map((v,i) => `<div class="bar-col"><div class="bar${i===vals.length-1?' accent':''}" style="height:${Math.round((v/max)*120)}px"></div><div class="bar-lbl">${labels[i]}</div></div>`).join('');
-}
-
-function setPeriod(p, btn) {
-  if (btn && btn.parentElement) {
-    btn.parentElement.querySelectorAll('.period-tab').forEach(function(t) { t.classList.remove('active'); });
-    btn.classList.add('active');
-  }
-  // Stats zeradas por padrão - serão populadas com dados reais
-  var el;
-  el = document.getElementById('st-pacientes'); if(el) el.textContent = '0';
-  el = document.getElementById('st-consultas'); if(el) el.textContent = '0';
-  el = document.getElementById('st-retornos'); if(el) el.textContent = '0';
-  el = document.getElementById('st-faltas'); if(el) el.textContent = '0';
-}
-
-// ===== DISCUSSIONS =====
-function renderDiscussions() {
-  const grid = document.getElementById('disc-grid');
-  if (grid) grid.innerHTML = allDiscussions.map(d => `
-    <div class="disc-card" onclick="openDisc(${d.id})">
-      <div class="disc-specialty">${d.specialty}</div>
-      <div class="disc-title">${d.title}</div>
-      <div class="disc-excerpt">${d.body.substring(0,100)}...</div>
-      <div class="disc-footer">
-        <span class="disc-author">${d.author}</span>
-        <div class="disc-reactions">
-          <span class="reaction">&#128142;${d.reactions.gem}</span>
-          <span class="reaction">&#128562;${d.reactions.shock}</span>
-          <span class="reaction">&#10084;${d.reactions.heart}</span>
-        </div>
-      </div>
-    </div>`).join('');
-  const ranking = document.getElementById('ranking-list');
-  if (ranking) {
-    const sorted = [...allDiscussions].sort((a,b) => (b.reactions.gem+b.reactions.heart)-(a.reactions.gem+a.reactions.heart)).slice(0,5);
-    ranking.innerHTML = sorted.map((d,i) => `
-      <div class="rank-item">
-        <div class="rank-num">0${i+1}</div>
-        <div class="rank-info"><div class="rank-t">${d.title}</div><div class="rank-s">${d.specialty}</div></div>
-        <div class="rank-score">&#128142;${d.reactions.gem+d.reactions.heart}</div>
-      </div>`).join('');
-  }
-}
-
-function openDisc(id) {
-  const d = allDiscussions.find(x => x.id === id);
-  if (!d) return;
-  document.getElementById('dp-specialty').textContent = d.specialty;
-  document.getElementById('dp-title').textContent = d.title;
-  document.getElementById('dp-author').textContent = d.author;
-  document.getElementById('dp-body').textContent = d.body;
-  document.getElementById('r1').textContent = d.reactions.gem;
-  document.getElementById('r2').textContent = d.reactions.shock;
-  document.getElementById('r3').textContent = d.reactions.heart;
-  document.getElementById('dp-comments').innerHTML = d.comments.map(c => `
-    <div class="comment">
-      <div class="comment-av">M</div>
-      <div class="comment-body"><div class="comment-author">Medico</div><div class="comment-text">${c}</div></div>
-    </div>`).join('');
-  document.getElementById('disc-overlay').classList.add('show');
-}
-
-function closeDisc() { document.getElementById('disc-overlay').classList.remove('show'); }
-
-function toggleReact(btn) {
-  btn.classList.toggle('active');
-  const span = btn.querySelector('span');
-  span.textContent = parseInt(span.textContent) + (btn.classList.contains('active') ? 1 : -1);
-}
-
-function sendComment() {
-  const inp = document.getElementById('comment-inp');
-  if (!inp.value.trim()) return;
-  const comments = document.getElementById('dp-comments');
-  comments.innerHTML += `<div class="comment"><div class="comment-av" style="background:#dbeafe;color:#1d4ed8;">VC</div><div class="comment-body"><div class="comment-author">Voce</div><div class="comment-text">${inp.value}</div></div></div>`;
-  inp.value = '';
-}
-
-function openNewDisc() { document.getElementById('new-disc-modal').classList.add('show'); }
-function closeNewDisc() { document.getElementById('new-disc-modal').classList.remove('show'); }
-
-function submitDisc() {
-  const specialty = document.getElementById('disc-specialty').value;
-  const title = document.getElementById('disc-title').value.trim();
-  const body = document.getElementById('disc-body').value.trim();
-  if (!title || !body) { alert('Preencha titulo e conteudo.'); return; }
-  const newDisc = {id: allDiscussions.length+1, specialty, title, author:'Voce', body, reactions:{gem:0,shock:0,heart:0}, comments:[]};
-  allDiscussions.unshift(newDisc);
-  closeNewDisc();
-  renderDiscussions();
-  document.getElementById('disc-title').value = '';
-  document.getElementById('disc-body').value = '';
-}
-
-async function loadClientsFromAPI() {
-  try {
-    const headers = token ? {'Authorization': 'Bearer ' + token} : {};
-    const res = await fetch(API + '/api/patients', { headers });
-    const data = await res.json();
-    const patients = data.patients || [];
-    const mapped = patients.map(function(p) {
-      return {
-        id: p.id || p._id,
-        init: (p.name||'P').charAt(0).toUpperCase(),
-        name: p.name || '-',
-        age: p.dob ? calcAge(p.dob) : '-',
-        city: p.city || '-',
-        email: p.email || '-',
-        phone: p.phone || '-',
-        born: p.dob || '-',
-        meds: p.medications || 'Nenhum',
-        summary: p.objetivo || 'Cadastrado via WhatsApp',
-        next: p.appointmentLabel || (p.appointment ? p.appointment : '--'),
-        status: p.appointment ? 'agendado' : 'novo',
-        history: [{date: p.registeredAt ? new Date(p.registeredAt).toLocaleDateString('pt-BR') : '-', desc: 'Cadastro via WhatsApp', notes: p.objetivo || '-'}],
-        docs: p.exames && p.exames.length ? ['Exame enviado via WhatsApp'] : []
-      };
-    });
-    CLIENTS_DATA.length = 0;
-    mapped.forEach(function(c) { CLIENTS_DATA.push(c); });
-    renderClients(CLIENTS_DATA);
-    var el = document.getElementById('st-pacientes');
-    if (el) el.textContent = patients.length;
-  } catch(e) { console.log('Erro ao carregar pacientes:', e.message); }
-}
-
-function calcAge(dob) {
-  if (!dob) return '-';
-  var parts = dob.split('/');
-  var birth;
-  if (parts.length === 3) {
-    birth = new Date(parts[2], parts[1]-1, parts[0]);
-  } else {
-    birth = new Date(dob);
-  }
-  var today = new Date();
-  var age = today.getFullYear() - birth.getFullYear();
-  var m = today.getMonth() - birth.getMonth();
-  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-  return isNaN(age) ? '-' : age;
-}
-
-function openNovoPaciente() {
-  document.getElementById('novo-paciente-modal').classList.add('show');
-}
-function closeNovoPaciente() {
-  document.getElementById('novo-paciente-modal').classList.remove('show');
-}
-async function salvarNovoPaciente() {
-  const nome = document.getElementById('np-nome').value.trim();
-  const nasc = document.getElementById('np-nasc').value.trim();
-  const cidade = document.getElementById('np-cidade').value.trim();
-  const email = document.getElementById('np-email').value.trim();
-  const phone = document.getElementById('np-phone').value.trim();
-  const meds = document.getElementById('np-meds').value.trim();
-  const objetivo = document.getElementById('np-objetivo').value.trim();
-  if (!nome) { alert('Nome obrigatorio.'); return; }
-  try {
-    const res = await fetch(API + '/api/patients', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({name:nome, dob:nasc, city:cidade, email, phone, medications:meds, objetivo, source:'manual'})
-    });
-    const data = await res.json();
-    if (data.error) { alert('Erro: ' + data.error); return; }
-  } catch(e) { console.log('Erro ao salvar paciente:', e.message); }
-  closeNovoPaciente();
-  showToast('Paciente cadastrado!');
-  ['np-nome','np-nasc','np-cidade','np-email','np-phone','np-meds','np-objetivo'].forEach(function(id){
-    var el = document.getElementById(id); if(el) el.value='';
-  });
-  loadClientsFromAPI();
-}
-
-function openNovaConsulta() {
-  document.getElementById('nova-consulta-modal').classList.add('show');
-}
-
-function closeNovaConsulta() {
-  document.getElementById('nova-consulta-modal').classList.remove('show');
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-  setPeriod('mes', document.querySelector('.period-tab') || {parentElement:{querySelectorAll:function(){return[];}}});
-  // Abre painel direto sem login
-  document.getElementById('login-page').classList.add('hidden');
-  document.getElementById('medico-page').classList.remove('hidden');
-  initMedico();
-});
-</script>
-<!-- NOVO PACIENTE MODAL -->
-<div class="modal-overlay" id="novo-paciente-modal" onclick="if(event.target===this)closeNovoPaciente()">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Novo Paciente</div>
-      <button class="close-btn" onclick="closeNovoPaciente()">&#10005;</button>
-    </div>
-    <div class="form-group"><label class="form-label">Nome completo *</label><input class="form-inp" id="np-nome" placeholder="Nome do paciente"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-      <div class="form-group"><label class="form-label">Data de nascimento</label><input class="form-inp" id="np-nasc" placeholder="DD/MM/AAAA"></div>
-      <div class="form-group"><label class="form-label">Cidade</label><input class="form-inp" id="np-cidade" placeholder="Cidade"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-      <div class="form-group"><label class="form-label">E-mail</label><input class="form-inp" id="np-email" type="email" placeholder="email@exemplo.com"></div>
-      <div class="form-group"><label class="form-label">Telefone</label><input class="form-inp" id="np-phone" placeholder="(11) 99999-9999"></div>
-    </div>
-    <div class="form-group"><label class="form-label">Medicamentos em uso</label><input class="form-inp" id="np-meds" placeholder="Ex: Losartana 50mg, Metformina..."></div>
-    <div class="form-group"><label class="form-label">Motivo da consulta / Objetivo</label><textarea class="form-ta" id="np-objetivo" placeholder="Descreva o motivo da consulta ou objetivo do paciente..."></textarea></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button class="btn btn-outline" onclick="closeNovoPaciente()">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarNovoPaciente()">Cadastrar paciente</button>
-    </div>
-  </div>
-</div>
-
-<!-- NOVA CONSULTA MODAL -->
-<div class="modal-overlay" id="nova-consulta-modal" onclick="if(event.target===this)closeNovaConsulta()">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Nova Consulta</div>
-      <button class="close-btn" onclick="closeNovaConsulta()">&#10005;</button>
-    </div>
-    <div class="form-group"><label class="form-label">Paciente</label><input class="form-inp" id="nc-paciente" placeholder="Nome do paciente"></div>
-    <div class="form-group"><label class="form-label">Data</label><input class="form-inp" id="nc-data" type="date"></div>
-    <div class="form-group"><label class="form-label">Horario</label><input class="form-inp" id="nc-hora" type="time"></div>
-    <div class="form-group"><label class="form-label">Tipo</label>
-      <select class="form-inp" id="nc-tipo">
-        <option value="consulta">Consulta</option>
-        <option value="retorno">Retorno</option>
-        <option value="reuniao">Reuniao</option>
-      </select>
-    </div>
-    <div class="form-group"><label class="form-label">Observacoes</label><textarea class="form-ta" id="nc-obs" placeholder="Observacoes opcionais..."></textarea></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;">
-      <button class="btn btn-outline" onclick="closeNovaConsulta()">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarConsulta()">Agendar</button>
-    </div>
-  </div>
-</div>
-
-<!-- UPLOAD DOC MODAL -->
-<div class="modal-overlay" id="upload-doc-modal" onclick="if(event.target===this)closeUploadDoc()">
-  <div class="modal">
-    <div class="modal-header">
-      <div class="modal-title">Adicionar Documento</div>
-      <button class="close-btn" onclick="closeUploadDoc()">&#10005;</button>
-    </div>
-    <div style="border:2px dashed #e5e7eb;border-radius:10px;padding:32px;text-align:center;margin-bottom:16px;cursor:pointer;" onclick="document.getElementById('doc-file-input').click()">
-      <div style="font-size:32px;margin-bottom:8px;">&#128196;</div>
-      <div style="font-size:14px;font-weight:500;color:#374151;">Clique para selecionar arquivo</div>
-      <div style="font-size:12px;color:#9ca3af;margin-top:4px;">PDF, JPG, PNG — max 10MB</div>
-      <input type="file" id="doc-file-input" style="display:none;" accept=".pdf,.jpg,.jpeg,.png" onchange="handleDocUpload(this)">
-    </div>
-    <div id="doc-upload-status" style="font-size:13px;color:#1a6b5a;text-align:center;"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
-      <button class="btn btn-outline" onclick="closeUploadDoc()">Cancelar</button>
-      <button class="btn btn-primary" id="doc-upload-btn" onclick="closeUploadDoc()">Concluir</button>
-    </div>
-  </div>
-</div>
-
-<script>
-async function salvarConsulta() {
-  var pac = document.getElementById('nc-paciente').value.trim();
-  var data = document.getElementById('nc-data').value;
-  var hora = document.getElementById('nc-hora').value;
-  var tipo = document.getElementById('nc-tipo').value;
-  if (!pac || !data || !hora) { alert('Preencha paciente, data e horario.'); return; }
-  var dataHora = data + 'T' + hora + ':00';
-  // Salva no backend
-  try {
-    await fetch(API + '/api/agenda', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({pacienteNome: pac, dataHora, tipo})
-    });
-  } catch(e) { console.log('Erro ao salvar agenda:', e.message); }
-  // Atualiza calendário local
-  var d = new Date(dataHora);
-  var key = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
-  if (!AGENDA_EVENTS[key]) AGENDA_EVENTS[key] = [];
-  AGENDA_EVENTS[key].push({label: pac, tipo: tipo, hora: hora});
-  renderCalendar();
-  closeNovaConsulta();
-  document.getElementById('nc-paciente').value='';
-  document.getElementById('nc-data').value='';
-  document.getElementById('nc-hora').value='';
-  document.getElementById('nc-obs').value='';
-  showToast('Consulta agendada!');
-}
-
-function showToast(msg) {
+// TOAST
+function toast(msg, err) {
   var t = document.createElement('div');
-  t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a6b5a;color:white;padding:12px 24px;border-radius:40px;font-size:14px;font-weight:500;z-index:9999;';
+  t.className = 'toast';
+  t.style.background = err ? '#ef4444' : '#1a6b5a';
   t.textContent = msg;
   document.body.appendChild(t);
   setTimeout(function(){t.remove();}, 3000);
 }
 
-function openUploadDoc() {
-  document.getElementById('upload-doc-modal').classList.add('show');
+// PANELS
+var TITLES = {agenda:'Agenda',clientes:'Clientes',stats:'Estatisticas',discussoes:'Discussoes'};
+function showPanel(id, el) {
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('active');});
+  document.getElementById('p-'+id).classList.add('active');
+  if (el) el.classList.add('active');
+  document.getElementById('ttitle').textContent = TITLES[id]||id;
+  var ta = document.getElementById('taction');
+  if (id==='agenda') ta.innerHTML = '<button class="btn btn-g" onclick="openNC()">+ Nova consulta</button>';
+  else if (id==='clientes') ta.innerHTML = '<button class="btn btn-g" onclick="openNP()">+ Novo paciente</button>';
+  else ta.innerHTML = '';
 }
-function closeUploadDoc() {
-  document.getElementById('upload-doc-modal').classList.remove('show');
-  document.getElementById('doc-upload-status').textContent = '';
-}
-function handleDocUpload(input) {
-  if (!input.files.length) return;
-  var file = input.files[0];
-  document.getElementById('doc-upload-status').textContent = 'Arquivo selecionado: ' + file.name;
-}
-</script>
 
+// CALENDAR
+function renderCal() {
+  var months = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('mlabel').textContent = months[calM-1]+' '+calY;
+  var grid = document.getElementById('cal-grid');
+  var first = new Date(calY,calM-1,1).getDay();
+  var days = new Date(calY,calM,0).getDate();
+  var prev = new Date(calY,calM-1,0).getDate();
+  var today = new Date();
+  var html = '';
+  for (var i=first-1;i>=0;i--) html+='<div class="cal-cell other"><div class="cal-num">'+(prev-i)+'</div></div>';
+  for (var d=1;d<=days;d++) {
+    var isT = d===today.getDate()&&calM===today.getMonth()+1&&calY===today.getFullYear();
+    var key = calY+'-'+calM+'-'+d;
+    var evs = EVS[key]||[];
+    var eh = evs.slice(0,2).map(function(e){return '<div class="ev ev-'+e.tipo+'">'+e.hora+' '+e.label+'</div>';}).join('');
+    if (evs.length>2) eh+='<div class="ev" style="background:#f3f4f6;color:#6b7280;">+'+(evs.length-2)+' mais</div>';
+    html+='<div class="cal-cell'+(isT?' today':'')+'" onclick="showDay('+d+',\''+key+'\')"><div class="cal-num">'+d+'</div>'+eh+'</div>';
+  }
+  var rem=42-first-days; if(rem<0)rem+=7;
+  for (var j=1;j<=rem;j++) html+='<div class="cal-cell other"><div class="cal-num">'+j+'</div></div>';
+  grid.innerHTML = html;
+}
+
+function showDay(d, key) {
+  var dd = document.getElementById('day-det');
+  dd.classList.add('show');
+  var months = ['Janeiro','Fevereiro','Marco','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('day-title').textContent = d+' de '+months[calM-1]+' de '+calY;
+  var evs = EVS[key]||[];
+  var tl = document.getElementById('day-tl');
+  if (!evs.length){tl.innerHTML='<p style="color:#9ca3af;font-size:13px;">Nenhum compromisso neste dia.</p>';return;}
+  tl.innerHTML = evs.map(function(e){
+    return '<div class="tl"><div class="tl-t">'+e.hora+'</div><div class="tl-l"></div><div class="tl-c"><h4>'+e.label+'</h4><p>'+e.tipo+'</p></div></div>';
+  }).join('');
+}
+function prevMonth(){calM--;if(calM<1){calM=12;calY--;}renderCal();}
+function nextMonth(){calM++;if(calM>12){calM=1;calY++;}renderCal();}
+function setView(v,btn){btn.parentElement.querySelectorAll('.vtab').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');}
+
+// LOAD AGENDA FROM API
+function loadAgenda() {
+  fetch(API+'/api/agenda').then(function(r){return r.json();}).then(function(data){
+    var items = data.agenda||[];
+    EVS = {};
+    items.forEach(function(item){
+      var dateStr = item.dataHora||item.appointment;
+      if (!dateStr) return;
+      var d, hora;
+      if (dateStr.indexOf('T')>=0) {
+        d = new Date(dateStr);
+        hora = item.appointmentTime||d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      } else {
+        var pts = dateStr.split('-');
+        if (pts.length!==3) return;
+        d = new Date(parseInt(pts[0]),parseInt(pts[1])-1,parseInt(pts[2]));
+        hora = item.appointmentTime||'09:00';
+      }
+      if (!d||isNaN(d.getTime())) return;
+      var key = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+      if (!EVS[key]) EVS[key]=[];
+      var label = item.pacienteNome||item.name||'Consulta';
+      var exists = EVS[key].some(function(e){return e.label===label&&e.hora===hora;});
+      if (!exists) EVS[key].push({label:label,tipo:item.tipo||'consulta',hora:hora});
+    });
+    renderCal();
+  }).catch(function(e){console.log('Agenda err:',e.message);renderCal();});
+}
+
+// SAVE CONSULTA
+function openNC(){document.getElementById('nc-modal').classList.add('show');}
+function closeNC(){document.getElementById('nc-modal').classList.remove('show');}
+function saveConsulta(){
+  var pac = document.getElementById('nc-pac').value.trim();
+  var data = document.getElementById('nc-data').value;
+  var hora = document.getElementById('nc-hora').value;
+  var tipo = document.getElementById('nc-tipo').value;
+  var obs = document.getElementById('nc-obs').value.trim();
+  if (!pac||!data||!hora){alert('Preencha paciente, data e horario.');return;}
+  var dataHora = data+'T'+hora+':00.000Z';
+  fetch(API+'/api/agenda',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pacienteNome:pac,dataHora:dataHora,tipo:tipo,obs:obs})})
+    .then(function(){
+      loadAgenda();
+      closeNC();
+      ['nc-pac','nc-data','nc-hora','nc-obs'].forEach(function(id){document.getElementById(id).value='';});
+      toast('Consulta agendada!');
+    }).catch(function(){
+      // salva local mesmo se API falhar
+      var d = new Date(data+'T'+hora);
+      var key = d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+      if (!EVS[key]) EVS[key]=[];
+      EVS[key].push({label:pac,tipo:tipo,hora:hora});
+      renderCal();
+      closeNC();
+      toast('Consulta salva localmente.');
+    });
+}
+
+// CLIENTS
+function loadClients() {
+  fetch(API+'/api/patients').then(function(r){return r.json();}).then(function(data){
+    var pts = data.patients||[];
+    CLIENTS = pts.map(function(p){
+      var dob = p.dob||'';
+      var age = '-';
+      if (dob) {
+        var pts2 = dob.split('/');
+        var b;
+        if (pts2.length===3) b=new Date(pts2[2],pts2[1]-1,pts2[0]);
+        else b=new Date(dob);
+        if (!isNaN(b.getTime())) {
+          var a=new Date().getFullYear()-b.getFullYear();
+          if (new Date().getMonth()<b.getMonth()||(new Date().getMonth()===b.getMonth()&&new Date().getDate()<b.getDate())) a--;
+          age=a;
+        }
+      }
+      return {
+        _id: p._id||'', id: p.id||p._id||'',
+        init:(p.name||'P').charAt(0).toUpperCase(),
+        name:p.name||'-',age:age,city:p.city||'-',
+        email:p.email||'-',phone:p.phone||'-',born:dob||'-',
+        meds:p.medications||'Nenhum',
+        summary:p.objetivo||'Cadastrado via WhatsApp',
+        next:p.appointmentLabel||(p.appointment?p.appointment:'--'),
+        status:p.appointment?'agendado':'novo',
+        history:p.history||[{date:p.registeredAt?new Date(p.registeredAt).toLocaleDateString('pt-BR'):'-',desc:'Cadastro',notes:p.objetivo||'-'}],
+        docs:(p.exames&&p.exames.length)?['Exame via WhatsApp']:[]
+      };
+    });
+    renderClients(CLIENTS);
+  }).catch(function(e){console.log('Clients err:',e.message);});
+}
+
+function renderClients(list) {
+  var grid = document.getElementById('cgrid');
+  var count = document.getElementById('ccount');
+  if (count) count.innerHTML='<strong>'+list.length+'</strong> pacientes';
+  if (!list.length){grid.innerHTML='<div style="text-align:center;padding:40px;color:#9ca3af;">Nenhum paciente encontrado.</div>';return;}
+  grid.innerHTML = list.map(function(c,idx){
+    var realIdx = CLIENTS.indexOf(c);
+    var bc=c.status==='agendado'?'ba':c.status==='retorno'?'br':'bn';
+    var bl=c.status==='agendado'?'Agendado':c.status==='retorno'?'Retorno':'Novo';
+    return '<div class="ccard">'+
+      '<div class="cav" onclick="openFicha('+realIdx+')">'+c.init+'</div>'+
+      '<div onclick="openFicha('+realIdx+')" style="cursor:pointer"><div class="cname">'+c.name+'</div><div class="cinfo">'+c.age+' anos &middot; '+c.city+'</div></div>'+
+      '<div class="csummary" onclick="openFicha('+realIdx+')" style="cursor:pointer">'+c.summary+'</div>'+
+      '<div class="cnext" onclick="openFicha('+realIdx+')" style="cursor:pointer"><strong>Proxima consulta</strong><span>'+c.next+'</span></div>'+
+      '<span class="cbadge '+bc+'">'+bl+'</span>'+
+      '<button class="bdel" onclick="delPaciente(\''+c.id+'\','+realIdx+')">Excluir</button>'+
+    '</div>';
+  }).join('');
+}
+
+function filterC(q) {
+  var f=CLIENTS.filter(function(c){return c.name.toLowerCase().includes(q.toLowerCase())||c.summary.toLowerCase().includes(q.toLowerCase());});
+  renderClients(f);
+}
+
+function delPaciente(id, idx) {
+  if (!confirm('Excluir este paciente?')) return;
+  fetch(API+'/api/patients/'+id,{method:'DELETE'}).then(function(){
+    CLIENTS.splice(idx,1);
+    renderClients(CLIENTS);
+    toast('Paciente excluido.');
+  }).catch(function(){toast('Erro ao excluir.',true);});
+}
+
+// NOVO PACIENTE
+function openNP(){document.getElementById('np-modal').classList.add('show');}
+function closeNP(){document.getElementById('np-modal').classList.remove('show');}
+function savePaciente(){
+  var nome=document.getElementById('np-nome').value.trim();
+  if (!nome){alert('Nome obrigatorio.');return;}
+  var body={name:nome,dob:document.getElementById('np-nasc').value,city:document.getElementById('np-cidade').value,
+    email:document.getElementById('np-email').value,phone:document.getElementById('np-fone').value,
+    medications:document.getElementById('np-meds').value,objetivo:document.getElementById('np-obj').value,source:'manual'};
+  fetch(API+'/api/patients',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+    .then(function(){
+      closeNP();
+      ['np-nome','np-nasc','np-cidade','np-email','np-fone','np-meds','np-obj'].forEach(function(id){document.getElementById(id).value='';});
+      toast('Paciente cadastrado!');
+      loadClients();
+    }).catch(function(){toast('Erro ao cadastrar.',true);});
+}
+
+// FICHA
+function openFicha(idx) {
+  var c = CLIENTS[idx];
+  if (!c) return;
+  currentFicha = idx;
+  document.getElementById('fav').textContent = c.init;
+  document.getElementById('fname').textContent = c.name;
+  document.getElementById('fsub').textContent = c.age+' anos &middot; '+c.city;
+  document.getElementById('finfo').innerHTML =
+    '<div class="ii"><label>Nascimento</label><span>'+c.born+'</span></div>'+
+    '<div class="ii"><label>E-mail</label><span>'+c.email+'</span></div>'+
+    '<div class="ii"><label>Telefone</label><span>'+c.phone+'</span></div>'+
+    '<div class="ii"><label>Medicamentos</label><span>'+c.meds+'</span></div>';
+  renderHistory(idx);
+  document.getElementById('finsights').innerHTML =
+    '<div class="aic"><div class="ailbl">&#10024; Insight Praxi IA</div>'+
+    '<div class="aitxt">Com base no historico de '+c.name+', recomenda-se acompanhamento continuo. Evidencias 2024 sugerem monitoramento trimestral.</div>'+
+    '<div class="aisrc">&#128218; Literatura clinica 2024 &middot; Google Academico</div></div>';
+  document.getElementById('fdocs').innerHTML = c.docs.length?
+    c.docs.map(function(d){return '<div class="doc-i"><span>&#128196;</span><div><div style="font-size:13px;font-weight:500;">'+d+'</div><div style="font-size:11px;color:#9ca3af;">Enviado via WhatsApp</div></div></div>';}).join(''):
+    '<p style="color:#9ca3af;font-size:13px;">Nenhum documento.</p>';
+  document.getElementById('ficha-ov').classList.add('show');
+}
+
+function renderHistory(idx) {
+  var c = CLIENTS[idx];
+  var h = (c.history||[]).map(function(h){
+    return '<div class="hi"><div class="hd">'+h.date+'</div><div class="hdesc">'+h.desc+'</div><div class="hnotes">'+h.notes+'</div></div>';
+  }).join('');
+  document.getElementById('fhistory').innerHTML = h||'<p style="color:#9ca3af;font-size:13px;">Sem historico.</p>';
+}
+
+function closeFicha(){document.getElementById('ficha-ov').classList.remove('show');}
+
+function saveHistory() {
+  var idx = currentFicha;
+  if (idx<0) return;
+  var desc = document.getElementById('h-desc').value.trim();
+  var notes = document.getElementById('h-notes').value.trim();
+  if (!desc&&!notes){alert('Preencha pelo menos um campo.');return;}
+  var c = CLIENTS[idx];
+  var entry = {date:new Date().toLocaleDateString('pt-BR'),desc:desc||'Registro',notes:notes||''};
+  var pid = c.id||c._id;
+  if (pid) {
+    fetch(API+'/api/patients/'+pid+'/history',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(entry)})
+      .then(function(){})
+      .catch(function(e){console.log('History err:',e.message);});
+  }
+  if (!c.history) c.history=[];
+  c.history.unshift(entry);
+  renderHistory(idx);
+  document.getElementById('h-desc').value='';
+  document.getElementById('h-notes').value='';
+  toast('Registro adicionado!');
+}
+
+// UPLOAD
+function openUpload(){document.getElementById('up-modal').classList.add('show');}
+function closeUpload(){document.getElementById('up-modal').classList.remove('show');document.getElementById('fstatus').textContent='';}
+function handleFile(inp){if(inp.files.length)document.getElementById('fstatus').textContent='Selecionado: '+inp.files[0].name;}
+
+// STATS
+function setPer(p,btn){
+  btn.parentElement.querySelectorAll('.ptab').forEach(function(t){t.classList.remove('active');});
+  btn.classList.add('active');
+  var total = CLIENTS.length;
+  document.getElementById('st-pac').textContent=total;
+  document.getElementById('st-con').textContent=total>0?Math.floor(total*1.3):0;
+  document.getElementById('st-ret').textContent=total>0?Math.floor(total*0.4):0;
+  document.getElementById('st-fal').textContent=0;
+}
+function renderBarChart(){
+  var ch=document.getElementById('bch');
+  var vals=[0,0,0,0,0,0,0,0,0,0,0,CLIENTS.length];
+  var lbls=['Jun','Jul','Ago','Set','Out','Nov','Dez','Jan','Fev','Mar','Abr','Mai'];
+  var max=Math.max.apply(null,vals)||1;
+  ch.innerHTML=vals.map(function(v,i){
+    return '<div class="bc"><div class="b'+(i===vals.length-1?' acc':'')+'" style="height:'+Math.round((v/max)*120)+'px;min-height:4px;"></div><div class="bl">'+lbls[i]+'</div></div>';
+  }).join('');
+}
+
+// DISCUSSIONS
+function renderDiscs(){
+  var grid=document.getElementById('dgrid');
+  grid.innerHTML=DISCS.map(function(d){
+    return '<div class="dcard" onclick="openDisc('+d.id+')">'+
+      '<div class="dspec">'+d.spec+'</div>'+
+      '<div class="dtitle">'+d.title+'</div>'+
+      '<div class="dexc">'+d.body.substring(0,100)+'...</div>'+
+      '<div class="dfoot"><span class="dauthor">'+d.author+'</span>'+
+      '<div class="dreac"><span>&#128142;'+d.reactions.g+'</span><span>&#128562;'+d.reactions.s+'</span><span>&#10084;'+d.reactions.h+'</span></div>'+
+      '</div></div>';
+  }).join('');
+  var sorted=[...DISCS].sort(function(a,b){return (b.reactions.g+b.reactions.h)-(a.reactions.g+a.reactions.h);});
+  document.getElementById('rlist').innerHTML=sorted.slice(0,5).map(function(d,i){
+    return '<div class="ri"><div class="rn">0'+(i+1)+'</div><div style="flex:1"><div class="rit">'+d.title+'</div><div class="ris">'+d.spec+'</div></div><div class="rscore">&#128142;'+(d.reactions.g+d.reactions.h)+'</div></div>';
+  }).join('');
+}
+function openDisc(id){
+  var d=DISCS.find(function(x){return x.id===id;});
+  if (!d) return;
+  document.getElementById('dp-spec').textContent=d.spec;
+  document.getElementById('dp-title').textContent=d.title;
+  document.getElementById('dp-author').textContent=d.author;
+  document.getElementById('dp-body').textContent=d.body;
+  document.getElementById('r1').textContent=d.reactions.g;
+  document.getElementById('r2').textContent=d.reactions.s;
+  document.getElementById('r3').textContent=d.reactions.h;
+  document.getElementById('dp-cmts').innerHTML=d.cmts.map(function(c){
+    return '<div class="cmt"><div class="cmtav">M</div><div class="cmtb"><div class="cmta">Medico</div><div class="cmtt">'+c+'</div></div></div>';
+  }).join('');
+  document.getElementById('dov').classList.add('show');
+}
+function closeDisc(){document.getElementById('dov').classList.remove('show');}
+function react(btn){btn.classList.toggle('active');var s=btn.querySelector('span');s.textContent=parseInt(s.textContent)+(btn.classList.contains('active')?1:-1);}
+function sendCmt(){
+  var inp=document.getElementById('cin');
+  if (!inp.value.trim()) return;
+  var cmts=document.getElementById('dp-cmts');
+  cmts.innerHTML+='<div class="cmt"><div class="cmtav" style="background:#dbeafe;color:#1d4ed8;">VC</div><div class="cmtb"><div class="cmta">Voce</div><div class="cmtt">'+inp.value+'</div></div></div>';
+  inp.value='';
+}
+function openND(){document.getElementById('nd-modal').classList.add('show');}
+function closeND(){document.getElementById('nd-modal').classList.remove('show');}
+function submitDisc(){
+  var title=document.getElementById('nd-title').value.trim();
+  var body=document.getElementById('nd-body').value.trim();
+  if (!title||!body){alert('Preencha titulo e conteudo.');return;}
+  DISCS.unshift({id:DISCS.length+1,spec:document.getElementById('nd-spec').value,title:title,author:'Voce',body:body,reactions:{g:0,s:0,h:0},cmts:[]});
+  closeND();
+  renderDiscs();
+  document.getElementById('nd-title').value='';
+  document.getElementById('nd-body').value='';
+  toast('Discussao publicada!');
+}
+
+// INIT
+document.addEventListener('DOMContentLoaded', function() {
+  loadAgenda();
+  loadClients();
+  renderDiscs();
+  document.getElementById('taction').innerHTML='<button class="btn btn-g" onclick="openNC()">+ Nova consulta</button>';
+  setPer('mes', document.querySelector('.ptab'));
+});
+</script>
 </body>
 </html>
