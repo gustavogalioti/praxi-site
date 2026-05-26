@@ -5,1643 +5,739 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Praxi — Painel Médico</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
-
-  :root {
-    --bg: #f5f4f0;
-    --surface: #ffffff;
-    --border: #e5e3dc;
-    --text: #1a1a18;
-    --muted: #7a7870;
-    --accent: #2d5a3d;
-    --accent-light: #e8f0ea;
-    --danger: #c0392b;
-    --danger-light: #fdf0ee;
-    --warning: #e67e22;
-    --warning-light: #fef5ec;
-    --sidebar-w: 220px;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    height: 100vh;
-    display: flex;
-    overflow: hidden;
-  }
-
-  /* ── SIDEBAR ── */
-  #sidebar {
-    width: var(--sidebar-w);
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    padding: 24px 0;
-    flex-shrink: 0;
-  }
-
-  .logo {
-    padding: 0 20px 24px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 16px;
-  }
-  .logo span {
-    font-family: 'DM Serif Display', serif;
-    font-size: 22px;
-    color: var(--accent);
-    letter-spacing: -0.5px;
-  }
-  .logo small {
-    display: block;
-    font-size: 11px;
-    color: var(--muted);
-    margin-top: 2px;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-  }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 20px;
-    cursor: pointer;
-    border-radius: 0;
-    font-size: 14px;
-    color: var(--muted);
-    transition: all 0.15s;
-    border-left: 3px solid transparent;
-  }
-  .nav-item:hover { background: var(--bg); color: var(--text); }
-  .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-light); font-weight: 500; }
-  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
-
-  .sidebar-bottom {
-    margin-top: auto;
-    padding: 16px 20px;
-    border-top: 1px solid var(--border);
-  }
-  .doctor-info { font-size: 13px; }
-  .doctor-info strong { display: block; }
-  .doctor-info span { color: var(--muted); font-size: 12px; }
-  .logout-btn {
-    margin-top: 12px;
-    width: 100%;
-    padding: 8px;
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 13px;
-    color: var(--muted);
-    font-family: 'DM Sans', sans-serif;
-    transition: all 0.15s;
-  }
-  .logout-btn:hover { border-color: var(--danger); color: var(--danger); }
-
-  /* ── MAIN ── */
-  #main {
-    flex: 1;
-    overflow-y: auto;
-    padding: 32px 36px;
-  }
-
-  .page { display: none; }
-  .page.active { display: block; }
-
-  .page-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 26px;
-    font-weight: 400;
-    margin-bottom: 6px;
-    letter-spacing: -0.5px;
-  }
-  .page-sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
-
-  /* ── CARDS ── */
-  .stat-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 28px;
-  }
-  .stat-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-  }
-  .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-  .stat-value { font-size: 30px; font-weight: 600; margin: 6px 0 2px; color: var(--accent); }
-  .stat-desc { font-size: 12px; color: var(--muted); }
-
-  /* ── AGENDA ── */
-  .agenda-grid {
-    display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 20px;
-  }
-
-  .calendar-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-  }
-
-  .cal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .cal-header h3 { font-size: 15px; font-weight: 600; }
-  .cal-nav { display: flex; gap: 8px; }
-  .cal-btn {
-    padding: 5px 10px;
-    border: 1px solid var(--border);
-    background: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    color: var(--muted);
-    transition: all 0.15s;
-  }
-  .cal-btn:hover { background: var(--bg); color: var(--text); }
-
-  .cal-weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    text-align: center;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    margin-bottom: 8px;
-  }
-
-  .cal-days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 3px;
-  }
-
-  .cal-day {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    font-size: 13px;
-    cursor: pointer;
-    position: relative;
-    transition: all 0.15s;
-  }
-  .cal-day:hover { background: var(--bg); }
-  .cal-day.empty { cursor: default; }
-  .cal-day.today { background: var(--accent); color: white; font-weight: 600; }
-  .cal-day.today:hover { background: var(--accent); opacity: 0.9; }
-  .cal-day.has-event::after {
-    content: '';
-    position: absolute;
-    bottom: 3px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: var(--accent);
-  }
-  .cal-day.today.has-event::after { background: white; }
-  .cal-day.selected { background: var(--accent-light); color: var(--accent); font-weight: 600; border: 1px solid var(--accent); }
-
-  /* Day detail panel */
-  .day-panel {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-  }
-  .day-panel h4 { font-size: 14px; font-weight: 600; margin-bottom: 14px; color: var(--muted); }
-
-  .appointment-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 10px;
-    background: var(--bg);
-    border-radius: 8px;
-    margin-bottom: 8px;
-    border-left: 3px solid var(--accent);
-  }
-  .appt-time { font-size: 12px; font-weight: 600; color: var(--accent); min-width: 45px; }
-  .appt-info strong { font-size: 13px; display: block; }
-  .appt-info span { font-size: 12px; color: var(--muted); }
-  .appt-delete {
-    margin-left: auto;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--muted);
-    font-size: 16px;
-    padding: 2px;
-    border-radius: 4px;
-    transition: all 0.15s;
-  }
-  .appt-delete:hover { color: var(--danger); background: var(--danger-light); }
-
-  .no-appts { color: var(--muted); font-size: 13px; text-align: center; padding: 24px 0; }
-
-  /* Add appointment form */
-  .add-appt-btn {
-    width: 100%;
-    margin-top: 12px;
-    padding: 10px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-  .add-appt-btn:hover { opacity: 0.88; }
-
-  /* ── MODAL ── */
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.4);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 999;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--surface);
-    border-radius: 12px;
-    padding: 28px;
-    width: 420px;
-    max-width: 95vw;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-  }
-  .modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 20px; }
-  .form-group { margin-bottom: 14px; }
-  .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
-  .form-group input, .form-group select, .form-group textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    background: var(--bg);
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-    border-color: var(--accent);
-  }
-  .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
-  .btn-cancel {
-    padding: 10px 18px;
-    border: 1px solid var(--border);
-    background: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    color: var(--muted);
-  }
-  .btn-save {
-    padding: 10px 20px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-  }
-  .btn-danger {
-    padding: 10px 18px;
-    background: var(--danger);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-  }
-
-  /* ── CLIENTES ── */
-  .clients-toolbar {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-    align-items: center;
-  }
-  .search-input {
-    flex: 1;
-    padding: 10px 14px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    background: var(--surface);
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .search-input:focus { border-color: var(--accent); }
-
-  .clients-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 14px;
-  }
-
-  .client-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 18px;
-    cursor: pointer;
-    transition: all 0.15s;
-    position: relative;
-  }
-  .client-card:hover { border-color: var(--accent); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
-  .client-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
-  .client-phone { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
-  .client-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-  .tag {
-    padding: 3px 8px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 500;
-  }
-  .tag-green { background: var(--accent-light); color: var(--accent); }
-  .tag-orange { background: var(--warning-light); color: var(--warning); }
-  .tag-red { background: var(--danger-light); color: var(--danger); }
-  .client-delete-btn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--muted);
-    font-size: 15px;
-    border-radius: 4px;
-    padding: 4px;
-    transition: all 0.15s;
-    opacity: 0;
-  }
-  .client-card:hover .client-delete-btn { opacity: 1; }
-  .client-delete-btn:hover { color: var(--danger); background: var(--danger-light); }
-
-  /* ── FICHA LATERAL ── */
-  .ficha-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.3);
-    display: none;
-    z-index: 800;
-  }
-  .ficha-overlay.open { display: block; }
-  .ficha-panel {
-    position: fixed;
-    top: 0; right: 0; bottom: 0;
-    width: 420px;
-    background: var(--surface);
-    border-left: 1px solid var(--border);
-    z-index: 801;
-    overflow-y: auto;
-    padding: 28px;
-    transform: translateX(100%);
-    transition: transform 0.25s ease;
-  }
-  .ficha-panel.open { transform: translateX(0); }
-  .ficha-close {
-    position: absolute;
-    top: 18px; right: 18px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    width: 30px; height: 30px;
-    cursor: pointer;
-    font-size: 16px;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--muted);
-  }
-  .ficha-name { font-family: 'DM Serif Display', serif; font-size: 22px; margin-bottom: 4px; margin-top: 8px; }
-  .ficha-phone { color: var(--muted); font-size: 13px; margin-bottom: 20px; }
-  .ficha-section { margin-bottom: 20px; }
-  .ficha-section h4 { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
-  .ficha-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
-  .ficha-row:last-child { border-bottom: none; }
-  .ficha-row span:first-child { color: var(--muted); }
-  .hist-item { padding: 10px; background: var(--bg); border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
-  .hist-item strong { display: block; margin-bottom: 3px; }
-  .hist-item small { color: var(--muted); }
-  .ficha-delete-btn {
-    width: 100%;
-    margin-top: 20px;
-    padding: 11px;
-    background: var(--danger-light);
-    color: var(--danger);
-    border: 1px solid var(--danger);
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.15s;
-  }
-  .ficha-delete-btn:hover { background: var(--danger); color: white; }
-
-  /* ── ESTATÍSTICAS ── */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-  }
-  .chart-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-  }
-  .chart-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
-
-  /* Bar chart */
-  .bar-chart { display: flex; align-items: flex-end; gap: 8px; height: 120px; }
-  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
-  .bar { width: 100%; border-radius: 4px 4px 0 0; background: var(--accent); opacity: 0.8; transition: opacity 0.15s; min-height: 4px; }
-  .bar:hover { opacity: 1; }
-  .bar-label { font-size: 10px; color: var(--muted); }
-  .bar-val { font-size: 10px; font-weight: 600; }
-
-  /* Donut */
-  .donut-wrap { display: flex; align-items: center; gap: 20px; }
-  .donut-legend { flex: 1; }
-  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 8px; }
-  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-
-  /* ── CONFIG AGENDA ── */
-  .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-  .config-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-  }
-  .config-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
-  .day-toggles { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-  .day-toggle {
-    padding: 6px 12px;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-family: 'DM Sans', sans-serif;
-    background: none;
-    color: var(--muted);
-  }
-  .day-toggle.active { background: var(--accent); color: white; border-color: var(--accent); }
-  .config-row { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
-  .config-row label { font-size: 13px; color: var(--muted); min-width: 80px; }
-  .config-row input, .config-row select {
-    flex: 1;
-    padding: 8px 10px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    background: var(--bg);
-    outline: none;
-  }
-  .config-row input:focus { border-color: var(--accent); }
-  .save-config-btn {
-    width: 100%;
-    margin-top: 8px;
-    padding: 11px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-  }
-  .save-config-btn:hover { opacity: 0.88; }
-
-  /* ── TOAST ── */
-  .toast {
-    position: fixed;
-    bottom: 28px; left: 50%; transform: translateX(-50%);
-    background: var(--text);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-size: 13px;
-    z-index: 9999;
-    opacity: 0;
-    transition: opacity 0.25s;
-    pointer-events: none;
-  }
-  .toast.show { opacity: 1; }
-  .toast.success { background: var(--accent); }
-  .toast.error { background: var(--danger); }
-
-  /* ── LOADING ── */
-  .loading {
-    text-align: center;
-    padding: 40px;
-    color: var(--muted);
-    font-size: 14px;
-  }
-  .spinner {
-    display: inline-block;
-    width: 24px; height: 24px;
-    border: 2px solid var(--border);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    margin-bottom: 10px;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .empty-state {
-    text-align: center;
-    padding: 48px;
-    color: var(--muted);
-  }
-  .empty-state .icon { font-size: 36px; margin-bottom: 12px; }
-  .empty-state p { font-size: 14px; }
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap');
+:root{--bg:#f5f4f0;--sur:#fff;--bor:#e5e3dc;--txt:#1a1a18;--mut:#7a7870;--acc:#2d5a3d;--acl:#e8f0ea;--dan:#c0392b;--danl:#fdf0ee;--warn:#e67e22;--warnl:#fef5ec;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--txt);height:100vh;display:flex;overflow:hidden;}
+/* SIDEBAR */
+#sb{width:210px;background:var(--sur);border-right:1px solid var(--bor);display:flex;flex-direction:column;padding:24px 0;flex-shrink:0;}
+.logo{padding:0 18px 20px;border-bottom:1px solid var(--bor);margin-bottom:12px;}
+.logo span{font-family:'DM Serif Display',serif;font-size:22px;color:var(--acc);}
+.logo small{display:block;font-size:10px;color:var(--mut);letter-spacing:.5px;text-transform:uppercase;}
+.ni{display:flex;align-items:center;gap:9px;padding:10px 18px;cursor:pointer;font-size:13px;color:var(--mut);border-left:3px solid transparent;transition:.15s;}
+.ni:hover{background:var(--bg);color:var(--txt);}
+.ni.on{color:var(--acc);border-left-color:var(--acc);background:var(--acl);font-weight:500;}
+.sb-bot{margin-top:auto;padding:14px 18px;border-top:1px solid var(--bor);}
+.sb-bot strong{display:block;font-size:13px;}
+.sb-bot span{font-size:11px;color:var(--mut);}
+.logout{margin-top:10px;width:100%;padding:7px;background:none;border:1px solid var(--bor);border-radius:6px;cursor:pointer;font-size:12px;color:var(--mut);font-family:'DM Sans',sans-serif;}
+/* MAIN */
+#main{flex:1;overflow-y:auto;padding:28px 32px;}
+.pg{display:none;} .pg.on{display:block;}
+.ptit{font-family:'DM Serif Display',serif;font-size:24px;font-weight:400;margin-bottom:4px;}
+.psub{color:var(--mut);font-size:13px;margin-bottom:24px;}
+/* STAT CARDS */
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.sc{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:18px;}
+.sc-lbl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;}
+.sc-val{font-size:28px;font-weight:600;color:var(--acc);margin:4px 0 2px;}
+.sc-desc{font-size:11px;color:var(--mut);}
+/* AGENDA LAYOUT */
+.ag-grid{display:grid;grid-template-columns:1fr 290px;gap:18px;}
+.cal-wrap{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:18px;}
+.cal-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.cal-hdr h3{font-size:14px;font-weight:600;}
+.cal-nav{display:flex;gap:6px;}
+.cal-btn{padding:4px 9px;border:1px solid var(--bor);background:none;border-radius:6px;cursor:pointer;font-size:13px;color:var(--mut);}
+.cal-btn:hover{background:var(--bg);}
+.cal-wk{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:10px;font-weight:600;color:var(--mut);letter-spacing:.3px;margin-bottom:6px;}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cd{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:12px;cursor:pointer;position:relative;transition:.12s;}
+.cd:hover{background:var(--bg);}
+.cd.empty{cursor:default;}
+.cd.today{background:var(--acc);color:#fff;font-weight:600;}
+.cd.has-ev::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--acc);}
+.cd.today.has-ev::after{background:#fff;}
+.cd.sel{background:var(--acl);color:var(--acc);font-weight:600;border:1px solid var(--acc);}
+/* DAY PANEL */
+.day-pnl{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:18px;}
+.day-pnl h4{font-size:13px;font-weight:600;color:var(--mut);margin-bottom:12px;}
+.appt{display:flex;align-items:flex-start;gap:9px;padding:9px;background:var(--bg);border-radius:8px;margin-bottom:7px;border-left:3px solid var(--acc);}
+.appt-t{font-size:12px;font-weight:600;color:var(--acc);min-width:40px;}
+.appt-i strong{font-size:13px;display:block;}
+.appt-i span{font-size:11px;color:var(--mut);}
+.appt-del{margin-left:auto;background:none;border:none;cursor:pointer;color:var(--mut);font-size:15px;padding:2px;border-radius:4px;}
+.appt-del:hover{color:var(--dan);background:var(--danl);}
+.no-appt{color:var(--mut);font-size:13px;text-align:center;padding:20px 0;}
+.add-btn{width:100%;margin-top:10px;padding:9px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;}
+.add-btn:hover{opacity:.88;}
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:999;}
+.ov.open{display:flex;}
+.modal{background:var(--sur);border-radius:12px;padding:26px;width:400px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.15);}
+.modal h3{font-size:16px;font-weight:600;margin-bottom:18px;}
+.fg{margin-bottom:12px;}
+.fg label{display:block;font-size:11px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;}
+.fg input,.fg select,.fg textarea{width:100%;padding:9px 11px;border:1px solid var(--bor);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);color:var(--txt);outline:none;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--acc);}
+.ma{display:flex;gap:9px;margin-top:18px;justify-content:flex-end;}
+.btn-c{padding:9px 16px;border:1px solid var(--bor);background:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--mut);}
+.btn-s{padding:9px 18px;background:var(--acc);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;}
+.btn-d{padding:9px 16px;background:var(--dan);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;}
+/* CLIENTES */
+.ctb{display:flex;gap:10px;margin-bottom:18px;}
+.srch{flex:1;padding:9px 13px;border:1px solid var(--bor);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--sur);outline:none;}
+.srch:focus{border-color:var(--acc);}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+.cc{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:16px;cursor:pointer;transition:.15s;position:relative;}
+.cc:hover{border-color:var(--acc);box-shadow:0 4px 14px rgba(0,0,0,.06);}
+.cc-name{font-weight:600;font-size:14px;margin-bottom:3px;}
+.cc-phone{font-size:12px;color:var(--mut);margin-bottom:7px;}
+.cc-tags{display:flex;gap:5px;flex-wrap:wrap;}
+.tag{padding:2px 7px;border-radius:20px;font-size:10px;font-weight:500;}
+.tg{background:var(--acl);color:var(--acc);}
+.to{background:var(--warnl);color:var(--warn);}
+.cc-del{position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:var(--mut);font-size:14px;border-radius:4px;padding:3px;opacity:0;transition:.15s;}
+.cc:hover .cc-del{opacity:1;}
+.cc-del:hover{color:var(--dan);background:var(--danl);}
+/* FICHA */
+.fov{position:fixed;inset:0;background:rgba(0,0,0,.3);display:none;z-index:800;}
+.fov.open{display:block;}
+.fpnl{position:fixed;top:0;right:0;bottom:0;width:400px;background:var(--sur);border-left:1px solid var(--bor);z-index:801;overflow-y:auto;padding:26px;transform:translateX(100%);transition:transform .25s ease;}
+.fpnl.open{transform:translateX(0);}
+.fcls{position:absolute;top:16px;right:16px;background:var(--bg);border:1px solid var(--bor);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:var(--mut);}
+.fname{font-family:'DM Serif Display',serif;font-size:20px;margin-bottom:3px;margin-top:6px;}
+.fphone{color:var(--mut);font-size:12px;margin-bottom:16px;}
+.fsec{margin-bottom:16px;}
+.fsec h4{font-size:10px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.frow{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--bor);font-size:12px;}
+.frow:last-child{border-bottom:none;}
+.frow span:first-child{color:var(--mut);}
+.hi{padding:9px;background:var(--bg);border-radius:8px;margin-bottom:7px;font-size:12px;}
+.hi strong{display:block;margin-bottom:2px;}
+.hi small{color:var(--mut);}
+.fdel{width:100%;margin-top:16px;padding:10px;background:var(--danl);color:var(--dan);border:1px solid var(--dan);border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;}
+.fdel:hover{background:var(--dan);color:#fff;}
+/* STATS */
+.stgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.stcard{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:18px;}
+.stcard h4{font-size:13px;font-weight:600;margin-bottom:14px;}
+.bar-chart{display:flex;align-items:flex-end;gap:7px;height:110px;}
+.bcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end;}
+.bar{width:100%;border-radius:4px 4px 0 0;background:var(--acc);opacity:.8;min-height:3px;}
+.blbl{font-size:9px;color:var(--mut);}
+.bval{font-size:9px;font-weight:600;}
+.donut-wrap{display:flex;align-items:center;gap:16px;}
+.dleg{flex:1;}
+.dleg-i{display:flex;align-items:center;gap:7px;font-size:11px;margin-bottom:7px;}
+.dleg-dot{width:9px;height:9px;border-radius:50%;}
+/* FORUM */
+.forum-wrap{display:grid;grid-template-columns:1fr 290px;gap:18px;}
+.f-new{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:18px;margin-bottom:16px;}
+.fpost{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:18px;margin-bottom:12px;}
+.fpost-hdr{display:flex;align-items:center;gap:9px;margin-bottom:9px;}
+.ftag-badge{padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600;text-transform:uppercase;}
+.fpost h3{font-size:14px;font-weight:600;margin-bottom:7px;}
+.fpost p{font-size:12px;color:var(--mut);line-height:1.6;margin-bottom:12px;}
+.freac{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.freac button{padding:3px 9px;border:1px solid var(--bor);border-radius:20px;background:none;cursor:pointer;font-size:12px;color:var(--mut);font-family:'DM Sans',sans-serif;}
+.freac button:hover{background:var(--bg);}
+.fcom-wrap{display:none;margin-top:12px;}
+.fcom-item{padding:9px;background:var(--bg);border-radius:8px;margin-bottom:6px;font-size:12px;}
+.fcom-item strong{font-size:11px;}
+.fcom-input{display:flex;gap:7px;margin-top:7px;}
+.fcom-input input{flex:1;padding:7px 11px;border:1px solid var(--bor);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;background:var(--bg);outline:none;}
+.fcom-input button{padding:7px 13px;background:var(--acc);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:12px;}
+/* CONFIG */
+.cfgrid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.cfcard{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:18px;}
+.cfcard h4{font-size:13px;font-weight:600;margin-bottom:14px;}
+.day-togs{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;}
+.dtog{padding:5px 11px;border:1px solid var(--bor);border-radius:20px;font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;background:none;color:var(--mut);}
+.dtog.on{background:var(--acc);color:#fff;border-color:var(--acc);}
+.cfrow{display:flex;gap:10px;align-items:center;margin-bottom:10px;}
+.cfrow label{font-size:12px;color:var(--mut);min-width:70px;}
+.cfrow input,.cfrow select{flex:1;padding:7px 10px;border:1px solid var(--bor);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;background:var(--bg);outline:none;}
+.cfrow input:focus{border-color:var(--acc);}
+.svcfg{width:100%;margin-top:6px;padding:10px;background:var(--acc);color:#fff;border:none;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;}
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--txt);color:#fff;padding:11px 18px;border-radius:8px;font-size:12px;z-index:9999;opacity:0;transition:opacity .25s;pointer-events:none;}
+.toast.show{opacity:1;}
+.toast.ok{background:var(--acc);}
+.toast.err{background:var(--dan);}
+/* EMPTY */
+.empty{text-align:center;padding:40px;color:var(--mut);}
+.empty .ico{font-size:32px;margin-bottom:10px;}
+.empty p{font-size:13px;}
 </style>
 </head>
 <body>
 
-<!-- SIDEBAR -->
-<nav id="sidebar">
-  <div class="logo">
-    <span>Praxi</span>
-    <small>Painel Médico</small>
-  </div>
-  <div class="nav-item active" onclick="showPage('agenda')">
-    <span class="nav-icon">📅</span> Agenda
-  </div>
-  <div class="nav-item" onclick="showPage('clientes')">
-    <span class="nav-icon">👥</span> Clientes
-  </div>
-  <div class="nav-item" onclick="showPage('estatisticas')">
-    <span class="nav-icon">📊</span> Estatísticas
-  </div>
-  <div class="nav-item" onclick="showPage('forum')">
-    <span class="nav-icon">💬</span> Fórum
-  </div>
-  <div class="nav-item" onclick="showPage('config')">
-    <span class="nav-icon">⚙️</span> Configurações
-  </div>
-  <div class="sidebar-bottom">
-    <div class="doctor-info">
-      <strong id="doc-name">Dr. Gustavo</strong>
-      <span id="doc-crm">CRM 00000</span>
-    </div>
-    <button class="logout-btn" onclick="logout()">Sair</button>
+<nav id="sb">
+  <div class="logo"><span>Praxi</span><small>Painel Médico</small></div>
+  <div class="ni on" onclick="showPage('agenda',this)">📅 Agenda</div>
+  <div class="ni" onclick="showPage('clientes',this)">👥 Clientes</div>
+  <div class="ni" onclick="showPage('estatisticas',this)">📊 Estatísticas</div>
+  <div class="ni" onclick="showPage('forum',this)">💬 Fórum</div>
+  <div class="ni" onclick="showPage('config',this)">⚙️ Configurações</div>
+  <div class="sb-bot">
+    <strong id="doc-name">Dr. Gustavo</strong>
+    <span id="doc-crm">CRM 00000</span>
+    <button class="logout" onclick="if(confirm('Sair?'))location.href='index.html'">Sair</button>
   </div>
 </nav>
 
-<!-- MAIN -->
 <main id="main">
 
-  <!-- AGENDA -->
-  <div id="page-agenda" class="page active">
-    <h1 class="page-title">Agenda</h1>
-    <p class="page-sub" id="agenda-sub">Carregando consultas...</p>
-
-    <div class="stat-grid" id="agenda-stats">
-      <div class="stat-card">
-        <div class="stat-label">Hoje</div>
-        <div class="stat-value" id="stat-hoje">—</div>
-        <div class="stat-desc">consultas</div>
+<!-- AGENDA -->
+<div id="pg-agenda" class="pg on">
+  <h1 class="ptit">Agenda</h1>
+  <p class="psub" id="ag-sub">Carregando consultas...</p>
+  <div class="sgrid">
+    <div class="sc"><div class="sc-lbl">Hoje</div><div class="sc-val" id="s-hoje">—</div><div class="sc-desc">consultas</div></div>
+    <div class="sc"><div class="sc-lbl">Esta semana</div><div class="sc-val" id="s-sem">—</div><div class="sc-desc">agendamentos</div></div>
+    <div class="sc"><div class="sc-lbl">Este mês</div><div class="sc-val" id="s-mes">—</div><div class="sc-desc">consultas</div></div>
+    <div class="sc"><div class="sc-lbl">Total</div><div class="sc-val" id="s-tot">—</div><div class="sc-desc">no banco</div></div>
+  </div>
+  <div class="ag-grid">
+    <div class="cal-wrap">
+      <div class="cal-hdr">
+        <h3 id="cal-lbl"></h3>
+        <div class="cal-nav">
+          <button class="cal-btn" onclick="mv(-1)">‹</button>
+          <button class="cal-btn" onclick="mv(1)">›</button>
+        </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-label">Esta semana</div>
-        <div class="stat-value" id="stat-semana">—</div>
-        <div class="stat-desc">agendamentos</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Este mês</div>
-        <div class="stat-value" id="stat-mes">—</div>
-        <div class="stat-desc">consultas</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Total</div>
-        <div class="stat-value" id="stat-total">—</div>
-        <div class="stat-desc">no banco</div>
-      </div>
+      <div class="cal-wk"><div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div></div>
+      <div class="cal-days" id="cal-days"></div>
     </div>
-
-    <div class="agenda-grid">
-      <div class="calendar-wrap">
-        <div class="cal-header">
-          <h3 id="cal-month-label"></h3>
-          <div class="cal-nav">
-            <button class="cal-btn" onclick="changeMonth(-1)">‹</button>
-            <button class="cal-btn" onclick="changeMonth(1)">›</button>
-          </div>
-        </div>
-        <div class="cal-weekdays">
-          <div>Dom</div><div>Seg</div><div>Ter</div>
-          <div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-        </div>
-        <div class="cal-days" id="cal-days"></div>
-      </div>
-
-      <div class="day-panel">
-        <h4 id="day-panel-title">Selecione um dia</h4>
-        <div id="day-appointments">
-          <div class="no-appts">Clique em um dia no calendário para ver as consultas</div>
-        </div>
-        <button class="add-appt-btn" id="add-appt-btn" style="display:none" onclick="openAddAppt()">
-          + Nova Consulta
-        </button>
-      </div>
+    <div class="day-pnl">
+      <h4 id="day-lbl">Selecione um dia</h4>
+      <div id="day-appts"><div class="no-appt">Clique em um dia para ver as consultas</div></div>
+      <button class="add-btn" id="add-btn" style="display:none" onclick="openAddAppt()">+ Nova Consulta</button>
     </div>
   </div>
+</div>
 
-  <!-- CLIENTES -->
-  <div id="page-clientes" class="page">
-    <h1 class="page-title">Clientes</h1>
-    <p class="page-sub">Pacientes cadastrados pelo WhatsApp</p>
-    <div class="clients-toolbar">
-      <input type="text" class="search-input" placeholder="Buscar por nome ou telefone..." oninput="filterClients(this.value)" />
-    </div>
-    <div id="clients-container" class="clients-grid">
-      <div class="loading"><div class="spinner"></div><br>Carregando...</div>
-    </div>
+<!-- CLIENTES -->
+<div id="pg-clientes" class="pg">
+  <h1 class="ptit">Clientes</h1>
+  <p class="psub">Pacientes cadastrados pelo WhatsApp</p>
+  <div class="ctb"><input class="srch" placeholder="Buscar por nome ou telefone..." oninput="filtCli(this.value)"></div>
+  <div id="cli-wrap" class="cgrid"><div class="empty"><div class="ico">⏳</div><p>Carregando...</p></div></div>
+</div>
+
+<!-- ESTATÍSTICAS -->
+<div id="pg-estatisticas" class="pg">
+  <h1 class="ptit">Estatísticas</h1>
+  <p class="psub">Visão geral do consultório</p>
+  <div class="sgrid" style="margin-bottom:20px">
+    <div class="sc"><div class="sc-lbl">Pacientes</div><div class="sc-val" id="e-pac">—</div><div class="sc-desc">cadastrados</div></div>
+    <div class="sc"><div class="sc-lbl">Consultas</div><div class="sc-val" id="e-con">—</div><div class="sc-desc">agendadas</div></div>
+    <div class="sc"><div class="sc-lbl">Este mês</div><div class="sc-val" id="e-mes">—</div><div class="sc-desc">consultas</div></div>
+    <div class="sc"><div class="sc-lbl">Hoje</div><div class="sc-val" id="e-hoj">—</div><div class="sc-desc">agendadas</div></div>
   </div>
-
-  <!-- ESTATÍSTICAS -->
-  <div id="page-estatisticas" class="page">
-    <h1 class="page-title">Estatísticas</h1>
-    <p class="page-sub">Visão geral do seu consultório</p>
-
-    <div class="stat-grid" style="margin-bottom:24px">
-      <div class="stat-card">
-        <div class="stat-label">Pacientes</div>
-        <div class="stat-value" id="est-pacientes">—</div>
-        <div class="stat-desc">cadastrados</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Consultas</div>
-        <div class="stat-value" id="est-consultas">—</div>
-        <div class="stat-desc">agendadas</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Este mês</div>
-        <div class="stat-value" id="est-mes">—</div>
-        <div class="stat-desc">consultas</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Hoje</div>
-        <div class="stat-value" id="est-hoje">—</div>
-        <div class="stat-desc">agendadas</div>
-      </div>
-    </div>
-
-    <div class="stats-grid">
-      <div class="chart-card">
-        <h4>Consultas por mês</h4>
-        <div class="bar-chart" id="bar-chart"></div>
-      </div>
-      <div class="chart-card">
-        <h4>Tipos de atendimento</h4>
-        <div class="donut-wrap">
-          <svg width="100" height="100" viewBox="0 0 100 100" id="donut-svg"></svg>
-          <div class="donut-legend" id="donut-legend"></div>
-        </div>
-      </div>
-      <div class="chart-card">
-        <h4>Consultas por dia da semana</h4>
-        <div class="bar-chart" id="bar-weekday"></div>
-      </div>
-      <div class="chart-card">
-        <h4>Horários mais populares</h4>
-        <div class="bar-chart" id="bar-hours"></div>
-      </div>
-    </div>
+  <div class="stgrid">
+    <div class="stcard"><h4>Consultas por mês</h4><div class="bar-chart" id="bc-mes"></div></div>
+    <div class="stcard"><h4>Tipos de atendimento</h4><div class="donut-wrap"><svg width="90" height="90" viewBox="0 0 100 100" id="donut"></svg><div class="dleg" id="dleg"></div></div></div>
+    <div class="stcard"><h4>Por dia da semana</h4><div class="bar-chart" id="bc-dia"></div></div>
+    <div class="stcard"><h4>Horários populares</h4><div class="bar-chart" id="bc-hr"></div></div>
   </div>
+</div>
 
-  <!-- CONFIG -->
-  <div id="page-config" class="page">
-    <h1 class="page-title">Configurações</h1>
-    <p class="page-sub">Configure sua agenda e disponibilidade</p>
-    <div class="config-grid">
-      <div class="config-card">
-        <h4>Dias de Atendimento</h4>
-        <div class="day-toggles" id="day-toggles"></div>
-        <h4 style="margin-top:16px">Horários</h4>
-        <div class="config-row">
-          <label>Início</label>
-          <input type="time" id="cfg-start" value="09:00">
-        </div>
-        <div class="config-row">
-          <label>Fim</label>
-          <input type="time" id="cfg-end" value="18:00">
-        </div>
-        <div class="config-row">
-          <label>Duração</label>
-          <select id="cfg-duration">
-            <option value="30">30 minutos</option>
-            <option value="45">45 minutos</option>
-            <option value="60" selected>60 minutos</option>
-            <option value="90">90 minutos</option>
+<!-- FORUM -->
+<div id="pg-forum" class="pg">
+  <h1 class="ptit">Fórum Médico</h1>
+  <p class="psub">Compartilhe casos com outros profissionais</p>
+  <div class="forum-wrap">
+    <div>
+      <div class="f-new">
+        <div class="fg"><label>Título</label><input id="f-tit" placeholder="Ex: Dúvida sobre diagnóstico..."></div>
+        <div class="fg"><label>Descrição do caso</label><textarea id="f-bod" rows="3" placeholder="Descreva o caso de forma anônima..."></textarea></div>
+        <div style="display:flex;gap:9px;align-items:center">
+          <select id="f-tag" style="padding:7px 10px;border:1px solid var(--bor);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;background:var(--bg)">
+            <option value="geral">Geral</option><option value="cardiologia">Cardiologia</option>
+            <option value="pediatria">Pediatria</option><option value="ortopedia">Ortopedia</option>
+            <option value="neurologia">Neurologia</option><option value="urgencia">Urgência</option>
           </select>
+          <button onclick="pubPost()" style="margin-left:auto;padding:9px 18px;background:var(--acc);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer">Publicar</button>
         </div>
-        <button class="save-config-btn" onclick="saveConfig()">Salvar Configurações</button>
       </div>
-      <div class="config-card">
-        <h4>Informações do Médico</h4>
-        <div class="config-row" style="flex-direction:column; align-items:flex-start; gap:6px">
-          <label style="min-width:auto">Nome</label>
-          <input type="text" id="cfg-nome" placeholder="Dr. Nome Sobrenome">
-        </div>
-        <div class="config-row" style="flex-direction:column; align-items:flex-start; gap:6px">
-          <label style="min-width:auto">CRM</label>
-          <input type="text" id="cfg-crm" placeholder="CRM 00000">
-        </div>
-        <div class="config-row" style="flex-direction:column; align-items:flex-start; gap:6px">
-          <label style="min-width:auto">Especialidade</label>
-          <input type="text" id="cfg-especialidade" placeholder="Clínica Geral">
-        </div>
-        <button class="save-config-btn" style="margin-top:16px" onclick="saveProfile()">Salvar Perfil</button>
+      <div id="f-posts"></div>
+    </div>
+    <div>
+      <div style="background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:18px;margin-bottom:14px">
+        <h4 style="font-size:13px;font-weight:600;margin-bottom:12px">🔥 Tags populares</h4>
+        <div id="f-tpop" style="display:flex;flex-wrap:wrap;gap:7px"></div>
+      </div>
+      <div style="background:var(--acl);border:1px solid var(--acc);border-radius:10px;padding:16px">
+        <h4 style="font-size:13px;font-weight:600;color:var(--acc);margin-bottom:7px">💡 Lembrete</h4>
+        <p style="font-size:12px;color:var(--mut);line-height:1.5">Não compartilhe dados identificáveis de pacientes.</p>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- FÓRUM -->
-  <div id="page-forum" class="page">
-    <h1 class="page-title">Fórum Médico</h1>
-    <p class="page-sub">Compartilhe casos e discussões com outros profissionais</p>
-
-    <div style="display:grid;grid-template-columns:1fr 320px;gap:20px">
-      <!-- Feed de posts -->
-      <div>
-        <!-- Nova discussão -->
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px">
-          <div class="form-group">
-            <label>Título da discussão</label>
-            <input type="text" id="forum-titulo" placeholder="Ex: Dúvida sobre diagnóstico diferencial...">
-          </div>
-          <div class="form-group">
-            <label>Descrição do caso</label>
-            <textarea id="forum-corpo" rows="4" placeholder="Descreva o caso ou dúvida de forma anônima..."></textarea>
-          </div>
-          <div style="display:flex;gap:10px;align-items:center">
-            <select id="forum-tag" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);color:var(--text)">
-              <option value="geral">Geral</option>
-              <option value="cardiologia">Cardiologia</option>
-              <option value="pediatria">Pediatria</option>
-              <option value="ortopedia">Ortopedia</option>
-              <option value="neurologia">Neurologia</option>
-              <option value="farmacologia">Farmacologia</option>
-              <option value="urgencia">Urgência</option>
-            </select>
-            <button onclick="publicarPost()" style="margin-left:auto;padding:10px 20px;background:var(--accent);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer">
-              Publicar
-            </button>
-          </div>
-        </div>
-
-        <!-- Posts -->
-        <div id="forum-posts"></div>
+<!-- CONFIG -->
+<div id="pg-config" class="pg">
+  <h1 class="ptit">Configurações</h1>
+  <p class="psub">Agenda e perfil</p>
+  <div class="cfgrid">
+    <div class="cfcard">
+      <h4>Dias de Atendimento</h4>
+      <div class="day-togs" id="day-togs"></div>
+      <h4 style="margin-top:14px;margin-bottom:10px">Horários</h4>
+      <div class="cfrow"><label>Início</label><input type="time" id="cfg-s" value="09:00"></div>
+      <div class="cfrow"><label>Fim</label><input type="time" id="cfg-e" value="18:00"></div>
+      <div class="cfrow"><label>Duração</label>
+        <select id="cfg-d" style="flex:1;padding:7px 10px;border:1px solid var(--bor);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;background:var(--bg)">
+          <option value="30">30 min</option><option value="45">45 min</option>
+          <option value="60" selected>60 min</option><option value="90">90 min</option>
+        </select>
       </div>
-
-      <!-- Sidebar Fórum -->
-      <div>
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px">
-          <h4 style="font-size:14px;font-weight:600;margin-bottom:14px">🔥 Tags populares</h4>
-          <div style="display:flex;flex-wrap:wrap;gap:8px" id="forum-tags-pop"></div>
-        </div>
-        <div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:10px;padding:18px">
-          <h4 style="font-size:14px;font-weight:600;color:var(--accent);margin-bottom:8px">💡 Lembrete</h4>
-          <p style="font-size:13px;color:var(--muted);line-height:1.5">Não compartilhe dados identificáveis de pacientes. Mantenha o anonimato em todos os casos clínicos.</p>
-        </div>
-      </div>
+      <button class="svcfg" onclick="saveCfg()">Salvar Configurações</button>
+    </div>
+    <div class="cfcard">
+      <h4>Informações do Médico</h4>
+      <div class="fg" style="margin-top:10px"><label>Nome</label><input id="cfg-nom" placeholder="Dr. Nome Sobrenome"></div>
+      <div class="fg"><label>CRM</label><input id="cfg-crm" placeholder="CRM 00000"></div>
+      <div class="fg"><label>Especialidade</label><input id="cfg-esp" placeholder="Clínica Geral"></div>
+      <button class="svcfg" style="margin-top:4px" onclick="saveProf()">Salvar Perfil</button>
     </div>
   </div>
+</div>
 
 </main>
 
-<!-- MODAL: Nova Consulta -->
-<div class="modal-overlay" id="modal-appt">
+<!-- MODAL NOVA CONSULTA -->
+<div class="ov" id="ov-appt">
   <div class="modal">
     <h3>Nova Consulta</h3>
-    <div class="form-group">
-      <label>Data</label>
-      <input type="date" id="appt-date">
+    <div class="fg"><label>Data</label><input type="date" id="a-date"></div>
+    <div class="fg"><label>Horário</label><input type="time" id="a-time"></div>
+    <div class="fg"><label>Nome do Paciente</label><input id="a-name" placeholder="Nome completo"></div>
+    <div class="fg"><label>Tipo</label>
+      <select id="a-type"><option value="consulta">Consulta</option><option value="retorno">Retorno</option><option value="exame">Exame</option></select>
     </div>
-    <div class="form-group">
-      <label>Horário</label>
-      <input type="time" id="appt-time">
-    </div>
-    <div class="form-group">
-      <label>Nome do Paciente</label>
-      <input type="text" id="appt-patient" placeholder="Nome completo">
-    </div>
-    <div class="form-group">
-      <label>Tipo</label>
-      <select id="appt-type">
-        <option value="consulta">Consulta</option>
-        <option value="retorno">Retorno</option>
-        <option value="exame">Exame</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Observações</label>
-      <textarea id="appt-obs" rows="2" placeholder="Opcional..."></textarea>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('modal-appt')">Cancelar</button>
-      <button class="btn-save" onclick="saveAppointment()">Salvar</button>
+    <div class="fg"><label>Observações</label><textarea id="a-obs" rows="2" placeholder="Opcional..."></textarea></div>
+    <div class="ma">
+      <button class="btn-c" onclick="closeOv('ov-appt')">Cancelar</button>
+      <button class="btn-s" onclick="saveAppt()">Salvar</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: Confirmar exclusão de paciente -->
-<div class="modal-overlay" id="modal-confirm-delete">
+<!-- MODAL CONFIRMAR DELETE -->
+<div class="ov" id="ov-del">
   <div class="modal">
-    <h3>Excluir paciente?</h3>
-    <p style="font-size:14px; color:var(--muted); margin-bottom:20px">Esta ação não pode ser desfeita. O histórico do paciente será removido permanentemente.</p>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('modal-confirm-delete')">Cancelar</button>
-      <button class="btn-danger" onclick="confirmDeleteClient()">Excluir</button>
+    <h3>Confirmar exclusão</h3>
+    <p style="font-size:13px;color:var(--mut);margin-bottom:18px">Esta ação não pode ser desfeita.</p>
+    <div class="ma">
+      <button class="btn-c" onclick="closeOv('ov-del')">Cancelar</button>
+      <button class="btn-d" onclick="doDelete()">Excluir</button>
     </div>
   </div>
 </div>
 
-<!-- Ficha lateral -->
-<div class="ficha-overlay" id="ficha-overlay" onclick="closeFicha()"></div>
-<div class="ficha-panel" id="ficha-panel">
-  <button class="ficha-close" onclick="closeFicha()">✕</button>
-  <div id="ficha-content"></div>
+<!-- FICHA -->
+<div class="fov" id="fov" onclick="closeFicha()"></div>
+<div class="fpnl" id="fpnl">
+  <button class="fcls" onclick="closeFicha()">✕</button>
+  <div id="f-cont"></div>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── CONFIG ───────────────────────────────────────────────────
 const API = 'https://praxi-bot-production.up.railway.app';
-const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-const DAYS_PT = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-const DAYS_FULL = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const MES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const DSS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DSF = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
 
-// ─── STATE ───────────────────────────────────────────────────
-let allAppointments = [];
-let allClients = [];
-let selectedDate = null;
-let calYear = new Date().getFullYear();
-let calMonth = new Date().getMonth();
-let pendingDeleteId = null;
-let pendingDeleteType = null; // 'client' | 'appointment'
+let appts = [];       // todas consultas normalizadas
+let clis  = [];       // todos clientes
+let selDate = null;
+let calY = new Date().getFullYear();
+let calM = new Date().getMonth();
+let delId = null, delType = null;
+let selDays = [1,2,3,4,5];
+let fPosts = [];
 
-// ─── INIT ────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  loadConfig();
-  loadDoctor();
-  renderCalendar();
-  loadAgenda();
-  loadClients();
-  initConfig();
+// ── INIT ──────────────────────────────────────────────
+window.addEventListener('load', () => {
+  loadLocalCfg();
+  renderCal();
+  fetchAgenda();
+  fetchClis();
+  fPosts = JSON.parse(localStorage.getItem('praxi_forum')||'[]');
 });
 
-// ─── NAVIGATION ──────────────────────────────────────────────
+// ── NAVIGATION ────────────────────────────────────────
+function showPage(name, el) {
+  document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
+  document.getElementById('pg-' + name).classList.add('on');
+  if (el) el.classList.add('on');
+  if (name === 'estatisticas') buildStats();
+  if (name === 'forum') renderForum();
+  if (name === 'config') initCfgUI();
+}
 
-// ─── DATA HELPERS ────────────────────────────────────────────
-
-/**
- * Normaliza um item de agenda para { _date, _time, _patientName, _type }
- * Suporta ambos os formatos do banco:
- *   1. { dataHora: "2026-05-22T14:00:00.000Z" }  (criado manualmente)
- *   2. { dataHora: "2026-05-15", appointmentTime: "09:00" }  (criado pelo bot)
- * Campos do servidor: pacienteNome, tipo, appointmentTime
- */
-function normalizeAppointment(item) {
-  let date = '';
-  let time = '';
-
-  if (item.dataHora) {
-    const raw = item.dataHora;
-    if (raw.includes('T')) {
-      // ISO completo — extrai direto da string, evita conversão de timezone
-      date = raw.substring(0, 10);   // "2026-05-22"
-      time = raw.substring(11, 16);  // "14:00"
-    } else {
-      // Só data — hora vem separada em appointmentTime
-      date = raw.substring(0, 10);
-      time = item.appointmentTime || item.horario || '00:00';
-    }
-  } else if (item.date) {
-    date = item.date;
-    time = item.time || item.appointmentTime || '00:00';
+// ── NORMALIZA CONSULTA ─────────────────────────────────
+// O servidor retorna: { agenda:[...], total:N }
+// Cada item pode ter:
+//   dataHora:"2026-05-22T14:00:00.000Z"  (manual)
+//   dataHora:"2026-05-15", appointmentTime:"09:00"  (bot)
+// Nome: pacienteNome  |  Tipo: tipo  |  ID: _id
+function norm(item) {
+  let date = '', time = '';
+  const raw = item.dataHora || '';
+  if (raw.includes('T')) {
+    date = raw.slice(0, 10);
+    time = raw.slice(11, 16);
+  } else if (raw) {
+    date = raw.slice(0, 10);
+    time = (item.appointmentTime || item.horario || '00:00').slice(0,5);
   }
-
-  // Normaliza campos — o servidor usa "pacienteNome" e "tipo"
-  const _patientName = item.pacienteNome || item.patientName || item.nome || item.name || 'Paciente';
-  const _type        = item.tipo || item.type || 'Consulta';
-
-  return { ...item, _date: date, _time: time, _patientName, _type };
+  const nome = item.pacienteNome || item.patientName || item.nome || item.name || 'Paciente';
+  const tipo = item.tipo || item.type || 'Consulta';
+  const id   = item._id || item.id || '';
+  return { ...item, _date: date, _time: time, _nome: nome, _tipo: tipo, _id: id };
 }
 
-function formatDateBR(dateStr) {
-  if (!dateStr) return '';
-  const [y, m, d] = dateStr.split('-');
-  return `${d}/${m}/${y}`;
-}
-
-function todayStr() {
-  return new Date().toLocaleDateString('sv-SE');
-}
-
-function isThisWeek(dateStr) {
-  const d = new Date(dateStr + 'T12:00:00');
-  const now = new Date();
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay());
-  startOfWeek.setHours(0,0,0,0);
-  const endOfWeek = new Date(startOfWeek);
-  endOfWeek.setDate(startOfWeek.getDate() + 7);
-  return d >= startOfWeek && d < endOfWeek;
-}
-
-function isThisMonth(dateStr) {
-  if (!dateStr) return false;
-  const now = new Date();
-  return dateStr.startsWith(`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`);
-}
-
-// ─── AGENDA ──────────────────────────────────────────────────
-async function loadAgenda() {
+// ── AGENDA FETCH ───────────────────────────────────────
+async function fetchAgenda() {
   try {
-    const res = await fetch(`${API}/api/agenda`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    // O servidor retorna { agenda: [...], total: N }
-    const list = Array.isArray(data) ? data
-                : (data.agenda || data.appointments || data.consultas || []);
-    allAppointments = list.map(normalizeAppointment);
-    renderCalendar();
-    updateAgendaStats();
-    document.getElementById('agenda-sub').textContent =
-      `${allAppointments.length} consulta(s) encontrada(s) no banco`;
-  } catch (e) {
-    console.error('Erro ao carregar agenda:', e);
-    document.getElementById('agenda-sub').textContent = 'Erro ao conectar com o servidor';
-    showToast('Erro ao carregar agenda', 'error');
+    const r = await fetch(API + '/api/agenda');
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    // Aceita array direto OU { agenda:[...] }
+    const list = Array.isArray(d) ? d : (d.agenda || d.appointments || []);
+    appts = list.map(norm);
+    renderCal();
+    updStats();
+    document.getElementById('ag-sub').textContent = appts.length + ' consulta(s) no banco';
+  } catch(e) {
+    document.getElementById('ag-sub').textContent = 'Erro ao conectar com o servidor';
+    toast('Erro ao carregar agenda', 'err');
   }
 }
 
-function updateAgendaStats() {
-  const today = todayStr();
-  const hoje = allAppointments.filter(a => a._date === today).length;
-  const semana = allAppointments.filter(a => isThisWeek(a._date)).length;
-  const mes = allAppointments.filter(a => isThisMonth(a._date)).length;
-  document.getElementById('stat-hoje').textContent = hoje;
-  document.getElementById('stat-semana').textContent = semana;
-  document.getElementById('stat-mes').textContent = mes;
-  document.getElementById('stat-total').textContent = allAppointments.length;
+function updStats() {
+  const today = toDay();
+  document.getElementById('s-hoje').textContent = appts.filter(a=>a._date===today).length;
+  document.getElementById('s-sem').textContent  = appts.filter(a=>isWeek(a._date)).length;
+  document.getElementById('s-mes').textContent  = appts.filter(a=>isMes(a._date)).length;
+  document.getElementById('s-tot').textContent  = appts.length;
 }
 
-// ─── CALENDAR ────────────────────────────────────────────────
-function renderCalendar() {
-  const label = `${MONTHS[calMonth]} ${calYear}`;
-  document.getElementById('cal-month-label').textContent = label;
-
-  const container = document.getElementById('cal-days');
-  container.innerHTML = '';
-
-  const firstDay = new Date(calYear, calMonth, 1).getDay();
-  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-  const today = todayStr();
-
-  // days with appointments this month
-  const monthStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}`;
-  const daysWithAppts = new Set(
-    allAppointments
-      .filter(a => a._date && a._date.startsWith(monthStr))
-      .map(a => parseInt(a._date.split('-')[2]))
-  );
-
-  // Empty cells
-  for (let i = 0; i < firstDay; i++) {
-    const el = document.createElement('div');
-    el.className = 'cal-day empty';
-    container.appendChild(el);
-  }
-
-  for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const el = document.createElement('div');
-    el.className = 'cal-day';
-    el.textContent = d;
-    if (dateStr === today) el.classList.add('today');
-    if (daysWithAppts.has(d)) el.classList.add('has-event');
-    if (dateStr === selectedDate) el.classList.add('selected');
-    el.onclick = () => selectDay(dateStr);
-    container.appendChild(el);
+// ── CALENDÁRIO ────────────────────────────────────────
+function renderCal() {
+  document.getElementById('cal-lbl').textContent = MES[calM] + ' ' + calY;
+  const c = document.getElementById('cal-days');
+  c.innerHTML = '';
+  const first = new Date(calY, calM, 1).getDay();
+  const dias  = new Date(calY, calM+1, 0).getDate();
+  const mStr  = calY+'-'+pad(calM+1);
+  const today = toDay();
+  const withAppt = new Set(appts.filter(a=>a._date&&a._date.startsWith(mStr)).map(a=>+a._date.slice(8,10)));
+  for(let i=0;i<first;i++){const e=document.createElement('div');e.className='cd empty';c.appendChild(e);}
+  for(let d=1;d<=dias;d++){
+    const ds = calY+'-'+pad(calM+1)+'-'+pad(d);
+    const e = document.createElement('div');
+    e.className='cd';
+    e.textContent=d;
+    if(ds===today) e.classList.add('today');
+    if(withAppt.has(d)) e.classList.add('has-ev');
+    if(ds===selDate) e.classList.add('sel');
+    e.onclick=()=>selDay(ds);
+    c.appendChild(e);
   }
 }
 
-function changeMonth(dir) {
-  calMonth += dir;
-  if (calMonth < 0) { calMonth = 11; calYear--; }
-  if (calMonth > 11) { calMonth = 0; calYear++; }
-  renderCalendar();
+function mv(dir){calM+=dir;if(calM<0){calM=11;calY--;}if(calM>11){calM=0;calY++;}renderCal();}
+
+function selDay(ds){
+  selDate=ds;
+  renderCal();
+  renderDayPanel(ds);
+  document.getElementById('add-btn').style.display='block';
 }
 
-function selectDay(dateStr) {
-  selectedDate = dateStr;
-  renderCalendar(); // atualiza selected highlight
-  renderDayPanel(dateStr);
-  document.getElementById('add-appt-btn').style.display = 'block';
+function renderDayPanel(ds){
+  const [y,m,d]=ds.split('-');
+  const dow=new Date(ds+'T12:00:00').getDay();
+  document.getElementById('day-lbl').textContent=DSF[dow]+', '+d+'/'+m+'/'+y;
+  const list=appts.filter(a=>a._date===ds).sort((a,b)=>a._time.localeCompare(b._time));
+  const c=document.getElementById('day-appts');
+  if(!list.length){c.innerHTML='<div class="no-appt">Sem consultas neste dia</div>';return;}
+  c.innerHTML=list.map(a=>`
+    <div class="appt">
+      <div class="appt-t">${a._time}</div>
+      <div class="appt-i"><strong>${a._nome}</strong><span>${a._tipo}</span></div>
+      <button class="appt-del" onclick="delAppt('${a._id}',event)">🗑</button>
+    </div>`).join('');
 }
 
-function renderDayPanel(dateStr) {
-  const title = document.getElementById('day-panel-title');
-  const container = document.getElementById('day-appointments');
+async function delAppt(id,ev){
+  ev.stopPropagation();
+  if(!id||id==='undefined'){toast('ID inválido','err');return;}
+  if(!confirm('Cancelar esta consulta?'))return;
+  try{
+    const r=await fetch(API+'/api/agenda/'+id,{method:'DELETE'});
+    if(!r.ok)throw new Error(r.status);
+    appts=appts.filter(a=>a._id!==id);
+    renderCal();
+    if(selDate)renderDayPanel(selDate);
+    updStats();
+    toast('Consulta cancelada','ok');
+  }catch(e){toast('Erro ao cancelar','err');}
+}
 
-  const [y, m, d] = dateStr.split('-');
-  const dayOfWeek = new Date(dateStr + 'T12:00:00').getDay();
-  title.textContent = `${DAYS_FULL[dayOfWeek]}, ${d}/${m}/${y}`;
+function openAddAppt(){
+  document.getElementById('a-date').value=selDate||toDay();
+  document.getElementById('a-time').value='';
+  document.getElementById('a-name').value='';
+  document.getElementById('a-type').value='consulta';
+  document.getElementById('a-obs').value='';
+  document.getElementById('ov-appt').classList.add('open');
+}
 
-  const appts = allAppointments
-    .filter(a => a._date === dateStr)
-    .sort((a, b) => a._time.localeCompare(b._time));
+async function saveAppt(){
+  const date=document.getElementById('a-date').value;
+  const time=document.getElementById('a-time').value;
+  const name=document.getElementById('a-name').value.trim();
+  const type=document.getElementById('a-type').value;
+  const obs=document.getElementById('a-obs').value.trim();
+  if(!date||!time||!name){toast('Preencha data, horário e nome','err');return;}
+  try{
+    const r=await fetch(API+'/api/agenda',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({dataHora:date+'T'+time+':00.000Z',pacienteNome:name,tipo:type,observacoes:obs})});
+    if(!r.ok)throw new Error(r.status);
+    const saved=await r.json();
+    appts.push(norm(saved.appointment||saved));
+    renderCal();
+    if(selDate===date)renderDayPanel(date);
+    updStats();
+    closeOv('ov-appt');
+    toast('Consulta salva!','ok');
+  }catch(e){toast('Erro ao salvar','err');}
+}
 
-  if (appts.length === 0) {
-    container.innerHTML = '<div class="no-appts">Sem consultas neste dia</div>';
-    return;
+// ── CLIENTES FETCH ─────────────────────────────────────
+async function fetchClis(){
+  try{
+    const r=await fetch(API+'/api/patients');
+    if(!r.ok)throw new Error(r.status);
+    const d=await r.json();
+    clis=Array.isArray(d)?d:(d.patients||d.clientes||d.data||[]);
+    renderClis(clis);
+  }catch(e){
+    document.getElementById('cli-wrap').innerHTML='<div class="empty"><div class="ico">⚠️</div><p>Erro ao carregar clientes</p></div>';
   }
+}
 
-  container.innerHTML = appts.map(a => `
-    <div class="appointment-item">
-      <div class="appt-time">${a._time}</div>
-      <div class="appt-info">
-        <strong>${a._patientName}</strong>
-        <span>${a._type}</span>
+function renderClis(list){
+  const c=document.getElementById('cli-wrap');
+  if(!list||!list.length){c.innerHTML='<div class="empty"><div class="ico">👤</div><p>Nenhum cliente ainda</p></div>';return;}
+  c.innerHTML=list.map(cl=>{
+    const nm=cl.name||cl.nome||cl.patientName||'Sem nome';
+    const ph=cl.phone||cl.telefone||cl.whatsapp||cl.phoneNumber||'';
+    const md=cl.medications||cl.medicamentos||'';
+    const id=cl._id||cl.id||'';
+    return `<div class="cc" onclick="openFicha('${id}')">
+      <button class="cc-del" onclick="askDel('${id}','client',event)">🗑</button>
+      <div class="cc-name">${nm}</div>
+      <div class="cc-phone">${ph||'Sem telefone'}</div>
+      <div class="cc-tags">
+        <span class="tag tg">Ativo</span>
+        ${md&&md!=='nenhum'?'<span class="tag to">Med. em uso</span>':''}
       </div>
-      <button class="appt-delete" title="Cancelar consulta"
-        onclick="deleteAppointment('${a._id || a.id}', event)">🗑</button>
-    </div>
-  `).join('');
-}
-
-async function deleteAppointment(id, evt) {
-  evt.stopPropagation();
-  if (!id || id === 'undefined') { showToast('ID inválido', 'error'); return; }
-  if (!confirm('Cancelar esta consulta?')) return;
-  try {
-    const res = await fetch(`${API}/api/agenda/${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    allAppointments = allAppointments.filter(a => (a._id || a.id) !== id);
-    renderCalendar();
-    if (selectedDate) renderDayPanel(selectedDate);
-    updateAgendaStats();
-    showToast('Consulta cancelada', 'success');
-  } catch (e) {
-    console.error(e);
-    showToast('Erro ao cancelar consulta', 'error');
-  }
-}
-
-function openAddAppt() {
-  const modal = document.getElementById('modal-appt');
-  document.getElementById('appt-date').value = selectedDate || todayStr();
-  document.getElementById('appt-time').value = '';
-  document.getElementById('appt-patient').value = '';
-  document.getElementById('appt-type').value = 'consulta';
-  document.getElementById('appt-obs').value = '';
-  modal.classList.add('open');
-}
-
-async function saveAppointment() {
-  const date = document.getElementById('appt-date').value;
-  const time = document.getElementById('appt-time').value;
-  const name = document.getElementById('appt-patient').value.trim();
-  const type = document.getElementById('appt-type').value;
-  const obs  = document.getElementById('appt-obs').value.trim();
-
-  if (!date || !time || !name) { showToast('Preencha data, horário e nome', 'error'); return; }
-
-  const body = {
-    dataHora: `${date}T${time}:00.000Z`,
-    patientName: name,
-    type,
-    observacoes: obs
-  };
-
-  try {
-    const res = await fetch(`${API}/api/agenda`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const saved = await res.json();
-    allAppointments.push(normalizeAppointment(saved.appointment || saved));
-    renderCalendar();
-    if (selectedDate === date) renderDayPanel(date);
-    updateAgendaStats();
-    closeModal('modal-appt');
-    showToast('Consulta agendada!', 'success');
-  } catch (e) {
-    console.error(e);
-    showToast('Erro ao salvar consulta', 'error');
-  }
-}
-
-// ─── CLIENTES ────────────────────────────────────────────────
-async function loadClients() {
-  try {
-    const res = await fetch(`${API}/api/patients`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    allClients = Array.isArray(data) ? data : (data.patients || data.clientes || []);
-    renderClients(allClients);
-  } catch (e) {
-    console.error(e);
-    document.getElementById('clients-container').innerHTML =
-      '<div class="empty-state"><div class="icon">⚠️</div><p>Erro ao carregar clientes</p></div>';
-  }
-}
-
-function renderClients(list) {
-  const container = document.getElementById('clients-container');
-  if (!list || list.length === 0) {
-    container.innerHTML = '<div class="empty-state"><div class="icon">👤</div><p>Nenhum cliente cadastrado ainda</p></div>';
-    return;
-  }
-  container.innerHTML = list.map(c => {
-    const name = c.name || c.nome || c.patientName || 'Sem nome';
-    const phone = c.phone || c.telefone || c.whatsapp || '';
-    const meds = c.medications || c.medicamentos || '';
-    return `
-      <div class="client-card" onclick="openFicha('${c._id || c.id}')">
-        <button class="client-delete-btn" onclick="askDeleteClient('${c._id || c.id}', event)" title="Excluir">🗑</button>
-        <div class="client-name">${name}</div>
-        <div class="client-phone">${phone || 'Sem telefone'}</div>
-        <div class="client-tags">
-          <span class="tag tag-green">Ativo</span>
-          ${meds && meds !== 'nenhum' ? '<span class="tag tag-orange">Med. em uso</span>' : ''}
-        </div>
-      </div>
-    `;
+    </div>`;
   }).join('');
 }
 
-function filterClients(q) {
-  const filtered = q
-    ? allClients.filter(c => {
-        const name = (c.name || c.nome || '').toLowerCase();
-        const phone = (c.phone || c.telefone || '').toLowerCase();
-        return name.includes(q.toLowerCase()) || phone.includes(q.toLowerCase());
-      })
-    : allClients;
-  renderClients(filtered);
+function filtCli(q){
+  const f=q?clis.filter(c=>{
+    const nm=(c.name||c.nome||'').toLowerCase();
+    const ph=(c.phone||c.telefone||c.phoneNumber||'').toLowerCase();
+    return nm.includes(q.toLowerCase())||ph.includes(q.toLowerCase());
+  }):clis;
+  renderClis(f);
 }
 
-function askDeleteClient(id, evt) {
-  evt.stopPropagation();
-  pendingDeleteId = id;
-  pendingDeleteType = 'client';
-  document.getElementById('modal-confirm-delete').classList.add('open');
-}
-
-async function confirmDeleteClient() {
-  if (!pendingDeleteId) return;
-  try {
-    const res = await fetch(`${API}/api/patients/${pendingDeleteId}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    allClients = allClients.filter(c => (c._id || c.id) !== pendingDeleteId);
-    renderClients(allClients);
-    closeModal('modal-confirm-delete');
-    closeFicha();
-    showToast('Paciente excluído', 'success');
-  } catch (e) {
-    console.error(e);
-    showToast('Erro ao excluir paciente', 'error');
-    closeModal('modal-confirm-delete');
-  }
-  pendingDeleteId = null;
-}
-
-// ─── FICHA ───────────────────────────────────────────────────
-function openFicha(id) {
-  const c = allClients.find(x => (x._id || x.id) === id);
-  if (!c) return;
-
-  const name = c.name || c.nome || 'Sem nome';
-  const phone = c.phone || c.telefone || '';
-  const dob = c.dob || c.dataNascimento || '';
-  const city = c.city || c.cidade || '';
-  const email = c.email || '';
-  const meds = c.medications || c.medicamentos || 'Nenhum';
-  const hist = c.history || c.historico || [];
-
-  const patientAppts = allAppointments
-    .filter(a => (a.pacienteId === (c._id||c.id) || a._patientName === name || a.pacienteNome === name))
-    .sort((a, b) => b._date.localeCompare(a._date))
-    .slice(0, 5);
-
-  document.getElementById('ficha-content').innerHTML = `
-    <div class="ficha-name">${name}</div>
-    <div class="ficha-phone">${phone || 'Sem telefone'}</div>
-
-    <div class="ficha-section">
-      <h4>Informações</h4>
-      ${dob ? `<div class="ficha-row"><span>Nascimento</span><span>${dob}</span></div>` : ''}
-      ${city ? `<div class="ficha-row"><span>Cidade</span><span>${city}</span></div>` : ''}
-      ${email ? `<div class="ficha-row"><span>Email</span><span>${email}</span></div>` : ''}
-      <div class="ficha-row"><span>Medicamentos</span><span>${meds}</span></div>
+// ── FICHA ─────────────────────────────────────────────
+function openFicha(id){
+  const c=clis.find(x=>(x._id||x.id)===id);
+  if(!c)return;
+  const nm=c.name||c.nome||c.patientName||'Sem nome';
+  const ph=c.phone||c.telefone||c.whatsapp||c.phoneNumber||'';
+  const dob=c.dob||c.dataNascimento||'';
+  const city=c.city||c.cidade||'';
+  const email=c.email||'';
+  const meds=c.medications||c.medicamentos||'Nenhum';
+  const pa=appts.filter(a=>a._nome===nm||a.pacienteId===id).sort((a,b)=>b._date.localeCompare(a._date)).slice(0,5);
+  document.getElementById('f-cont').innerHTML=`
+    <div class="fname">${nm}</div>
+    <div class="fphone">${ph||'Sem telefone'}</div>
+    <div class="fsec"><h4>Informações</h4>
+      ${dob?`<div class="frow"><span>Nascimento</span><span>${dob}</span></div>`:''}
+      ${city?`<div class="frow"><span>Cidade</span><span>${city}</span></div>`:''}
+      ${email?`<div class="frow"><span>Email</span><span>${email}</span></div>`:''}
+      <div class="frow"><span>Medicamentos</span><span>${meds}</span></div>
     </div>
-
-    ${patientAppts.length > 0 ? `
-    <div class="ficha-section">
-      <h4>Consultas</h4>
-      ${patientAppts.map(a => `
-        <div class="hist-item">
-          <strong>${a._time} — ${a._type}</strong>
-          <small>${formatDateBR(a._date)}</small>
-        </div>
-      `).join('')}
-    </div>` : ''}
-
-    ${hist.length > 0 ? `
-    <div class="ficha-section">
-      <h4>Histórico</h4>
-      ${hist.map(h => `
-        <div class="hist-item">
-          <strong>${h.type || 'Entrada'}</strong>
-          <small>${h.date || ''}</small>
-        </div>
-      `).join('')}
-    </div>` : ''}
-
-    <button class="ficha-delete-btn" onclick="askDeleteClient('${id}', event)">
-      🗑 Excluir este paciente
-    </button>
-  `;
-
-  document.getElementById('ficha-overlay').classList.add('open');
-  document.getElementById('ficha-panel').classList.add('open');
+    ${pa.length?`<div class="fsec"><h4>Consultas</h4>${pa.map(a=>`
+      <div class="hi"><strong>${a._time} — ${a._tipo}</strong><small>${fmtDt(a._date)}</small></div>`).join('')}</div>`:''}
+    <button class="fdel" onclick="askDel('${id}','client',event)">🗑 Excluir paciente</button>`;
+  document.getElementById('fov').classList.add('open');
+  document.getElementById('fpnl').classList.add('open');
+}
+function closeFicha(){
+  document.getElementById('fov').classList.remove('open');
+  document.getElementById('fpnl').classList.remove('open');
 }
 
-function closeFicha() {
-  document.getElementById('ficha-overlay').classList.remove('open');
-  document.getElementById('ficha-panel').classList.remove('open');
+// ── DELETE ─────────────────────────────────────────────
+function askDel(id,type,ev){ev.stopPropagation();delId=id;delType=type;document.getElementById('ov-del').classList.add('open');}
+async function doDelete(){
+  if(!delId)return;
+  try{
+    const url=delType==='client'?`${API}/api/patients/${delId}`:`${API}/api/agenda/${delId}`;
+    const r=await fetch(url,{method:'DELETE'});
+    if(!r.ok)throw new Error(r.status);
+    if(delType==='client'){clis=clis.filter(c=>(c._id||c.id)!==delId);renderClis(clis);closeFicha();}
+    else{appts=appts.filter(a=>a._id!==delId);renderCal();if(selDate)renderDayPanel(selDate);updStats();}
+    closeOv('ov-del');
+    toast('Excluído com sucesso','ok');
+  }catch(e){toast('Erro ao excluir','err');closeOv('ov-del');}
+  delId=null;delType=null;
 }
 
-// ─── ESTATÍSTICAS ────────────────────────────────────────────
-function buildStats() {
-  const today = todayStr();
-  const nowMonth = today.substring(0, 7);
-
-  document.getElementById('est-pacientes').textContent = allClients.length;
-  document.getElementById('est-consultas').textContent = allAppointments.length;
-  document.getElementById('est-mes').textContent = allAppointments.filter(a => isThisMonth(a._date)).length;
-  document.getElementById('est-hoje').textContent = allAppointments.filter(a => a._date === today).length;
-
-  buildBarChart();
+// ── ESTATÍSTICAS ──────────────────────────────────────
+function buildStats(){
+  const today=toDay();
+  document.getElementById('e-pac').textContent=clis.length;
+  document.getElementById('e-con').textContent=appts.length;
+  document.getElementById('e-mes').textContent=appts.filter(a=>isMes(a._date)).length;
+  document.getElementById('e-hoj').textContent=appts.filter(a=>a._date===today).length;
+  buildBar('bc-mes',()=>{
+    const now=new Date();
+    return Array.from({length:6},(_,i)=>{
+      const d=new Date(now.getFullYear(),now.getMonth()-5+i,1);
+      const k=d.getFullYear()+'-'+pad(d.getMonth()+1);
+      return{lbl:MES[d.getMonth()].slice(0,3),val:appts.filter(a=>a._date&&a._date.startsWith(k)).length};
+    });
+  });
   buildDonut();
-  buildWeekdayChart();
-  buildHoursChart();
+  buildBar('bc-dia',()=>DSS.map((l,i)=>({lbl:l,val:appts.filter(a=>a._date&&new Date(a._date+'T12:00:00').getDay()===i).length})));
+  buildBar('bc-hr',()=>['08','09','10','11','12','13','14','15','16','17'].map(h=>({lbl:h+'h',val:appts.filter(a=>a._time&&a._time.startsWith(h)).length})));
 }
 
-function buildBarChart() {
-  const now = new Date();
-  const months = [];
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    months.push({
-      label: MONTHS[d.getMonth()].substring(0, 3),
-      key: `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`
-    });
-  }
-
-  const counts = months.map(m => ({
-    label: m.label,
-    val: allAppointments.filter(a => a._date && a._date.startsWith(m.key)).length
-  }));
-
-  const max = Math.max(...counts.map(c => c.val), 1);
-  document.getElementById('bar-chart').innerHTML = counts.map(c => `
-    <div class="bar-col">
-      <div class="bar-val">${c.val}</div>
-      <div class="bar" style="height:${(c.val/max*100)}%"></div>
-      <div class="bar-label">${c.label}</div>
-    </div>
-  `).join('');
+function buildBar(id,fn){
+  const data=fn();const max=Math.max(...data.map(d=>d.val),1);
+  document.getElementById(id).innerHTML=data.map(d=>`
+    <div class="bcol">
+      <div class="bval">${d.val||''}</div>
+      <div class="bar" style="height:${(d.val/max*100)}%"></div>
+      <div class="blbl">${d.lbl}</div>
+    </div>`).join('');
 }
 
-function buildDonut() {
-  const tipos = {};
-  allAppointments.forEach(a => {
-    const t = a._type || 'Consulta';
-    tipos[t] = (tipos[t] || 0) + 1;
-  });
-
-  const colors = ['#2d5a3d', '#7ab59a', '#e8f0ea', '#b5cfc0', '#4a8a62'];
-  const entries = Object.entries(tipos);
-  const total = entries.reduce((s, [,v]) => s + v, 0) || 1;
-
-  // SVG donut
-  let offset = 0;
-  const radius = 40, cx = 50, cy = 50;
-  const circumference = 2 * Math.PI * radius;
-
-  const segments = entries.map(([label, val], i) => {
-    const pct = val / total;
-    const dash = pct * circumference;
-    const gap = circumference - dash;
-    const seg = `<circle r="${radius}" cx="${cx}" cy="${cy}" fill="none" stroke="${colors[i % colors.length]}"
-      stroke-width="16" stroke-dasharray="${dash} ${gap}"
-      stroke-dashoffset="${-offset * circumference}" transform="rotate(-90 50 50)"/>`;
-    offset += pct;
-    return seg;
-  });
-
-  document.getElementById('donut-svg').innerHTML = segments.join('') ||
-    `<circle r="40" cx="50" cy="50" fill="none" stroke="#e5e3dc" stroke-width="16"/>`;
-
-  document.getElementById('donut-legend').innerHTML = entries.map(([label, val], i) => `
-    <div class="legend-item">
-      <div class="legend-dot" style="background:${colors[i % colors.length]}"></div>
-      <span>${label} (${val})</span>
-    </div>
-  `).join('') || '<div style="font-size:13px;color:var(--muted)">Sem dados</div>';
+function buildDonut(){
+  const tipos={};appts.forEach(a=>{const t=a._tipo||'Consulta';tipos[t]=(tipos[t]||0)+1;});
+  const cols=['#2d5a3d','#7ab59a','#e67e22','#8e44ad','#2980b9'];
+  const ent=Object.entries(tipos);const tot=ent.reduce((s,[,v])=>s+v,0)||1;
+  let off=0;const r=40,C=2*Math.PI*r;
+  document.getElementById('donut').innerHTML=ent.map(([,v],i)=>{
+    const p=v/tot;const seg=`<circle r="${r}" cx="50" cy="50" fill="none" stroke="${cols[i%cols.length]}" stroke-width="16" stroke-dasharray="${p*C} ${(1-p)*C}" stroke-dashoffset="${-off*C}" transform="rotate(-90 50 50)"/>`;
+    off+=p;return seg;
+  }).join('')||`<circle r="40" cx="50" cy="50" fill="none" stroke="#e5e3dc" stroke-width="16"/>`;
+  document.getElementById('dleg').innerHTML=ent.map(([l,v],i)=>`
+    <div class="dleg-i"><div class="dleg-dot" style="background:${cols[i%cols.length]}"></div><span>${l} (${v})</span></div>`).join('')
+    ||'<span style="font-size:12px;color:var(--mut)">Sem dados</span>';
 }
 
-function buildWeekdayChart() {
-  const days = [0,1,2,3,4,5,6];
-  const counts = days.map(d => ({
-    label: DAYS_PT[d],
-    val: allAppointments.filter(a => {
-      if (!a._date) return false;
-      return new Date(a._date + 'T12:00:00').getDay() === d;
-    }).length
-  }));
-  const max = Math.max(...counts.map(c => c.val), 1);
-  document.getElementById('bar-weekday').innerHTML = counts.map(c => `
-    <div class="bar-col">
-      <div class="bar-val">${c.val}</div>
-      <div class="bar" style="height:${(c.val/max*100)}%; opacity:0.7"></div>
-      <div class="bar-label">${c.label}</div>
-    </div>
-  `).join('');
+// ── FÓRUM ─────────────────────────────────────────────
+const fTagCols={geral:'#7a7870',cardiologia:'#c0392b',pediatria:'#2980b9',ortopedia:'#8e44ad',neurologia:'#16a085',urgencia:'#e67e22'};
+
+function pubPost(){
+  const tit=document.getElementById('f-tit').value.trim();
+  const bod=document.getElementById('f-bod').value.trim();
+  const tag=document.getElementById('f-tag').value;
+  if(!tit||!bod){toast('Preencha título e descrição','err');return;}
+  const p={id:Date.now(),tit,bod,tag,autor:document.getElementById('doc-name').textContent,data:new Date().toLocaleDateString('pt-BR'),reac:{'👍':0,'❤️':0,'🧠':0},coms:[]};
+  fPosts.unshift(p);localStorage.setItem('praxi_forum',JSON.stringify(fPosts));
+  document.getElementById('f-tit').value='';document.getElementById('f-bod').value='';
+  renderForum();toast('Publicado!','ok');
 }
 
-function buildHoursChart() {
-  const slots = ['08','09','10','11','12','13','14','15','16','17'];
-  const counts = slots.map(h => ({
-    label: `${h}h`,
-    val: allAppointments.filter(a => a._time && a._time.startsWith(h)).length
-  }));
-  const max = Math.max(...counts.map(c => c.val), 1);
-  document.getElementById('bar-hours').innerHTML = counts.map(c => `
-    <div class="bar-col">
-      <div class="bar-val">${c.val || ''}</div>
-      <div class="bar" style="height:${(c.val/max*100)}%; opacity:0.6"></div>
-      <div class="bar-label">${c.label}</div>
-    </div>
-  `).join('');
+function reag(id,e){const p=fPosts.find(x=>x.id===id);if(!p)return;p.reac[e]=(p.reac[e]||0)+1;localStorage.setItem('praxi_forum',JSON.stringify(fPosts));renderForum();}
+function togCom(id){const el=document.getElementById('fc-'+id);if(el)el.style.display=el.style.display==='none'?'block':'none';}
+function addCom(id){
+  const inp=document.getElementById('fci-'+id);if(!inp||!inp.value.trim())return;
+  const p=fPosts.find(x=>x.id===id);if(!p)return;
+  p.coms.push({autor:document.getElementById('doc-name').textContent,txt:inp.value.trim(),data:new Date().toLocaleDateString('pt-BR')});
+  localStorage.setItem('praxi_forum',JSON.stringify(fPosts));renderForum();
 }
 
-// ─── CONFIG ──────────────────────────────────────────────────
-const DAYS_CONFIG = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
-let selectedDays = [1,2,3,4,5]; // Seg-Sex default
-
-function initConfig() {
-  const container = document.getElementById('day-toggles');
-  container.innerHTML = DAYS_CONFIG.map((d, i) => `
-    <button class="day-toggle ${selectedDays.includes(i) ? 'active' : ''}"
-      onclick="toggleDay(${i}, this)">${d}</button>
-  `).join('');
+function renderForum(){
+  const c=document.getElementById('f-posts');if(!c)return;
+  if(!fPosts.length){c.innerHTML='<div class="empty"><div class="ico">💬</div><p>Nenhuma publicação ainda</p></div>';return;}
+  c.innerHTML=fPosts.map(p=>{
+    const cor=fTagCols[p.tag]||'#7a7870';
+    const reacs=Object.entries(p.reac||{}).map(([e,n])=>`<button onclick="reag(${p.id},'${e}')">${e} ${n}</button>`).join('');
+    const coms=(p.coms||[]).map(cm=>`<div class="fcom-item"><strong>${cm.autor}</strong> <span style="color:var(--mut);font-size:10px">${cm.data}</span><p style="margin-top:4px">${cm.txt}</p></div>`).join('');
+    return `<div class="fpost">
+      <div class="fpost-hdr">
+        <span class="ftag-badge" style="background:${cor}20;color:${cor}">${p.tag}</span>
+        <span style="font-size:11px;color:var(--mut);margin-left:auto">${p.autor} · ${p.data}</span>
+      </div>
+      <h3>${p.tit}</h3><p>${p.bod}</p>
+      <div class="freac">${reacs}<button onclick="togCom(${p.id})" style="margin-left:auto">💬 ${p.coms?.length||0}</button></div>
+      <div class="fcom-wrap" id="fc-${p.id}">${coms}
+        <div class="fcom-input"><input id="fci-${p.id}" placeholder="Comentário..."><button onclick="addCom(${p.id})">Enviar</button></div>
+      </div>
+    </div>`;
+  }).join('');
+  const tp=document.getElementById('f-tpop');if(!tp)return;
+  const cnt={};fPosts.forEach(p=>cnt[p.tag]=(cnt[p.tag]||0)+1);
+  tp.innerHTML=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).map(([t,n])=>{const cor=fTagCols[t]||'#7a7870';return`<span style="padding:3px 9px;border-radius:20px;font-size:11px;background:${cor}20;color:${cor}">${t} (${n})</span>`;}).join('')||'<span style="font-size:12px;color:var(--mut)">Nenhuma ainda</span>';
 }
 
-function toggleDay(i, el) {
-  if (selectedDays.includes(i)) {
-    selectedDays = selectedDays.filter(d => d !== i);
-    el.classList.remove('active');
-  } else {
-    selectedDays.push(i);
-    el.classList.add('active');
-  }
+// ── CONFIG ────────────────────────────────────────────
+function initCfgUI(){
+  const c=document.getElementById('day-togs');
+  c.innerHTML=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map((d,i)=>`<button class="dtog ${selDays.includes(i)?'on':''}" onclick="togDay(${i},this)">${d}</button>`).join('');
+  const cfg=JSON.parse(localStorage.getItem('praxi_cfg')||'{}');
+  if(cfg.s)document.getElementById('cfg-s').value=cfg.s;
+  if(cfg.e)document.getElementById('cfg-e').value=cfg.e;
+  if(cfg.d)document.getElementById('cfg-d').value=cfg.d;
+  if(cfg.nom)document.getElementById('cfg-nom').value=cfg.nom;
+  if(cfg.crm)document.getElementById('cfg-crm').value=cfg.crm;
+  if(cfg.esp)document.getElementById('cfg-esp').value=cfg.esp;
+}
+function togDay(i,el){selDays.includes(i)?selDays=selDays.filter(d=>d!==i):selDays.push(i);el.classList.toggle('on');}
+async function saveCfg(){
+  const cfg=JSON.parse(localStorage.getItem('praxi_cfg')||'{}');
+  cfg.days=selDays;cfg.s=document.getElementById('cfg-s').value;
+  cfg.e=document.getElementById('cfg-e').value;cfg.d=document.getElementById('cfg-d').value;
+  localStorage.setItem('praxi_cfg',JSON.stringify(cfg));
+  try{await fetch(API+'/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({dias:selDays,horaInicio:cfg.s,horaFim:cfg.e,duracaoConsulta:parseInt(cfg.d)})});}catch(e){}
+  toast('Configurações salvas!','ok');
+}
+function saveProf(){
+  const cfg=JSON.parse(localStorage.getItem('praxi_cfg')||'{}');
+  cfg.nom=document.getElementById('cfg-nom').value;
+  cfg.crm=document.getElementById('cfg-crm').value;
+  cfg.esp=document.getElementById('cfg-esp').value;
+  localStorage.setItem('praxi_cfg',JSON.stringify(cfg));
+  loadLocalCfg();toast('Perfil salvo!','ok');
+}
+function loadLocalCfg(){
+  const cfg=JSON.parse(localStorage.getItem('praxi_cfg')||'{}');
+  if(cfg.days)selDays=cfg.days;
+  if(cfg.nom){document.getElementById('doc-name').textContent=cfg.nom;}
+  if(cfg.crm){document.getElementById('doc-crm').textContent=cfg.crm;}
 }
 
-function loadConfig() {
-  const cfg = JSON.parse(localStorage.getItem('praxi_config') || '{}');
-  if (cfg.days) selectedDays = cfg.days;
-  if (cfg.start) document.getElementById('cfg-start') && (document.getElementById('cfg-start').value = cfg.start);
-  if (cfg.end) document.getElementById('cfg-end') && (document.getElementById('cfg-end').value = cfg.end);
-  if (cfg.duration) document.getElementById('cfg-duration') && (document.getElementById('cfg-duration').value = cfg.duration);
-}
-
-function loadDoctor() {
-  const cfg = JSON.parse(localStorage.getItem('praxi_config') || '{}');
-  if (cfg.nome) document.getElementById('doc-name').textContent = cfg.nome;
-  if (cfg.crm) document.getElementById('doc-crm').textContent = cfg.crm;
-  if (cfg.nome) document.getElementById('cfg-nome') && (document.getElementById('cfg-nome').value = cfg.nome);
-  if (cfg.crm) document.getElementById('cfg-crm') && (document.getElementById('cfg-crm').value = cfg.crm);
-  if (cfg.especialidade) document.getElementById('cfg-especialidade') && (document.getElementById('cfg-especialidade').value = cfg.especialidade);
-}
-
-async function saveConfig() {
-  const cfg = JSON.parse(localStorage.getItem('praxi_config') || '{}');
-  cfg.days = selectedDays;
-  cfg.start = document.getElementById('cfg-start').value;
-  cfg.end = document.getElementById('cfg-end').value;
-  cfg.duration = document.getElementById('cfg-duration').value;
-  localStorage.setItem('praxi_config', JSON.stringify(cfg));
-
-  // Envia pro servidor tb
-  try {
-    await fetch(`${API}/api/config`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dias: selectedDays, horaInicio: cfg.start, horaFim: cfg.end, duracaoConsulta: parseInt(cfg.duration) })
-    });
-  } catch (e) { /* silencioso — salvo localmente de qualquer forma */ }
-
-  showToast('Configurações salvas!', 'success');
-}
-
-function saveProfile() {
-  const cfg = JSON.parse(localStorage.getItem('praxi_config') || '{}');
-  cfg.nome = document.getElementById('cfg-nome').value;
-  cfg.crm = document.getElementById('cfg-crm').value;
-  cfg.especialidade = document.getElementById('cfg-especialidade').value;
-  localStorage.setItem('praxi_config', JSON.stringify(cfg));
-  loadDoctor();
-  showToast('Perfil salvo!', 'success');
-}
-
-// ─── UTILS ───────────────────────────────────────────────────
-function closeModal(id) {
-  document.getElementById(id).classList.remove('open');
-}
-
-function showToast(msg, type = '') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (type ? ' ' + type : '');
-  setTimeout(() => t.className = 'toast', 3000);
-}
-
-// ─── FÓRUM ───────────────────────────────────────────────────
-let forumPosts = JSON.parse(localStorage.getItem('praxi_forum') || '[]');
-
-const tagColors = {
-  geral: '#7a7870', cardiologia: '#c0392b', pediatria: '#2980b9',
-  ortopedia: '#8e44ad', neurologia: '#16a085', farmacologia: '#e67e22', urgencia: '#c0392b'
-};
-
-function salvarForum() {
-  localStorage.setItem('praxi_forum', JSON.stringify(forumPosts));
-}
-
-function publicarPost() {
-  const titulo = document.getElementById('forum-titulo').value.trim();
-  const corpo  = document.getElementById('forum-corpo').value.trim();
-  const tag    = document.getElementById('forum-tag').value;
-  if (!titulo || !corpo) { showToast('Preencha título e descrição', 'error'); return; }
-
-  const post = {
-    id: Date.now(),
-    titulo, corpo, tag,
-    autor: document.getElementById('doc-name').textContent || 'Dr.',
-    data: new Date().toLocaleDateString('pt-BR'),
-    reacoes: { 👍: 0, ❤️: 0, 🧠: 0 },
-    comentarios: []
-  };
-
-  forumPosts.unshift(post);
-  salvarForum();
-  document.getElementById('forum-titulo').value = '';
-  document.getElementById('forum-corpo').value = '';
-  renderForum();
-  showToast('Publicado!', 'success');
-}
-
-function reagirPost(id, emoji) {
-  const post = forumPosts.find(p => p.id === id);
-  if (!post) return;
-  post.reacoes[emoji] = (post.reacoes[emoji] || 0) + 1;
-  salvarForum();
-  renderForum();
-}
-
-function comentarPost(id) {
-  const input = document.getElementById(`coment-input-${id}`);
-  const texto = input?.value?.trim();
-  if (!texto) return;
-  const post = forumPosts.find(p => p.id === id);
-  if (!post) return;
-  post.comentarios.push({
-    autor: document.getElementById('doc-name').textContent || 'Dr.',
-    texto,
-    data: new Date().toLocaleDateString('pt-BR')
-  });
-  salvarForum();
-  renderForum();
-}
-
-function toggleComents(id) {
-  const el = document.getElementById(`coments-${id}`);
-  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
-}
-
-function renderForum() {
-  const container = document.getElementById('forum-posts');
-  if (!container) return;
-
-  if (forumPosts.length === 0) {
-    container.innerHTML = '<div class="empty-state"><div class="icon">💬</div><p>Seja o primeiro a publicar uma discussão</p></div>';
-  } else {
-    container.innerHTML = forumPosts.map(p => {
-      const cor = tagColors[p.tag] || '#7a7870';
-      const reacs = Object.entries(p.reacoes || {}).map(([e, n]) =>
-        `<button onclick="reagirPost(${p.id},'${e}')" style="padding:4px 10px;border:1px solid var(--border);border-radius:20px;background:none;cursor:pointer;font-size:13px;color:var(--muted)">${e} ${n}</button>`
-      ).join('');
-      const comList = (p.comentarios || []).map(c =>
-        `<div style="padding:10px;background:var(--bg);border-radius:8px;margin-bottom:6px;font-size:13px">
-          <strong style="font-size:12px">${c.autor}</strong> <span style="color:var(--muted);font-size:11px">${c.data}</span>
-          <p style="margin-top:4px">${c.texto}</p>
-        </div>`
-      ).join('');
-      return `
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:14px">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-            <span style="background:${cor}20;color:${cor};padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase">${p.tag}</span>
-            <span style="font-size:12px;color:var(--muted);margin-left:auto">${p.autor} · ${p.data}</span>
-          </div>
-          <h3 style="font-size:15px;font-weight:600;margin-bottom:8px">${p.titulo}</h3>
-          <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px">${p.corpo}</p>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            ${reacs}
-            <button onclick="toggleComents(${p.id})" style="margin-left:auto;padding:4px 12px;border:1px solid var(--border);border-radius:20px;background:none;cursor:pointer;font-size:13px;color:var(--muted)">
-              💬 ${p.comentarios?.length || 0}
-            </button>
-          </div>
-          <div id="coments-${p.id}" style="display:none;margin-top:14px">
-            ${comList}
-            <div style="display:flex;gap:8px;margin-top:8px">
-              <input id="coment-input-${p.id}" type="text" placeholder="Adicione um comentário..."
-                style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);outline:none">
-              <button onclick="comentarPost(${p.id})" style="padding:8px 14px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px">Enviar</button>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  // Tags populares
-  const tagPop = document.getElementById('forum-tags-pop');
-  if (tagPop) {
-    const counts = {};
-    forumPosts.forEach(p => { counts[p.tag] = (counts[p.tag]||0)+1; });
-    tagPop.innerHTML = Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([tag,n]) => {
-      const cor = tagColors[tag] || '#7a7870';
-      return `<span style="padding:4px 10px;border-radius:20px;font-size:12px;background:${cor}20;color:${cor};cursor:pointer">${tag} (${n})</span>`;
-    }).join('') || '<span style="font-size:13px;color:var(--muted)">Nenhuma ainda</span>';
-  }
-}
-
-// Inicializa fórum quando a aba é aberta
-// Sobrescreve showPage para inicializar fórum
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  event.currentTarget.classList.add('active');
-  if (name === 'estatisticas') buildStats();
-  if (name === 'forum') renderForum();
-}
+// ── UTILS ─────────────────────────────────────────────
+function toDay(){return new Date().toLocaleDateString('sv-SE');}
+function pad(n){return String(n).padStart(2,'0');}
+function fmtDt(ds){if(!ds)return'';const[y,m,d]=ds.split('-');return`${d}/${m}/${y}`;}
+function isWeek(ds){if(!ds)return false;const d=new Date(ds+'T12:00:00'),n=new Date();const s=new Date(n);s.setDate(n.getDate()-n.getDay());s.setHours(0,0,0,0);const e=new Date(s);e.setDate(s.getDate()+7);return d>=s&&d<e;}
+function isMes(ds){if(!ds)return false;const n=new Date();return ds.startsWith(n.getFullYear()+'-'+pad(n.getMonth()+1));}
+function closeOv(id){document.getElementById(id).classList.remove('open');}
+function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(type?' '+type:'');setTimeout(()=>t.className='toast',3000);}
 </script>
 </body>
 </html>
