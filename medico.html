@@ -609,6 +609,9 @@
   <div class="nav-item" onclick="showPage('estatisticas')">
     <span class="nav-icon">📊</span> Estatísticas
   </div>
+  <div class="nav-item" onclick="showPage('forum')">
+    <span class="nav-icon">💬</span> Fórum
+  </div>
   <div class="nav-item" onclick="showPage('config')">
     <span class="nav-icon">⚙️</span> Configurações
   </div>
@@ -790,6 +793,58 @@
     </div>
   </div>
 
+  <!-- FÓRUM -->
+  <div id="page-forum" class="page">
+    <h1 class="page-title">Fórum Médico</h1>
+    <p class="page-sub">Compartilhe casos e discussões com outros profissionais</p>
+
+    <div style="display:grid;grid-template-columns:1fr 320px;gap:20px">
+      <!-- Feed de posts -->
+      <div>
+        <!-- Nova discussão -->
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:20px">
+          <div class="form-group">
+            <label>Título da discussão</label>
+            <input type="text" id="forum-titulo" placeholder="Ex: Dúvida sobre diagnóstico diferencial...">
+          </div>
+          <div class="form-group">
+            <label>Descrição do caso</label>
+            <textarea id="forum-corpo" rows="4" placeholder="Descreva o caso ou dúvida de forma anônima..."></textarea>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <select id="forum-tag" style="padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);color:var(--text)">
+              <option value="geral">Geral</option>
+              <option value="cardiologia">Cardiologia</option>
+              <option value="pediatria">Pediatria</option>
+              <option value="ortopedia">Ortopedia</option>
+              <option value="neurologia">Neurologia</option>
+              <option value="farmacologia">Farmacologia</option>
+              <option value="urgencia">Urgência</option>
+            </select>
+            <button onclick="publicarPost()" style="margin-left:auto;padding:10px 20px;background:var(--accent);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer">
+              Publicar
+            </button>
+          </div>
+        </div>
+
+        <!-- Posts -->
+        <div id="forum-posts"></div>
+      </div>
+
+      <!-- Sidebar Fórum -->
+      <div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:16px">
+          <h4 style="font-size:14px;font-weight:600;margin-bottom:14px">🔥 Tags populares</h4>
+          <div style="display:flex;flex-wrap:wrap;gap:8px" id="forum-tags-pop"></div>
+        </div>
+        <div style="background:var(--accent-light);border:1px solid var(--accent);border-radius:10px;padding:18px">
+          <h4 style="font-size:14px;font-weight:600;color:var(--accent);margin-bottom:8px">💡 Lembrete</h4>
+          <p style="font-size:13px;color:var(--muted);line-height:1.5">Não compartilhe dados identificáveis de pacientes. Mantenha o anonimato em todos os casos clínicos.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </main>
 
 <!-- MODAL: Nova Consulta -->
@@ -876,21 +931,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ─── NAVIGATION ──────────────────────────────────────────────
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  event.currentTarget.classList.add('active');
-  if (name === 'estatisticas') buildStats();
-}
 
 // ─── DATA HELPERS ────────────────────────────────────────────
 
 /**
- * Normaliza um item de agenda para { date: "YYYY-MM-DD", time: "HH:MM", ... }
+ * Normaliza um item de agenda para { _date, _time, _patientName, _type }
  * Suporta ambos os formatos do banco:
  *   1. { dataHora: "2026-05-22T14:00:00.000Z" }  (criado manualmente)
  *   2. { dataHora: "2026-05-15", appointmentTime: "09:00" }  (criado pelo bot)
+ * Campos do servidor: pacienteNome, tipo, appointmentTime
  */
 function normalizeAppointment(item) {
   let date = '';
@@ -898,14 +947,12 @@ function normalizeAppointment(item) {
 
   if (item.dataHora) {
     const raw = item.dataHora;
-
     if (raw.includes('T')) {
-      // Formato ISO completo
-      const d = new Date(raw);
-      date = d.toLocaleDateString('sv-SE'); // YYYY-MM-DD em horário local
-      time = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      // ISO completo — extrai direto da string, evita conversão de timezone
+      date = raw.substring(0, 10);   // "2026-05-22"
+      time = raw.substring(11, 16);  // "14:00"
     } else {
-      // Formato "YYYY-MM-DD" separado da hora
+      // Só data — hora vem separada em appointmentTime
       date = raw.substring(0, 10);
       time = item.appointmentTime || item.horario || '00:00';
     }
@@ -914,7 +961,11 @@ function normalizeAppointment(item) {
     time = item.time || item.appointmentTime || '00:00';
   }
 
-  return { ...item, _date: date, _time: time };
+  // Normaliza campos — o servidor usa "pacienteNome" e "tipo"
+  const _patientName = item.pacienteNome || item.patientName || item.nome || item.name || 'Paciente';
+  const _type        = item.tipo || item.type || 'Consulta';
+
+  return { ...item, _date: date, _time: time, _patientName, _type };
 }
 
 function formatDateBR(dateStr) {
@@ -950,7 +1001,10 @@ async function loadAgenda() {
     const res = await fetch(`${API}/api/agenda`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    allAppointments = (Array.isArray(data) ? data : (data.agenda || data.appointments || [])).map(normalizeAppointment);
+    // O servidor retorna { agenda: [...], total: N }
+    const list = Array.isArray(data) ? data
+                : (data.agenda || data.appointments || data.consultas || []);
+    allAppointments = list.map(normalizeAppointment);
     renderCalendar();
     updateAgendaStats();
     document.getElementById('agenda-sub').textContent =
@@ -1048,8 +1102,8 @@ function renderDayPanel(dateStr) {
     <div class="appointment-item">
       <div class="appt-time">${a._time}</div>
       <div class="appt-info">
-        <strong>${a.patientName || a.nome || a.name || 'Paciente'}</strong>
-        <span>${a.type || a.tipo || 'Consulta'}</span>
+        <strong>${a._patientName}</strong>
+        <span>${a._type}</span>
       </div>
       <button class="appt-delete" title="Cancelar consulta"
         onclick="deleteAppointment('${a._id || a.id}', event)">🗑</button>
@@ -1210,7 +1264,7 @@ function openFicha(id) {
   const hist = c.history || c.historico || [];
 
   const patientAppts = allAppointments
-    .filter(a => (a.patientPhone === phone || a.patientName === name))
+    .filter(a => (a.pacienteId === (c._id||c.id) || a._patientName === name || a.pacienteNome === name))
     .sort((a, b) => b._date.localeCompare(a._date))
     .slice(0, 5);
 
@@ -1231,7 +1285,7 @@ function openFicha(id) {
       <h4>Consultas</h4>
       ${patientAppts.map(a => `
         <div class="hist-item">
-          <strong>${a._time} — ${a.type || 'Consulta'}</strong>
+          <strong>${a._time} — ${a._type}</strong>
           <small>${formatDateBR(a._date)}</small>
         </div>
       `).join('')}
@@ -1307,7 +1361,7 @@ function buildBarChart() {
 function buildDonut() {
   const tipos = {};
   allAppointments.forEach(a => {
-    const t = a.type || a.tipo || 'Consulta';
+    const t = a._type || 'Consulta';
     tipos[t] = (tipos[t] || 0) + 1;
   });
 
@@ -1458,10 +1512,135 @@ function showToast(msg, type = '') {
   setTimeout(() => t.className = 'toast', 3000);
 }
 
-function logout() {
-  if (confirm('Sair do painel?')) {
-    window.location.href = 'index.html';
+// ─── FÓRUM ───────────────────────────────────────────────────
+let forumPosts = JSON.parse(localStorage.getItem('praxi_forum') || '[]');
+
+const tagColors = {
+  geral: '#7a7870', cardiologia: '#c0392b', pediatria: '#2980b9',
+  ortopedia: '#8e44ad', neurologia: '#16a085', farmacologia: '#e67e22', urgencia: '#c0392b'
+};
+
+function salvarForum() {
+  localStorage.setItem('praxi_forum', JSON.stringify(forumPosts));
+}
+
+function publicarPost() {
+  const titulo = document.getElementById('forum-titulo').value.trim();
+  const corpo  = document.getElementById('forum-corpo').value.trim();
+  const tag    = document.getElementById('forum-tag').value;
+  if (!titulo || !corpo) { showToast('Preencha título e descrição', 'error'); return; }
+
+  const post = {
+    id: Date.now(),
+    titulo, corpo, tag,
+    autor: document.getElementById('doc-name').textContent || 'Dr.',
+    data: new Date().toLocaleDateString('pt-BR'),
+    reacoes: { 👍: 0, ❤️: 0, 🧠: 0 },
+    comentarios: []
+  };
+
+  forumPosts.unshift(post);
+  salvarForum();
+  document.getElementById('forum-titulo').value = '';
+  document.getElementById('forum-corpo').value = '';
+  renderForum();
+  showToast('Publicado!', 'success');
+}
+
+function reagirPost(id, emoji) {
+  const post = forumPosts.find(p => p.id === id);
+  if (!post) return;
+  post.reacoes[emoji] = (post.reacoes[emoji] || 0) + 1;
+  salvarForum();
+  renderForum();
+}
+
+function comentarPost(id) {
+  const input = document.getElementById(`coment-input-${id}`);
+  const texto = input?.value?.trim();
+  if (!texto) return;
+  const post = forumPosts.find(p => p.id === id);
+  if (!post) return;
+  post.comentarios.push({
+    autor: document.getElementById('doc-name').textContent || 'Dr.',
+    texto,
+    data: new Date().toLocaleDateString('pt-BR')
+  });
+  salvarForum();
+  renderForum();
+}
+
+function toggleComents(id) {
+  const el = document.getElementById(`coments-${id}`);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function renderForum() {
+  const container = document.getElementById('forum-posts');
+  if (!container) return;
+
+  if (forumPosts.length === 0) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">💬</div><p>Seja o primeiro a publicar uma discussão</p></div>';
+  } else {
+    container.innerHTML = forumPosts.map(p => {
+      const cor = tagColors[p.tag] || '#7a7870';
+      const reacs = Object.entries(p.reacoes || {}).map(([e, n]) =>
+        `<button onclick="reagirPost(${p.id},'${e}')" style="padding:4px 10px;border:1px solid var(--border);border-radius:20px;background:none;cursor:pointer;font-size:13px;color:var(--muted)">${e} ${n}</button>`
+      ).join('');
+      const comList = (p.comentarios || []).map(c =>
+        `<div style="padding:10px;background:var(--bg);border-radius:8px;margin-bottom:6px;font-size:13px">
+          <strong style="font-size:12px">${c.autor}</strong> <span style="color:var(--muted);font-size:11px">${c.data}</span>
+          <p style="margin-top:4px">${c.texto}</p>
+        </div>`
+      ).join('');
+      return `
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin-bottom:14px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+            <span style="background:${cor}20;color:${cor};padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase">${p.tag}</span>
+            <span style="font-size:12px;color:var(--muted);margin-left:auto">${p.autor} · ${p.data}</span>
+          </div>
+          <h3 style="font-size:15px;font-weight:600;margin-bottom:8px">${p.titulo}</h3>
+          <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px">${p.corpo}</p>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            ${reacs}
+            <button onclick="toggleComents(${p.id})" style="margin-left:auto;padding:4px 12px;border:1px solid var(--border);border-radius:20px;background:none;cursor:pointer;font-size:13px;color:var(--muted)">
+              💬 ${p.comentarios?.length || 0}
+            </button>
+          </div>
+          <div id="coments-${p.id}" style="display:none;margin-top:14px">
+            ${comList}
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <input id="coment-input-${p.id}" type="text" placeholder="Adicione um comentário..."
+                style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;background:var(--bg);outline:none">
+              <button onclick="comentarPost(${p.id})" style="padding:8px 14px;background:var(--accent);color:white;border:none;border-radius:8px;cursor:pointer;font-size:13px">Enviar</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
+
+  // Tags populares
+  const tagPop = document.getElementById('forum-tags-pop');
+  if (tagPop) {
+    const counts = {};
+    forumPosts.forEach(p => { counts[p.tag] = (counts[p.tag]||0)+1; });
+    tagPop.innerHTML = Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([tag,n]) => {
+      const cor = tagColors[tag] || '#7a7870';
+      return `<span style="padding:4px 10px;border-radius:20px;font-size:12px;background:${cor}20;color:${cor};cursor:pointer">${tag} (${n})</span>`;
+    }).join('') || '<span style="font-size:13px;color:var(--muted)">Nenhuma ainda</span>';
+  }
+}
+
+// Inicializa fórum quando a aba é aberta
+// Sobrescreve showPage para inicializar fórum
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if (name === 'estatisticas') buildStats();
+  if (name === 'forum') renderForum();
 }
 </script>
 </body>
